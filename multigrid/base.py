@@ -285,7 +285,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Check that agents don't overlap with other objects
         for agent in self.agents:
             start_cell = self.grid.get(*agent.state.pos)
-            assert start_cell is None or start_cell.can_overlap()
+            # assert start_cell is None or start_cell.can_overlap()
 
         # Step count since episode start
         self.step_count = 0

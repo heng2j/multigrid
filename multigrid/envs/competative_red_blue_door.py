@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from multigrid import MultiGridEnv
+from multigrid.base import MultiGridEnv
 from multigrid.core import Action, Grid, MissionSpace
 from multigrid.core.constants import Color
 from multigrid.core.world_object import Door, Key, Ball
@@ -143,7 +143,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence = ["red", "blue"]
+        color_sequence = ["red"] # ["red", "blue"]
 
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -166,8 +166,8 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         self.blue_door = Door(Color.blue, is_locked=True)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
-        # Block red door with a ball
-        self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
+        # # Block red door with a ball
+        # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
 
         # Place keys in hallway
         for key_color in color_sequence:
@@ -193,14 +193,28 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         obs, reward, terminated, truncated, info = super().step(actions)
 
         for agent_id, action in actions.items():
+            agent = self.agents[agent_id]
             if action == Action.toggle:
-                agent = self.agents[agent_id]
                 fwd_obj = self.grid.get(*agent.front_pos)
-                if fwd_obj == self.blue_door and self.blue_door.is_open:
+                if fwd_obj == self.red_door and self.red_door.is_open:
                     if self.red_door.is_open:
+                        # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
-                    else:
-                        self.on_failure(agent, reward, terminated)
-                        self.blue_door.is_open = False  # close the door again
+                    # else:
+                    #     self.on_failure(agent, reward, terminated)
+                    #     self.blue_door.is_open = False  # close the door again
+            
+            elif action == Action.pickup:
+                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True):
+                    # FIXME - make me elegant 
+                    agent.carrying.is_available = False
+                    agent.carrying.is_pickedup = True
+                    reward[agent_id] += 0.5
+                else:
+                    # If we are grabbing bad stuff
+                    reward[agent_id] -= 0.001  # OG 0.2
+
+
+
 
         return obs, reward, terminated, truncated, info
