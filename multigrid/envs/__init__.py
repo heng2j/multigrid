@@ -30,13 +30,16 @@ Configurations
 """
 
 from .blockedunlockpickup import BlockedUnlockPickupEnv
+from .competative_red_blue_door import CompetativeRedBlueDoorEnv
 from .empty import EmptyEnv
 from .locked_hallway import LockedHallwayEnv
 from .playground import PlaygroundEnv
 from .redbluedoors import RedBlueDoorsEnv
 
+
 CONFIGURATIONS = {
     'MultiGrid-BlockedUnlockPickup-v0': (BlockedUnlockPickupEnv, {}),
+    'MultiGrid-CompetativeRedBlueDoor-v0': (CompetativeRedBlueDoorEnv, {'size': 8}),
     'MultiGrid-Empty-5x5-v0': (EmptyEnv, {'size': 5}),
     'MultiGrid-Empty-Random-5x5-v0': (EmptyEnv, {'size': 5, 'agent_start_pos': None}),
     'MultiGrid-Empty-6x6-v0': (EmptyEnv, {'size': 6}),
