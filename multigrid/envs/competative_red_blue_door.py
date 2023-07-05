@@ -157,19 +157,18 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         # Add a red door at the bottom of the left wall
         red_door_x = room_top[0]
         red_door_y = height - 2 #self._rand_int(1, height - 1)
-        self.red_door = Door(Color.red)
+        self.red_door = Door(Color.red,  is_locked=True)
         self.grid.set(red_door_x, red_door_y, self.red_door)
 
         # Add a blue door at the top of the right wall
         blue_door_x = room_top[0] + room_size[0] - 1
         blue_door_y = 1 #self._rand_int(1, height - 1)
-        self.blue_door = Door(Color.blue)
+        self.blue_door = Door(Color.blue,  is_locked=True)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
 
         # Block red door with a ball
         self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
-
 
 
         # Place keys in hallway
