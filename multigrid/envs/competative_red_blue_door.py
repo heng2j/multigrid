@@ -3,7 +3,7 @@ from __future__ import annotations
 from multigrid import MultiGridEnv
 from multigrid.core import Action, Grid, MissionSpace
 from multigrid.core.constants import Color
-from multigrid.core.world_object import Door
+from multigrid.core.world_object import Door, Key, Ball
 
 
 
@@ -142,6 +142,9 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         """
         :meta private:
         """
+        LEFT, HALLWAY, RIGHT = range(3) # columns
+        color_sequence = ["red", "blue"]
+
         # Create an empty grid
         self.grid = Grid(width, height)
 
@@ -162,6 +165,17 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         blue_door_y = 1 #self._rand_int(1, height - 1)
         self.blue_door = Door(Color.blue)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
+
+
+        # Block red door with a ball
+        self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
+
+
+
+        # Place keys in hallway
+        for key_color in color_sequence:
+            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+
 
         # Place agents in the top-left corner
         # TODO - update to encapsulate muti-agent positioning 
