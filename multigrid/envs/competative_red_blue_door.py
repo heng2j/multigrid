@@ -6,7 +6,6 @@ from multigrid.core.constants import Color
 from multigrid.core.world_object import Door, Key, Ball
 
 
-
 class CompetativeRedBlueDoorEnv(MultiGridEnv):
     """
     .. image:: https://i.imgur.com/usbavAh.gif
@@ -19,7 +18,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
     This environment is a room with one red and one blue door facing
     opposite directions. Agents must open the red door and then open the blue door,
     in that order.
-    
+
     The standard setting is cooperative, where all agents receive the reward
     upon completion of the task.
 
@@ -104,9 +103,10 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         size: int = 8,
         max_steps: int | None = None,
         joint_reward: bool = True,
-        success_termination_mode: str = 'any',
-        failure_termination_mode: str = 'any',
-        **kwargs):
+        success_termination_mode: str = "any",
+        failure_termination_mode: str = "any",
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -142,7 +142,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         """
         :meta private:
         """
-        LEFT, HALLWAY, RIGHT = range(3) # columns
+        LEFT, HALLWAY, RIGHT = range(3)  # columns
         color_sequence = ["red", "blue"]
 
         # Create an empty grid
@@ -156,29 +156,25 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
 
         # Add a red door at the bottom of the left wall
         red_door_x = room_top[0]
-        red_door_y = height - 2 #self._rand_int(1, height - 1)
-        self.red_door = Door(Color.red)
+        red_door_y = height - 2  # self._rand_int(1, height - 1)
+        self.red_door = Door(Color.red, is_locked=True)
         self.grid.set(red_door_x, red_door_y, self.red_door)
 
         # Add a blue door at the top of the right wall
         blue_door_x = room_top[0] + room_size[0] - 1
-        blue_door_y = 1 #self._rand_int(1, height - 1)
-        self.blue_door = Door(Color.blue)
+        blue_door_y = 1  # self._rand_int(1, height - 1)
+        self.blue_door = Door(Color.blue, is_locked=True)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
-
 
         # Block red door with a ball
         self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
-
-
 
         # Place keys in hallway
         for key_color in color_sequence:
             self.place_obj(Key(color=key_color), top=room_top, size=room_size)
 
-
         # Place agents in the top-left corner
-        # TODO - update to encapsulate muti-agent positioning 
+        # TODO - update to encapsulate muti-agent positioning
         for agent in self.agents:
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=room_size)
@@ -187,10 +183,8 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
 
             else:
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
-                agent.state.pos =  (red_door_x + 1, red_door_y)
+                agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
-
-
 
     def step(self, actions):
         """
@@ -207,6 +201,6 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                         self.on_success(agent, reward, terminated)
                     else:
                         self.on_failure(agent, reward, terminated)
-                        self.blue_door.is_open = False # close the door again
+                        self.blue_door.is_open = False  # close the door again
 
         return obs, reward, terminated, truncated, info

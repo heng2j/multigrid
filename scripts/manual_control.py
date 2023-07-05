@@ -9,7 +9,7 @@ from gymnasium import Env
 from multigrid.envs import *
 from multigrid.core.actions import Action
 from multigrid.base import MultiGridEnv
-from multigrid.wrappers import SingleAgentWrapper #ImgObsWrapper, RGBImgPartialObsWrapper
+from multigrid.wrappers import SingleAgentWrapper  # ImgObsWrapper, RGBImgPartialObsWrapper
 
 
 class ManualControl:
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         type=str,
         help="gym environment to load",
         choices=gym.envs.registry.keys(),
-        default="MultiGrid-CompetativeRedBlueDoor-v0", #  MultiGrid-LockedHallway-2Rooms-v0
+        default="MultiGrid-CompetativeRedBlueDoor-v0",  #  MultiGrid-LockedHallway-2Rooms-v0
     )
     parser.add_argument(
         "--seed",
@@ -98,9 +98,7 @@ if __name__ == "__main__":
         help="random seed to generate the environment with",
         default=None,
     )
-    parser.add_argument(
-        "--tile-size", type=int, help="size at which to render tiles", default=32
-    )
+    parser.add_argument("--tile-size", type=int, help="size at which to render tiles", default=32)
     parser.add_argument(
         "--agent-view",
         action="store_true",
@@ -149,11 +147,9 @@ if __name__ == "__main__":
     #     env = RGBImgPartialObsWrapper(env, args.tile_size)
     #     env = ImgObsWrapper(env)
 
-
     if args.single_agent:
         print("Convert to single agent")
         env = SingleAgentWrapper(env)
-
 
     manual_control = ManualControl(env, seed=args.seed)
     manual_control.start()
