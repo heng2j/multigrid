@@ -126,7 +126,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
             See :attr:`multigrid.base.MultiGridEnv.__init__`
         """
         self.size = size
-        mission_space = MissionSpace.from_string("open the door that match your agent's door")
+        mission_space = MissionSpace.from_string("open the door that match your agent's color")
         super().__init__(
             mission_space=mission_space,
             width=(2 * size),
