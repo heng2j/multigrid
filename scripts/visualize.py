@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from ray.rllib.algorithms import Algorithm
-from train import algorithm_config, get_checkpoint_dir, policy_mapping_fn
+from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, policy_mapping_fn
 
 
 
