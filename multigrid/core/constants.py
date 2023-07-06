@@ -95,6 +95,10 @@ class State(str, IndexedEnum):
     open = 'open'
     closed = 'closed'
     locked = 'locked'
+    pickedup = 'pickedup'
+    available = 'available'
+    alive = 'alive'
+    dead = 'dead'
 
 
 class Direction(enum.IntEnum):

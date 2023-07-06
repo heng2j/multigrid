@@ -506,14 +506,46 @@ class Key(WorldObj):
     Key object that can be picked up and used to unlock doors.
     """
 
-    def __new__(cls, color: str = Color.blue):
+    def __new__(cls, color: str = Color.blue, is_pickedup: bool = False, is_available: bool = True, ):
         """
         Parameters
         ----------
         color : str
             Object color
         """
-        return super().__new__(cls, color=color)
+        key = super().__new__(cls, color=color)
+        key.is_pickedup = is_pickedup
+        key.is_available = is_available
+        return key
+
+    @property
+    def is_pickedup(self) -> bool:
+        """
+        Whether the key is pickedup.
+        """
+        return self.state == State.pickedup
+
+    @is_pickedup.setter
+    def is_pickedup(self, value: bool):
+        """
+        Set the key to be pickup or not.
+        """
+        self.state = State.pickedup # set state to pickedup
+
+    @property
+    def is_available(self) -> bool:
+        """
+        Whether the key is is available.
+        """
+        return self.state == State.available
+
+    @is_available.setter
+    def is_available(self, value: bool):
+        """
+        Set the key to be available or not.
+        """
+        self.state = State.available # set state to available
+
 
     def can_pickup(self) -> bool:
         """

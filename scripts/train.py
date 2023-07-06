@@ -157,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-Empty-8x8-v0',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
@@ -165,9 +165,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '--num-agents', type=int, default=2, help="Number of agents in environment.")
     parser.add_argument(
-        '--num-workers', type=int, default=8, help="Number of rollout workers.")
+        '--num-workers', type=int, default=6, help="Number of rollout workers.")
     parser.add_argument(
-        '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
+        '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
         '--num-timesteps', type=int, default=1e7,
         help="Total number of timesteps to train.")
