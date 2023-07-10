@@ -58,7 +58,9 @@ if __name__ == "__main__":
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=1, help="Number of agents in environment.")
+        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+    parser.add_argument(
+        '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
         '--num-workers', type=int, default=6, help="Number of rollout workers.")
     parser.add_argument(
@@ -74,9 +76,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--save-dir', type=str, default='./ray_results/',
         help="Directory for saving checkpoints, results, and trained policies.")
+    parser.add_argument(
+        '--name', type=str, default='<my_experinemnt>',
+        help="Distinct name to track your experinemnt in save-dir")
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))
+    config.seed = args.seed
     stop_conditions = {'timesteps_total': args.num_timesteps}
 
     print()
