@@ -5,6 +5,7 @@ import json
 import os
 import ray
 
+from multigrid.utils.training_utilis import algorithm_config, can_use_gpu,  get_checkpoint_dir, policy_mapping_fn
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel
 from pathlib import Path
 from pprint import pprint
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--num-workers', type=int, default=6, help="Number of rollout workers.")
     parser.add_argument(
@@ -71,7 +72,7 @@ if __name__ == "__main__":
         '--load-dir', type=str,
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
-        '--save-dir', type=str, default='~/ray_results/',
+        '--save-dir', type=str, default='./ray_results/',
         help="Directory for saving checkpoints, results, and trained policies.")
 
     args = parser.parse_args()

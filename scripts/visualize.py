@@ -97,7 +97,8 @@ if __name__ == '__main__':
 
     frames = visualize(algorithm, num_episodes=args.num_episodes)
     if args.gif:
-        from array2gif import write_gif
+        import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
         print(f"Saving GIF to {filename}")
-        write_gif(np.array(frames), filename, fps=10)
+        # write to file
+        imageio.mimsave(filename, frames)
