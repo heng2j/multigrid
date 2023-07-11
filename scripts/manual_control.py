@@ -17,10 +17,13 @@ class ManualControl:
         self,
         env: Env,
         seed=None,
+        agents=2
     ) -> None:
         self.env = env
         self.seed = seed
         self.closed = False
+        self.total_rewards = 0
+        self.agents = agents
 
     def start(self):
         """Start the window display with blocking event loop"""
@@ -37,13 +40,20 @@ class ManualControl:
 
     def step(self, action: Action):
         _, reward, terminated, truncated, _ = self.env.step(action)
-        print(f"step={self.env.step_count}, reward={reward:.2f}")
+        reward = reward if self.agents <2 else reward[0]
+        terminated = terminated if self.agents <2 else terminated[0]
+        truncated = truncated if self.agents <2 else truncated[0]
+
+        self.total_rewards+= reward
+        print(f"step={self.env.step_count}, reward={reward:.2f}, total_reward={self.total_rewards: .2f} ")
 
         if terminated:
-            print("terminated!")
+            print("terminated! total_reward={self.total_rewards: .2f} ")
+            self.total_rewards = 0
             self.reset(self.seed)
         elif truncated:
-            print("truncated!")
+            print("truncated! total_reward={self.total_rewards: .2f} ")
+            self.total_rewards = 0
             self.reset(self.seed)
         else:
             self.env.render()
@@ -76,7 +86,13 @@ class ManualControl:
         }
         if key in key_to_action.keys():
             action = key_to_action[key]
-            self.step(action)
+            if self.agents<2:
+                self.step(action)
+            else:
+                actions = {0: action}
+                for i in range(1, self.agents):
+                    actions[i] = Action.done
+                self.step(actions)
         else:
             print(key)
 
@@ -90,7 +106,7 @@ if __name__ == "__main__":
         type=str,
         help="gym environment to load",
         choices=gym.envs.registry.keys(),
-        default="MultiGrid-CompetativeRedBlueDoor-v0",  #  MultiGrid-LockedHallway-2Rooms-v0
+        default="MultiGrid-CompetativeRedBlueDoor-v2",  #  MultiGrid-LockedHallway-2Rooms-v0
     )
     parser.add_argument(
         "--seed",
@@ -118,14 +134,14 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--single-agent",
-        type=int,
-        default=True,
+        type=bool,
+        default=False,
         help="",
     )
     parser.add_argument(
         "--agents",
         type=int,
-        default=1,
+        default=2,
         help="",
     )
 
@@ -151,5 +167,5 @@ if __name__ == "__main__":
         print("Convert to single agent")
         env = SingleAgentWrapper(env)
 
-    manual_control = ManualControl(env, seed=args.seed)
+    manual_control = ManualControl(env, seed=args.seed, agents=args.agents)
     manual_control.start()
