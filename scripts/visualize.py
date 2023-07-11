@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from ray.rllib.algorithms import Algorithm
-from train import algorithm_config, get_checkpoint_dir, policy_mapping_fn
+from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, policy_mapping_fn
 
 
 
@@ -97,7 +97,8 @@ if __name__ == '__main__':
 
     frames = visualize(algorithm, num_episodes=args.num_episodes)
     if args.gif:
-        from array2gif import write_gif
+        import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
         print(f"Saving GIF to {filename}")
-        write_gif(np.array(frames), filename, fps=10)
+        # write to file
+        imageio.mimsave(filename, frames)

@@ -129,3 +129,15 @@ class SingleAgentWrapper(gym.Wrapper):
         """
         result = super().step({0: action})
         return tuple(item[0] for item in result)
+
+
+
+
+class OurWrapper(ObservationWrapper):
+    """
+    Wrapper to get a one-hot encoding of a partially observable
+    agent view as observation.
+
+    Examples
+    """
+    ...
