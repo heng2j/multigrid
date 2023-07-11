@@ -53,8 +53,8 @@ class Color(str, IndexedEnum):
     Enumeration of object colors.
     """
     red = 'red'
-    green = 'green'
     blue = 'blue'
+    green = 'green'
     purple = 'purple'
     yellow = 'yellow'
     grey = 'grey'
