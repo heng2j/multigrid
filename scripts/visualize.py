@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from ray.rllib.algorithms import Algorithm
-from train import algorithm_config, get_checkpoint_dir, policy_mapping_fn
+from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, policy_mapping_fn
 
 
 
@@ -29,11 +29,20 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100) -> list[np.ndarray]
 
             actions = {}
             for agent_id in env.get_agent_ids():
-                actions[agent_id], states[agent_id], _ = algorithm.compute_single_action(
+
+                # Single-agent
+                actions[agent_id] = algorithm.compute_single_action(
                     observations[agent_id],
                     states[agent_id],
                     policy_id=policy_mapping_fn(agent_id)
                 )
+
+                # # Multi-agent
+                # actions[agent_id], states[agent_id], _ = algorithm.compute_single_action(
+                #     observations[agent_id],
+                #     states[agent_id],
+                #     policy_id=policy_mapping_fn(agent_id)
+                # )
 
             observations, rewards, terminations, truncations, infos = env.step(actions)
             for agent_id in rewards:
@@ -58,13 +67,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-Empty-8x8-v0',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--num-episodes', type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument(
@@ -88,7 +97,8 @@ if __name__ == '__main__':
 
     frames = visualize(algorithm, num_episodes=args.num_episodes)
     if args.gif:
-        from array2gif import write_gif
+        import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
         print(f"Saving GIF to {filename}")
-        write_gif(np.array(frames), filename, fps=10)
+        # write to file
+        imageio.mimsave(filename, frames)

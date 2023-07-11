@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from multigrid import MultiGridEnv
+from multigrid.base import MultiGridEnv
 from multigrid.core import Action, Grid, MissionSpace
 from multigrid.core.constants import Color
 from multigrid.core.world_object import Door
@@ -158,13 +158,13 @@ class RedBlueDoorsEnv(MultiGridEnv):
         # Add a red door at a random position in the left wall
         x = room_top[0]
         y = self._rand_int(1, height - 1)
-        self.red_door = Door(Color.red)
+        self.red_door = Door(Color.red, is_locked=True)
         self.grid.set(x, y, self.red_door)
 
         # Add a blue door at a random position in the right wall
         x = room_top[0] + room_size[0] - 1
         y = self._rand_int(1, height - 1)
-        self.blue_door = Door(Color.blue)
+        self.blue_door = Door(Color.blue, is_locked=True)
         self.grid.set(x, y, self.blue_door)
 
     def step(self, actions):
