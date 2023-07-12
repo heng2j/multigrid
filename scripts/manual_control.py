@@ -22,7 +22,7 @@ class ManualControl:
         self.env = env
         self.seed = seed
         self.closed = False
-        self.total_rewards = 0
+        self.total_episodic_rewards = 0
         self.agents = agents
 
     def start(self):
@@ -44,16 +44,16 @@ class ManualControl:
         terminated = terminated if self.agents <2 else terminated[0]
         truncated = truncated if self.agents <2 else truncated[0]
 
-        self.total_rewards+= reward
-        print(f"step={self.env.step_count}, reward={reward:.2f}, total_reward={self.total_rewards: .2f} ")
+        self.total_episodic_rewards+= reward
+        print(f"step={self.env.step_count}, reward={reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} ")
 
         if terminated:
-            print("terminated! total_reward={self.total_rewards: .2f} ")
-            self.total_rewards = 0
+            print(f"terminated! total episodic reward={self.total_episodic_rewards: .2f} ")
+            self.total_episodic_rewards = 0
             self.reset(self.seed)
         elif truncated:
-            print("truncated! total_reward={self.total_rewards: .2f} ")
-            self.total_rewards = 0
+            print(f"truncated! total episodic reward={self.total_episodic_rewards: .2f} ")
+            self.total_episodic_rewards = 0
             self.reset(self.seed)
         else:
             self.env.render()

@@ -219,24 +219,24 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             
             # TODO - Add Sparse rewards
             elif action == Action.pickup:
-                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True):
+                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
                     # FIXME - make me elegant 
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
                 else:
                     # If we are grabbing bad stuff
-                    reward[agent_id] -= 0.001  # OG 0.2
+                    # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
+                    reward[agent_id] -= 0.2 # OG 0.001 
             
-
-
             # TODO - Add Dense Rewards to encourage agent to learn faster
 
 
 
         return obs, reward, terminated, truncated, info
 
-
+    def reward_scheme(self):
+        ...
 
 
 class CompetativeRedBlueDoorEnv(MultiGridEnv):
@@ -439,21 +439,25 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
             
             # TODO - Add Sparse rewards
             elif action == Action.pickup:
-                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True):
+                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
                     # FIXME - make me elegant 
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
                 else:
                     # If we are grabbing bad stuff
-                    reward[agent_id] -= 0.001  # OG 0.2
+                    # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
+                    reward[agent_id] -= 0.2 # OG 0.001 
 
-            # TODO - Add Dense Rewards to encourage agent to learn faster
+            # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
 
 
 
         return obs, reward, terminated, truncated, info
 
+
+    def reward_scheme(self):
+        ...
 
 
 
