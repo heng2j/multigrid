@@ -88,6 +88,14 @@ Monitor and track your runs using Tensorboard with the following command:
 ```shell
 tensorboard --logdir ./ray_result
 ```
+
+You can filter the plots using the following filters:
+
+```
+episode_len_mean|ray/tune/episode_reward_mean|episode_reward_min|entropy|vf|loss|kl|cpu|ram
+```
+
+
 You will see scalar summaries as well as videos of your trained policies in the 'Images' tab.
 
 To visualize a specific checkpoint, use the following command:
@@ -95,5 +103,12 @@ To visualize a specific checkpoint, use the following command:
 python scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v0  --num-episodes 20  --load-dir ./ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v0_37eb5_00000_0_2023-07-10_11-12-43 --gif ./result.gif
 ```
 If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
-```
+
 ---
+
+
+## Task 4 - Submit your homework on Github Classroom
+
+You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. Convert your notebook into HTML format and then push to your Github Classroom Github Page folder.
+
+During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
