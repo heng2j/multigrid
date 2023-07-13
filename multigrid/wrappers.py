@@ -212,13 +212,13 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         """
         Provide the observation. 
         """
-        # FIXME 1:
+        # HW1 TODO 1:
         # For each agent_id in obs, update obs[agent_id]['image'] using the self.one_hot() method and 'image' from obs[agent_id].
         # If there's a type mismatch or one of the sub-observations is out of bounds, you might encounter an error like this:
         # ValueError: The observation collected from env.reset was not contained within your env's observation space.
         #             Its possible that there was a typemismatch (for example observations of np.float32 and a space ofnp.float64 observations),
         #             or that one of the sub-observations wasout of bounds.
-        # Make sure to handle this exception and implement the correct logic to avoid it.
+        # Make sure to handle this exception and implement the correct observation to avoid it.
 
         for agent_id in obs:
             # Your code here
