@@ -40,7 +40,7 @@ This course provides a four-week learning experience facilitated by two instruct
 
 ## Reference to MultiGrid
 
-Our course materials were built on top of the public repository "MultiGrid". MultiGrid provides a collection of fast multi-agent discrete gridworld environments for reinforcement learning. It is designed to be fast and easily customizable. For more information, you can visit the original [MultiGrid repository](https://github.com/ini/multigrid).
+Our course materials were built on top of the public repository "MultiGrid" by Ini Oguntola. MultiGrid provides a collection of fast multi-agent discrete gridworld environments for reinforcement learning. It is designed to be fast and easily customizable. For more information, you can visit the original [MultiGrid repository](https://github.com/ini/multigrid).
 
 # MultiGrid
 
