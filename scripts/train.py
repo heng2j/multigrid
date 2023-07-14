@@ -14,8 +14,11 @@ from ray.rllib.algorithms import AlgorithmConfig
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
+from ray.tune import CLIReporter
 
 
+# Limit the number of rows.
+reporter = CLIReporter(max_progress_rows=10)
 
 def train(
     algo: str,
@@ -36,6 +39,7 @@ def train(
         restore=get_checkpoint_dir(load_dir),
         checkpoint_freq=20,
         checkpoint_at_end=True,
+        progress_reporter=reporter
     )
     ray.shutdown()
 
