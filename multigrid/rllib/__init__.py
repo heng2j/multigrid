@@ -57,6 +57,10 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
         return {agent.index for agent in self.agents}
 
     def step(self, *args, **kwargs):
+
+        # if len(args[0]) < 2:
+        #     print("here")
+
         obs, rewards, terminations, truncations, infos = super().step(*args, **kwargs)
         terminations['__all__'] = all(terminations.values())
         truncations['__all__'] = all(truncations.values())

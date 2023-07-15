@@ -188,10 +188,15 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
 
+        self.agents
+
     def step(self, actions):
         """
         :meta private:
-        """
+        # """
+        # if len(actions) < 2:
+        #     print("Here")
+
         obs, reward, terminated, truncated, info = super().step(actions)
 
         for agent_id, action in actions.items():
@@ -214,7 +219,8 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                     # TODO - Make this clean
                     fwd_obj.terminated = True
                     self.grid.set(*fwd_obj.pos, None)
-                    fwd_obj.pos = (999,999)
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    reward[agent_id] += 0.5
 
             
             # TODO - Add Sparse rewards
@@ -227,7 +233,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 else:
                     # If we are grabbing bad stuff
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                    reward[agent_id] -= 0.2 # OG 0.001 
+                    reward[agent_id] -= 0.001 # OG  0.2
             
             # TODO - Add Dense Rewards to encourage agent to learn faster
 

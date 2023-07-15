@@ -101,7 +101,10 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         screen_size: int | None = 640,
         highlight: bool = True,
         tile_size: int = TILE_PIXELS,
-        agent_pov: bool = False):
+        agent_pov: bool = False,
+        our_agent_ids: list[int] = [0]
+        ):
+
         """
         Parameters
         ----------
@@ -156,6 +159,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.grid: Grid = Grid(width, height)
 
         # Initialize agents
+        self.our_agent_ids = our_agent_ids
+
         if isinstance(agents, int):
             self.num_agents = agents
             self.agent_states = AgentState(agents) # joint agent state (vectorized)
@@ -183,8 +188,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Action enumeration for this environment
         self.actions = Action
 
-        # Range of possible rewards
-        self.reward_range = (0, 1)
+        # # Range of possible rewards
+        # self.reward_range = (0, 1)
 
         assert isinstance(
             max_steps, int
@@ -297,6 +302,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         if self.render_mode == 'human':
             self.render()
 
+        # if len( self.agents) < 2:
+        #     print("Here")
+
         return observations, defaultdict(dict)
 
     def step(
@@ -329,6 +337,10 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         infos : dict[AgentID, dict[str, Any]]
             Additional information for each agent
         """
+
+        # if len(actions) < 2:
+        #     print("Here")
+
         self.step_count += 1
         rewards = self.handle_actions(actions)
 
@@ -392,7 +404,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
         # Randomize agent action order
-        if self.num_agents == 1:
+        if (self.num_agents == 1) or (len(self.our_agent_ids)==1):
             order = (0,)
         else:
             order = self.np_random.random(size=self.num_agents).argsort()

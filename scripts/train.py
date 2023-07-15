@@ -25,11 +25,12 @@ def train(
     config: AlgorithmConfig,
     stop_conditions: dict,
     save_dir: str,
-    load_dir: str | None = None):
+    load_dir: str | None = None,
+    local_mode: bool = False):
     """
     Train an RLlib algorithm.
     """
-    ray.init(num_cpus=(config.num_rollout_workers + 1))
+    ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
     tune.run(
         algo,
         stop=stop_conditions,
@@ -56,17 +57,17 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v2',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=1, help="Number of rollout workers.")
+        '--num-workers', type=int, default=6, help="Number of rollout workers.")
     parser.add_argument(
         '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
@@ -78,11 +79,14 @@ if __name__ == "__main__":
         '--load-dir', type=str,
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
-        '--save-dir', type=str, default='./ray_results/',
+        '--save-dir', type=str, default='submission/ray_results/',
         help="Directory for saving checkpoints, results, and trained policies.")
     parser.add_argument(
         '--name', type=str, default='<my_experinemnt>',
         help="Distinct name to track your experinemnt in save-dir")
+    parser.add_argument(
+        '--local-mode', type=bool, default=False,
+        help="Boolean value to set to use local mode for debugging while num-workers must be 0 ")
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))
@@ -94,4 +98,4 @@ if __name__ == "__main__":
     print('\n', '-' * 64, '\n', "Training with following configuration:", '\n', '-' * 64)
     print()
     pprint(config.to_dict())
-    train(args.algo, config, stop_conditions, args.save_dir, args.load_dir)
+    train(args.algo, config, stop_conditions, args.save_dir, args.load_dir, args.local_mode)
