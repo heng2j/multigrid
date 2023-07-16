@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+from typing import Any, SupportsFloat
 from multigrid.base import MultiGridEnv
-from multigrid.core import Action, Grid, MissionSpace
+from multigrid.core import Action, Grid, MissionSpace, Type
 from multigrid.core.constants import Color
 from multigrid.core.world_object import Door, Key, Ball
 from multigrid.core.agent import Agent
 
+import numpy as np
 
+
+### Typing
+
+AgentID = int
+ObsType = dict[str, Any]
 
 class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
     """
@@ -171,9 +178,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         # # Block red door with a ball
         # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
 
-        # Place keys in hallway
-        for key_color in color_sequence:
-            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
 
         # Place agents in the top-left corner
         # TODO - update to encapsulate muti-agent positioning
@@ -187,6 +191,12 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
                 agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
+
+        
+        # Place keys in hallway
+        for key_color in color_sequence:
+            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+
 
         self.agents
 
@@ -240,6 +250,105 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
 
         return obs, reward, terminated, truncated, info
+
+
+    def handle_actions(
+        self, actions: dict[AgentID, Action]) -> dict[AgentID, SupportsFloat]:
+        """
+        Handle actions taken by agents.
+
+        Parameters
+        ----------
+        actions : dict[AgentID, Action]
+            Action for each agent acting at this timestep
+
+        Returns
+        -------
+        rewards : dict[AgentID, SupportsFloat]
+            Reward for each agent
+        """
+        rewards = {agent_index: 0 for agent_index in self.our_agent_ids}
+
+        # Randomize agent action order
+        if  len(self.our_agent_ids) == 1: #self.num_agents == 1:
+            order = (0,)
+        else:
+            order = self.np_random.random(size=self.num_agents).argsort()
+
+        # Update agent states, grid states, and reward from actions
+        for i in order:
+            agent, action = self.agents[i], actions[i]
+
+            if agent.state.terminated:
+                continue
+
+            # Rotate left
+            if action == Action.left:
+                agent.state.dir = (agent.state.dir - 1) % 4
+
+            # Rotate right
+            elif action == Action.right:
+                agent.state.dir = (agent.state.dir + 1) % 4
+
+            # Move forward
+            elif action == Action.forward:
+                fwd_pos = agent.front_pos
+                fwd_obj = self.grid.get(*fwd_pos)
+
+                if fwd_obj is None or fwd_obj.can_overlap():
+                    if not self.allow_agent_overlap:
+                        agent_present = np.bitwise_and.reduce(
+                            self.agent_states.pos == fwd_pos, axis=1).any()
+                        if agent_present:
+                            continue
+
+                    agent.state.pos = fwd_pos
+                    if fwd_obj is not None:
+                        if fwd_obj.type == Type.goal:
+                            self.on_success(agent, rewards, {})
+                        if fwd_obj.type == Type.lava:
+                            self.on_failure(agent, rewards, {})
+
+            # Pick up an object
+            elif action == Action.pickup:
+                fwd_pos = agent.front_pos
+                fwd_obj = self.grid.get(*fwd_pos)
+
+                if fwd_obj is not None and fwd_obj.can_pickup():
+                    if agent.state.carrying is None:
+                        agent.state.carrying = fwd_obj
+                        self.grid.set(*fwd_pos, None)
+
+            # Drop an object
+            elif action == Action.drop:
+                fwd_pos = agent.front_pos
+                fwd_obj = self.grid.get(*fwd_pos)
+
+                if agent.state.carrying and fwd_obj is None:
+                    agent_present = np.bitwise_and.reduce(
+                        self.agent_states.pos == fwd_pos, axis=1).any()
+                    if not agent_present:
+                        self.grid.set(*fwd_pos, agent.state.carrying)
+                        agent.state.carrying.cur_pos = fwd_pos
+                        agent.state.carrying = None
+
+            # Toggle/activate an object
+            elif action == Action.toggle:
+                fwd_pos = agent.front_pos
+                fwd_obj = self.grid.get(*fwd_pos)
+
+                if fwd_obj is not None:
+                    fwd_obj.toggle(self, agent, fwd_pos)
+
+            # Done action (not used by default)
+            elif action == Action.done:
+                pass
+
+            else:
+                raise ValueError(f"Unknown action: {action}")
+
+        return rewards
+
 
     def reward_scheme(self):
         ...

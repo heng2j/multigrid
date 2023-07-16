@@ -144,6 +144,10 @@ if __name__ == "__main__":
         default=2,
         help="",
     )
+    parser.add_argument(
+        '--our-agent-ids', nargs="+", type=int, default=[0],
+        help="List of agent ids to evaluate")
+
 
     args = parser.parse_args()
 

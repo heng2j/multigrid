@@ -15,10 +15,26 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
 from ray.tune import CLIReporter
+from ray.rllib.policy.policy import Policy
+import ray.rllib.algorithms.callbacks as callbacks
+from ray.rllib.algorithms.callbacks import DefaultCallbacks
 
 
 # Limit the number of rows.
 reporter = CLIReporter(max_progress_rows=10)
+
+
+
+
+# policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
+# restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
+# restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
+
+# class RestoreWeightsCallback(DefaultCallbacks):
+#     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+#         algorithm.set_weights({"default_policy": restored_policy_0_weights})
+
+
 
 def train(
     algo: str,
@@ -63,11 +79,11 @@ if __name__ == "__main__":
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=1, help="Number of agents in environment.")
+        '--num-agents', type=int, default=2, help="Number of agents in environment.")
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=6, help="Number of rollout workers.")
+        '--num-workers', type=int, default=0, help="Number of rollout workers.")
     parser.add_argument(
         '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
@@ -85,8 +101,14 @@ if __name__ == "__main__":
         '--name', type=str, default='<my_experinemnt>',
         help="Distinct name to track your experinemnt in save-dir")
     parser.add_argument(
-        '--local-mode', type=bool, default=False,
-        help="Boolean value to set to use local mode for debugging while num-workers must be 0 ")
+        '--local-mode', type=bool, default=True,
+        help="Boolean value to set to use local mode for debugging")
+    parser.add_argument(
+        '--our-agent-ids', nargs="+", type=int, default=[0],
+        help="List of agent ids to train")
+    parser.add_argument(
+        '--policies-to-train', nargs="+", type=str, default=["policy_0"],
+        help="List of agent ids to train")
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))

@@ -7,7 +7,7 @@ from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
 
 
 
-def visualize(algorithm: Algorithm, num_episodes: int = 100, our_agent_ids: list[int] = [0]) -> list[np.ndarray]:
+def visualize(algorithm: Algorithm, num_episodes: int = 100) -> list[np.ndarray]:
     """
     Visualize trajectories from trained agents.
     """
@@ -17,24 +17,18 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100, our_agent_ids: list
     for episode in range(num_episodes):
         print('\n', '-' * 32, '\n', 'Episode', episode, '\n', '-' * 32)
 
-        episode_rewards = {agent_id: 0.0 for agent_id in our_agent_ids}
-        # episode_rewards = {agent_id: 0.0 for agent_id in env.get_agent_ids()}
+        episode_rewards = {agent_id: 0.0 for agent_id in env.get_agent_ids()}
         terminations, truncations = {'__all__': False}, {'__all__': False}
         observations, infos = env.reset()
-        # states = {
-        #     agent_id: algorithm.get_policy(policy_mapping_fn(agent_id)).get_initial_state()
-        #     for agent_id in env.get_agent_ids()
-        # }
         states = {
             agent_id: algorithm.get_policy(policy_mapping_fn(agent_id)).get_initial_state()
-            for agent_id in our_agent_ids
+            for agent_id in env.get_agent_ids()
         }
         while not terminations['__all__'] and not truncations['__all__']:
             frames.append(env.get_frame())
 
             actions = {}
-            # for agent_id in env.get_agent_ids():
-            for agent_id in our_agent_ids:
+            for agent_id in env.get_agent_ids():
 
                 # Single-agent
                 actions[agent_id] = algorithm.compute_single_action(
@@ -52,8 +46,7 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100, our_agent_ids: list
 
             observations, rewards, terminations, truncations, infos = env.step(actions)
             for agent_id in rewards:
-                if agent_id in our_agent_ids:
-                    episode_rewards[agent_id] += rewards[agent_id]
+                episode_rewards[agent_id] += rewards[agent_id]
 
         frames.append(env.get_frame())
         print('Rewards:', episode_rewards)
@@ -80,7 +73,7 @@ if __name__ == '__main__':
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--num-episodes', type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument(
@@ -88,9 +81,6 @@ if __name__ == '__main__':
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
         '--gif', type=str, help="Store output as GIF at given path.")
-    parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int,
-        help="List of agent ids to evaluate")
 
     args = parser.parse_args()
     args.env_config.update(render_mode='human')
@@ -105,7 +95,7 @@ if __name__ == '__main__':
         print(f"Loading checkpoint from {checkpoint}")
         algorithm.restore(checkpoint)
 
-    frames = visualize(algorithm, num_episodes=args.num_episodes, our_agent_ids=args.our_agent_ids)
+    frames = visualize(algorithm, num_episodes=args.num_episodes)
     if args.gif:
         import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
