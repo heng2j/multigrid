@@ -20,6 +20,11 @@ import ray.rllib.algorithms.callbacks as callbacks
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 
+import pathlib
+SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
+
+import git
+
 # Limit the number of rows.
 reporter = CLIReporter(max_progress_rows=10)
 
@@ -38,8 +43,31 @@ reporter = CLIReporter(max_progress_rows=10)
 
 
 tags = { "user_name" : "John",
-         "git_commit_hash" : "abc123"}
+         "git_commit_hash" : git.Repo(SCRIPT_PATH).head.commit
+         }
 
+
+# config = {
+
+#         "mlflow": {
+#             "run_name" : "my_run_name",
+#             "name": "my_name",
+#             "experiment_name": "testing_experiment",
+#             "tracking_uri": "./submission/mlflow",
+#             # "experiment_id" : "Class_20230717",
+#             "create_experiment_if_not_exists" : True,
+#             "artifact_location" : "./submission/mlflow_artifacts"
+
+#         },
+
+#     }
+
+
+# from ray.air.integrations.mlflow import setup_mlflow
+
+
+
+# setup_mlflow(config)
 
 def train(
     algo: str,
@@ -48,7 +76,7 @@ def train(
     save_dir: str,
     load_dir: str | None = None,
     local_mode: bool = False,
-    experiment_name: str | None = None,
+    experiment_name: str = "testing_experiment",
     ):
     """
     Train an RLlib algorithm.
@@ -65,7 +93,7 @@ def train(
         checkpoint_at_end=True,
         progress_reporter=reporter,
         callbacks=[MLflowLoggerCallback(
-            tracking_uri="./submission",
+        tracking_uri="./submission/mlflow",
         experiment_name=experiment_name,
             tags=tags,
             save_artifact=True)]

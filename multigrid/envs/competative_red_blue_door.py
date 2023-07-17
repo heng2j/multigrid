@@ -155,7 +155,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence = ["red", "blue"]
+        color_sequence = ["red"] # ["red", "blue"]
 
         # Create an empty grid
         self.grid = Grid(width, height)
