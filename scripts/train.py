@@ -18,7 +18,7 @@ from ray.tune import CLIReporter
 from ray.rllib.policy.policy import Policy
 import ray.rllib.algorithms.callbacks as callbacks
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
-
+from ray.air.integrations.mlflow import MLflowLoggerCallback
 
 # Limit the number of rows.
 reporter = CLIReporter(max_progress_rows=10)
@@ -36,13 +36,20 @@ reporter = CLIReporter(max_progress_rows=10)
 
 
 
+
+tags = { "user_name" : "John",
+         "git_commit_hash" : "abc123"}
+
+
 def train(
     algo: str,
     config: AlgorithmConfig,
     stop_conditions: dict,
     save_dir: str,
     load_dir: str | None = None,
-    local_mode: bool = False):
+    local_mode: bool = False,
+    experiment_name: str | None = None,
+    ):
     """
     Train an RLlib algorithm.
     """
@@ -56,7 +63,12 @@ def train(
         restore=get_checkpoint_dir(load_dir),
         checkpoint_freq=20,
         checkpoint_at_end=True,
-        progress_reporter=reporter
+        progress_reporter=reporter,
+        callbacks=[MLflowLoggerCallback(
+            tracking_uri="./submission",
+        experiment_name=experiment_name,
+            tags=tags,
+            save_artifact=True)]
     )
     ray.shutdown()
 
