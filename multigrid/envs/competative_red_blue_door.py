@@ -6,9 +6,11 @@ from multigrid.core import Action, Grid, MissionSpace, Type
 from multigrid.core.constants import Color
 from multigrid.core.world_object import Door, Key, Ball
 from multigrid.core.agent import Agent
+from multigrid.utils.obs import gen_obs_grid_encoding
 
 import numpy as np
-
+from functools import cached_property
+from gymnasium import spaces
 
 ### Typing
 
@@ -147,6 +149,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             **kwargs,
         )
 
+
     def _gen_grid(self, width, height):
         """
         :meta private:
@@ -175,10 +178,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         self.blue_door = Door(Color.blue, is_locked=True)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
-        # # Block red door with a ball
-        # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
-
-
         # Place agents in the top-left corner
         # TODO - update to encapsulate muti-agent positioning
         for agent in self.agents:
@@ -192,13 +191,18 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
 
-        
+
+
+        # Block red door with a ball
+        self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+
+    
         # Place keys in hallway
         for key_color in color_sequence:
             self.place_obj(Key(color=key_color), top=room_top, size=room_size)
 
 
-        self.agents
+
 
     def step(self, actions):
         """
@@ -209,11 +213,15 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         obs, reward, terminated, truncated, info = super().step(actions)
 
+        # FIXME - Updated agent actions
+        actions = {agent_index: actions[agent_index] for agent_index in self.our_agent_ids}
+        terminated = {agent_index: terminated[agent_index] for agent_index in self.our_agent_ids}
+        truncated = {agent_index: truncated[agent_index] for agent_index in self.our_agent_ids}
+
         for agent_id, action in actions.items():
             agent = self.agents[agent_id]
-            if action == Action.toggle:
-                fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
-                
+            fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
+            if action == Action.toggle:                
                 for other_agent in self.agents:
                     if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
                         fwd_obj = other_agent
@@ -240,6 +248,10 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
+                elif agent.carrying and (agent.carrying.type == "ball") and agent.front_pos == agent.carrying.init_pos:
+                    reward[agent_id] += 0.5 * agent.carrying.discount_factor
+                    agent.carrying.discount_factor *= agent.carrying.discount_factor
+
                 else:
                     # If we are grabbing bad stuff
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
@@ -268,6 +280,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             Reward for each agent
         """
         rewards = {agent_index: 0 for agent_index in self.our_agent_ids}
+
 
         # Randomize agent action order
         if  len(self.our_agent_ids) == 1: #self.num_agents == 1:
@@ -349,6 +362,35 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         return rewards
 
+    # def gen_obs(self) -> dict[AgentID, ObsType]:
+    #     """
+    #     Generate observations for each agent (partially observable, low-res encoding).
+
+    #     Returns
+    #     -------
+    #     observations : dict[AgentID, ObsType]
+    #         Mapping from agent ID to observation dict, containing:
+    #             * 'image': partially observable view of the environment
+    #             * 'direction': agent's direction / orientation (acting as a compass)
+    #             * 'mission': textual mission string (instructions for the agent)
+    #     """
+    #     direction = self.agent_states.dir
+    #     image = gen_obs_grid_encoding(
+    #         self.grid.state,
+    #         self.agent_states,
+    #         self.agents[0].view_size,
+    #         self.agents[0].see_through_walls,
+    #     )
+
+    #     observations = {}
+    #     for i in  self.our_agent_ids:
+    #         observations[i] = {
+    #             'image': image[i],
+    #             'direction': direction[i],
+    #             'mission': self.agents[i].mission,
+    #         }
+
+    #     return observations
 
     def reward_scheme(self):
         ...
@@ -517,9 +559,6 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         # # Block red door with a ball
         # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
 
-        # Place keys in hallway
-        for key_color in color_sequence:
-            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
 
         # Place agents in the top-left corner
         # TODO - update to encapsulate muti-agent positioning
@@ -533,6 +572,12 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
                 agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
+
+        # Place keys in hallway
+        for key_color in color_sequence:
+            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+
+
 
     def step(self, actions):
         """

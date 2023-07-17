@@ -79,11 +79,11 @@ if __name__ == "__main__":
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=0, help="Number of rollout workers.")
+        '--num-workers', type=int, default=6, help="Number of rollout workers.")
     parser.add_argument(
         '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         '--name', type=str, default='<my_experinemnt>',
         help="Distinct name to track your experinemnt in save-dir")
     parser.add_argument(
-        '--local-mode', type=bool, default=True,
+        '--local-mode', type=bool, default=False,
         help="Boolean value to set to use local mode for debugging")
     parser.add_argument(
         '--our-agent-ids', nargs="+", type=int, default=[0],

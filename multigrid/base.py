@@ -159,7 +159,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
         # Initialize agents
         self.our_agent_ids = our_agent_ids
-        
+
         if isinstance(agents, int):
             self.num_agents = agents
             self.agent_states = AgentState(agents) # joint agent state (vectorized)
@@ -230,6 +230,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             agent.index: agent.action_space
             for agent in self.agents
         })
+
 
     @abstractmethod
     def _gen_grid(self, width: int, height: int):

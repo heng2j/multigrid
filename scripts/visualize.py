@@ -81,6 +81,10 @@ if __name__ == '__main__':
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
         '--gif', type=str, help="Store output as GIF at given path.")
+    parser.add_argument(
+        '--our-agent-ids', nargs="+", type=int, default=[0],
+        help="List of agent ids to evaluate")
+
 
     args = parser.parse_args()
     args.env_config.update(render_mode='human')

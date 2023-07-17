@@ -135,13 +135,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--single-agent",
         type=bool,
-        default=False,
+        default=True,
         help="",
     )
     parser.add_argument(
         "--agents",
         type=int,
-        default=2,
+        default=1,
         help="",
     )
     parser.add_argument(

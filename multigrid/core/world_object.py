@@ -576,14 +576,17 @@ class Ball(WorldObj):
     Ball object that can be picked up by agents.
     """
 
-    def __new__(cls, color: str = Color.blue):
+    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0,0)):
         """
         Parameters
         ----------
         color : str
             Object color
         """
-        return super().__new__(cls, color=color)
+        ball = super().__new__(cls, color=color)
+        ball.init_pos = init_pos
+        ball.discount_factor = 0.9
+        return ball
 
     def can_pickup(self) -> bool:
         """
@@ -596,6 +599,22 @@ class Ball(WorldObj):
         :meta private:
         """
         fill_coords(img, point_in_circle(0.5, 0.5, 0.31), self.color.rgb())
+
+    # @property
+    # def discount_factor(self) -> float:
+    #     """
+    #     Whether the key is is available.
+    #     """
+    #     return self.state == State.available
+
+    # @discount_factor.setter
+    # def discount_factor(self, value: float):
+    #     """
+    #     Set the key to be available or not.
+    #     """
+    #     self.state = State.available # set state to available
+
+
 
 
 class Box(WorldObj):
