@@ -293,8 +293,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             start_cell = self.grid.get(*agent.state.pos)
             # assert start_cell is None or start_cell.can_overlap()
 
+        # Episodic reward since episode start
+        self.episodic_reward = 0
+
         # Step count since episode start
         self.step_count = 0
+
+        # # Episodic info since episode start
+        # self.info = defaultdict(dict)
 
         # Return first observation
         observations = self.gen_obs()
@@ -533,11 +539,16 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             agent.state.terminated = True # terminate this agent only
             terminations[agent.index] = True
 
+
     def is_done(self) -> bool:
         """
         Return whether the current episode is finished (for all agents).
         """
         truncated = self.step_count >= self.max_steps
+
+        # if truncated or all(self.agent_states.terminated):
+        #     self.info["episode_done"].get("r", self.episodic_reward)
+        #     self.info["episode_done"].get("l", self.step_count)
         return truncated or all(self.agent_states.terminated)
 
     def __str__(self):

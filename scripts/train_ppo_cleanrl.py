@@ -16,6 +16,8 @@ from torch.utils.tensorboard import SummaryWriter
 from multigrid.envs import *
 from multigrid.wrappers import SingleAgentWrapper, CompetativeRedBlueDoorWrapper
 
+CHECKPOINT_FREQUENCY = 50
+
 def parse_args():
     # fmt: off
     parser = argparse.ArgumentParser()
@@ -29,6 +31,8 @@ def parse_args():
         help="if toggled, cuda will be enabled by default")
     parser.add_argument("--track", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
         help="if toggled, this experiment will be tracked with Weights and Biases")
+    parser.add_argument("--save-checkpoint", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
+        help="if toggled, the checkpoint for this experiment will be tracked and save in checkpoints/")
     parser.add_argument("--wandb-project-name", type=str, default="cleanRL",
         help="the wandb's project name")
     parser.add_argument("--wandb-entity", type=str, default=None,
@@ -39,13 +43,13 @@ def parse_args():
     # Algorithm specific arguments
     parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2", #"CartPole-v1",
         help="the id of the environment")
-    parser.add_argument("--total-timesteps", type=int, default=500000,
+    parser.add_argument("--total-timesteps", type=int, default=5000000,
         help="total timesteps of the experiments")
     parser.add_argument("--learning-rate", type=float, default=2.5e-4,
         help="the learning rate of the optimizer")
     parser.add_argument("--num-envs", type=int, default=4,
         help="the number of parallel game environments")
-    parser.add_argument("--num-steps", type=int, default=128,
+    parser.add_argument("--num-steps", type=int, default=500,
         help="the number of steps to run in each environment per policy rollout")
     parser.add_argument("--anneal-lr", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggle learning rate annealing for policy and value networks")
@@ -80,7 +84,7 @@ def parse_args():
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
-        env = gym.make(env_id, render_mode="human",agents=1, screen_size=640)
+        env = gym.make(env_id,agents=1,  screen_size=640) #  render_mode="human",
         env = CompetativeRedBlueDoorWrapper(env)
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
@@ -138,6 +142,16 @@ class Agent(nn.Module):
 if __name__ == "__main__":
     args = parse_args()
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+
+    if args.save_checkpoint:
+        checkpoint_folder = f"checkpoints/{run_name}"
+
+        checkpoint_folder = os.path.abspath(checkpoint_folder)
+        # Create output folder if needed
+        os.makedirs(checkpoint_folder, exist_ok=True)
+
+
+
     if args.track:
         import wandb
 
@@ -217,12 +231,24 @@ if __name__ == "__main__":
             rewards[step] = torch.tensor(reward).to(device).view(-1)
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
 
-            for item in [info]:
-                if "episode" in item.keys():
-                    print(f"global_step={global_step}, episodic_return={item['episode']['r']}")
-                    writer.add_scalar("charts/episodic_return", item["episode"]["r"], global_step)
-                    writer.add_scalar("charts/episodic_length", item["episode"]["l"], global_step)
-                    break
+            # if any(done):
+            #     writer.add_scalar("charts/episodic_return", float(rewards.mean()), global_step)
+            #     writer.add_scalar("charts/episodic_length", step, global_step)
+            if "final_info" in info:
+                episodic_returns = []
+                episodic_lengths = []
+                for item in info["final_info"]:
+                    if  (item is not None ) and ("episode" in item.keys()):
+                        # episodic_returns.append(item['episode']['r'])
+                        # episodic_lengths.append(item['episode']['l'])
+                        # print(f"global_step={global_step}, episodic_return={item['episode']['r']},  episodic_length={item['episode']['l']}")
+                        writer.add_scalar("charts/episodic_return", item["episode"]["r"], global_step)
+                        writer.add_scalar("charts/episodic_length", item["episode"]["l"], global_step)
+                        break
+                # print(f"global_step={global_step}, episodic_return_mean={np.mean(episodic_returns)},  episodic_length={np.mean(episodic_lengths)}")
+                # writer.add_scalar("charts/episodic_return_mean", np.mean(episodic_returns), global_step)
+                # writer.add_scalar("charts/episodic_length_mean", np.mean(episodic_lengths), global_step)
+
 
         # bootstrap value if not done
         with torch.no_grad():
@@ -303,6 +329,7 @@ if __name__ == "__main__":
                 if approx_kl > args.target_kl:
                     break
 
+
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
         explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
@@ -318,6 +345,13 @@ if __name__ == "__main__":
         writer.add_scalar("losses/explained_variance", explained_var, global_step)
         print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+
+
+        if args.save_checkpoint:
+            # make sure to tune `CHECKPOINT_FREQUENCY` 
+            # so models are not saved too frequently
+            if update % CHECKPOINT_FREQUENCY == 0:
+                torch.save(agent.state_dict(), f"{checkpoint_folder}/agent.pt" )
 
     envs.close()
     writer.close()

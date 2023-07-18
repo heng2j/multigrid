@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing_extensions import assert_type
 
 import gymnasium as gym
 import numba as nb
@@ -177,7 +178,7 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
             len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent observation spaces
-        dim = sum(self.dim_sizes)
+        dim = sum(self.dim_sizes) + 1 # For all direction
         for agent in self.env.agents:
             view_height, view_width, _ = agent.observation_space.shape
             agent.observation_space = spaces.Box(
@@ -194,8 +195,10 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         :meta private:
         """
 
-            # obs[agent_id] = self.one_hot(obs, self.dim_sizes)
-        obs = self.one_hot(obs, self.dim_sizes)
+
+        obs["image"] = self.one_hot(obs[0]["image"], self.dim_sizes)
+        obs["direction"] = np.full((obs[0]["image"].shape[:2] + (1,)), obs[0]["direction"]).astype('uint8')
+        obs = np.concatenate((obs["direction"] , obs["image"]), axis=2, )
 
         return obs
 

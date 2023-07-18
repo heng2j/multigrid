@@ -224,15 +224,15 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         observations = {}
         for i in range(self.num_agents):
-            # observations[i] = {
-            #     'image': image[i],
-            #     # 'direction': direction[i],
-            #     # 'mission': self.agents[i].mission,
-            # }
+            observations[i] = {
+                'image': image[i],
+                'direction': direction[i],
+                # 'mission': self.agents[i].mission,
+            }
 
-            observations[i] = image[i]
+            # observations[i] = image[i]
 
-        return observations[0]
+        return observations
 
 
     def step(self, actions):
@@ -261,6 +261,9 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                     if self.red_door.is_open:
                         # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
+
+                        # self.info["episode_done"].get("r", self.episodic_reward)
+                        # self.info["episode_done"].get("l", self.step_count)
                     # else:
                     #     self.on_failure(agent, reward, terminated)
                     #     self.blue_door.is_open = False  # close the door again
@@ -291,6 +294,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             # TODO - Add Dense Rewards to encourage agent to learn faster
 
 
+        self.episodic_reward += reward[0]
 
         return obs, reward[0], terminated[0], truncated[0], info
 
@@ -679,6 +683,10 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     if self.red_door.is_open:
                         # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
+
+                        # self.info["episode"].get("r", self.episodic_reward)
+                        # self.info["episode"].get("l", self.step_count)
+                        
                     # else:
                     #     self.on_failure(agent, reward, terminated)
                     #     self.blue_door.is_open = False  # close the door again
