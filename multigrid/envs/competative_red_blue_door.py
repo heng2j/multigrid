@@ -406,7 +406,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         obs_shape = self.agents[0].observation_space.shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
         agent_obs = self.gen_obs()
-        vis_masks[0] = (agent_obs[..., 0] != Type.unseen.to_index())
+        vis_masks[0] = (agent_obs[0]["image"][..., 0] != Type.unseen.to_index())
 
         # for i, agent_obs in self.gen_obs().items():
             

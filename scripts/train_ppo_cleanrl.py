@@ -37,7 +37,7 @@ def parse_args():
         help="the wandb's project name")
     parser.add_argument("--wandb-entity", type=str, default=None,
         help="the entity (team) of wandb's project")
-    parser.add_argument("--capture-video", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
+    parser.add_argument("--capture-video", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="whether to capture videos of the agent performances (check out `videos` folder)")
 
     # Algorithm specific arguments
@@ -84,7 +84,7 @@ def parse_args():
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
-        env = gym.make(env_id,agents=1,  screen_size=640) #  render_mode="human",
+        env = gym.make(env_id,agents=1, render_mode="rgb_array", screen_size=640) #  render_mode="rgb_array",
         env = CompetativeRedBlueDoorWrapper(env)
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
