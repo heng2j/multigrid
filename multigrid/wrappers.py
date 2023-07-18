@@ -116,19 +116,22 @@ class SingleAgentWrapper(gym.Wrapper):
         self.observation_space = env.agents[0].observation_space
         self.action_space = env.agents[0].action_space
 
+        # self.observation_space 
+
+
     def reset(self, *args, **kwargs):
         """
         :meta private:
         """
         result = super().reset(*args, **kwargs)
-        return tuple(item[0] for item in result)
+        return tuple(item for item in result)
 
     def step(self, action):
         """
         :meta private:
         """
         result = super().step({0: action})
-        return tuple(item[0] for item in result)
+        return tuple(item for item in result)
 
 
 
@@ -176,16 +179,23 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         # Update agent observation spaces
         dim = sum(self.dim_sizes)
         for agent in self.env.agents:
-            view_height, view_width, _ = agent.observation_space['image'].shape
-            agent.observation_space['image'] = spaces.Box(
+            view_height, view_width, _ = agent.observation_space.shape
+            agent.observation_space = spaces.Box(
                 low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8)
+            
+            # agent.observation_space = agent.observation_space['image']
+
+        # self.observation_space = {0: self.observation_space[0]['image']}
+
+        # self.observation_space = self.observation_space[0] 
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         """
         :meta private:
         """
-        for agent_id in obs:
-            obs[agent_id]['image'] = self.one_hot(obs[agent_id]['image'], self.dim_sizes)
+
+            # obs[agent_id] = self.one_hot(obs, self.dim_sizes)
+        obs = self.one_hot(obs, self.dim_sizes)
 
         return obs
 

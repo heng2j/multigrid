@@ -216,10 +216,11 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         Return the joint observation space of all agents.
         """
-        return spaces.Dict({
-            agent.index: agent.observation_space
-            for agent in self.agents
-        })
+        # return spaces.Dict({
+        #     agent.index: agent.observation_space
+        #     for agent in self.agents
+        # })
+        return self.agents[0].observation_space
 
     @cached_property
     def action_space(self) -> spaces.Dict[AgentID, spaces.Space]:

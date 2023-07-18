@@ -47,27 +47,7 @@ tags = { "user_name" : "John",
          }
 
 
-# config = {
-
-#         "mlflow": {
-#             "run_name" : "my_run_name",
-#             "name": "my_name",
-#             "experiment_name": "testing_experiment",
-#             "tracking_uri": "./submission/mlflow",
-#             # "experiment_id" : "Class_20230717",
-#             "create_experiment_if_not_exists" : True,
-#             "artifact_location" : "./submission/mlflow_artifacts"
-
-#         },
-
-#     }
-
-
-# from ray.air.integrations.mlflow import setup_mlflow
-
-
-
-# setup_mlflow(config)
+# TODO - Set Evaluation
 
 def train(
     algo: str,
