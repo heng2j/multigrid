@@ -24,7 +24,7 @@ SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import git
 
 # Set up Ray CLIReporter
-# Limit the number of rows.
+# Limit the number of rows
 reporter = CLIReporter(max_progress_rows=10)
 
 
@@ -43,8 +43,35 @@ def train(
 ):
     """
     Train an RLlib algorithm.
+
+    Parameters
+    ----------
+    algo : str
+        Name of the RLlib-registered algorithm to use.
+    config : AlgorithmConfig
+        Algorithm-specific configuration parameters.
+    stop_conditions : dict
+        Conditions to stop the training loop.
+    save_dir : str
+        Directory to save training checkpoints and results.
+    user_name : str
+        Experimenter's name.
+    checkpoint_freq : int, optional
+        Frequency of saving checkpoints, by default 20.
+    load_dir : str, optional
+        Directory to load pre-trained models from, by default None.
+    local_mode : bool, optional
+        Set to True to run Ray in local mode for debugging, by default False.
+    experiment_name : str, optional
+        Name of the experiment, by default "testing_experiment".
+    mlflow_tracking_uri : str, optional
+        Directory to save MLFlow metrics and artifacts, by default "submission/mlflow".
     """
+
+    # Initialize Ray.
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
+
+    # Execute training
     tune.run(
         algo,
         stop=stop_conditions,
@@ -67,10 +94,13 @@ def train(
             )
         ],
     )
+
+    # Shutdown Ray after training is complete
     ray.shutdown()
 
 
 if __name__ == "__main__":
+    # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--algo",
@@ -178,7 +208,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))
-    config.seed = args.seed # NOTE Can be tune.randint(0, 10000) if needed 
+    config.seed = args.seed  # NOTE You can use tune.randint(0, 10000) if needed
     stop_conditions = {"timesteps_total": args.num_timesteps}
 
     random.seed(args.seed)
@@ -186,8 +216,9 @@ if __name__ == "__main__":
 
     if args.framework == "torch":
         import torch
+
         torch.manual_seed(args.seed)
-    
+
     print()
     print(f"Running with following CLI options: {args}")
     print("\n", "-" * 64, "\n", "Training with following configuration:", "\n", "-" * 64)
@@ -203,5 +234,5 @@ if __name__ == "__main__":
         load_dir=args.load_dir,
         local_mode=args.local_mode,
         experiment_name=args.experiment_name,
-        mlflow_tracking_uri=args.mlflow_tracking_uri
+        mlflow_tracking_uri=args.mlflow_tracking_uri,
     )
