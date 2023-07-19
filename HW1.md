@@ -25,7 +25,7 @@ You have the option of running the code either on Google Colab or on your local 
 1. **Local Setup:** If you choose to run locally, you will need to install MuJoCo and some Python packages. Refer to [INSTALLATION.md](INSTALLATION.md) for instructions.
 2. **Google Colab:** The initial sections of the notebook will install all required dependencies. You can try out the Colab option by clicking the badge below:
 
-    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](#)
+    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/heng2j/multigrid/blob/hw1/notebooks/homework1.ipynb)
 
 ## Complete the Code
 
