@@ -5,17 +5,35 @@ from __future__ import annotations
 import gymnasium as gym
 import pygame
 from gymnasium import Env
+import argparse
 
 from multigrid.envs import *
 from multigrid.core.actions import Action
 from multigrid.base import MultiGridEnv
 from multigrid.wrappers import (
     SingleAgentWrapper,
-)  # ImgObsWrapper, RGBImgPartialObsWrapper
+)
 
 
 class ManualControl:
+    """
+    Class to manual control an agent within a given environment.
+    It allows the user to interact with the environment using keyboard input.
+    """
+
     def __init__(self, env: Env, seed=None, agents=2) -> None:
+        """
+        Initialize ManualControl.
+
+        Parameters
+        ----------
+        env : Env
+            The environment in which to operate.
+        seed : int, optional
+            The seed used for random number generator.
+        agents : int, optional
+            The number of agents to operate in the environment. Default is 2.
+        """
         self.env = env
         self.seed = seed
         self.closed = False
@@ -26,6 +44,7 @@ class ManualControl:
         """Start the window display with blocking event loop"""
         self.reset(self.seed)
 
+        # Event loop for the pygame display.
         while not self.closed:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -36,7 +55,19 @@ class ManualControl:
                     self.key_handler(event)
 
     def step(self, action: Action):
+        """Perform a step in the environment with the given action.
+
+        The step updates the environment based on the action provided.
+        If the step leads to a termination or truncation, the environment is reset.
+
+        Parameters
+        ----------
+        action : Action
+            The action to be performed.
+        """
+
         _, reward, terminated, truncated, _ = self.env.step(action)
+        # Adjust reward, termination and truncation based on number of agents.
         reward = reward if self.agents < 2 else reward[0]
         terminated = terminated if self.agents < 2 else terminated[0]
         truncated = truncated if self.agents < 2 else truncated[0]
@@ -58,10 +89,29 @@ class ManualControl:
             self.env.render()
 
     def reset(self, seed=None):
+        """Reset the environment with an optional new seed.
+
+        Parameters
+        ----------
+        seed : int, optional
+            The seed for the environment's random number generator.
+        """
         self.env.reset(seed=seed)
         self.env.render()
 
     def key_handler(self, event):
+        """
+        Handle key events.
+
+        Certain keys are mapped to specific actions in the environment.
+        Escape and Backspace keys have special functionality, closing the environment
+        and resetting the environment respectively.
+
+        Parameters
+        ----------
+        event : pygame.event.Event
+            The event to handle.
+        """
         key: str = event.key
         print("pressed", key)
 
@@ -97,15 +147,14 @@ class ManualControl:
 
 
 if __name__ == "__main__":
-    import argparse
-
+    # Argument parsing
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--env-id",
         type=str,
         help="gym environment to load",
         choices=gym.envs.registry.keys(),
-        default="MultiGrid-CompetativeRedBlueDoor-v2",  #  MultiGrid-LockedHallway-2Rooms-v0
+        default="MultiGrid-CompetativeRedBlueDoor-v0",  #  MultiGrid-LockedHallway-2Rooms-v0
     )
     parser.add_argument(
         "--seed",
@@ -153,21 +202,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Instantiate environment with provided parameters
     env: MultiGridEnv = gym.make(
         args.env_id,
-        # tile_size=args.tile_size,
         render_mode="human",
         agents=args.agents,
-        # agent_pov=args.agent_view,
-        # agent_view_size=args.agent_view_size,
+        agent_pov=args.agent_view,
+        agent_view_size=args.agent_view_size,
         screen_size=args.screen_size,
     )
-
-    # # TODO: check if this can be removed
-    # if args.agent_view:
-    #     print("Using agent view")
-    #     env = RGBImgPartialObsWrapper(env, args.tile_size)
-    #     env = ImgObsWrapper(env)
 
     if args.single_agent:
         print("Convert to single agent")

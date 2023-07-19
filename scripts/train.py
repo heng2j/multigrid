@@ -4,6 +4,7 @@ import argparse
 import json
 import random
 import numpy as np
+import git
 import ray
 
 from multigrid.utils.training_utilis import (
@@ -21,7 +22,6 @@ import pathlib
 
 SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
 
-import git
 
 # Set up Ray CLIReporter
 # Limit the number of rows
@@ -39,7 +39,7 @@ def train(
     load_dir: str | None = None,
     local_mode: bool = False,
     experiment_name: str = "testing_experiment",
-    mlflow_tracking_uri: str = "submission/mlflow",
+    mlflow_tracking_uri: str = "submission/mlflow/",
 ):
     """
     Train an RLlib algorithm.
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--env",
         type=str,
-        default="MultiGrid-CompetativeRedBlueDoor-v2",
+        default="MultiGrid-CompetativeRedBlueDoor-v0",
         help="MultiGrid environment to use.",
     )
     parser.add_argument(
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mlflow-tracking-uri",
         type=str,
-        default="submission/mlflow",
+        default="submission/mlflow/",
         help="Directory for saving mlflow metrics and artifacts",
     )
     parser.add_argument(
@@ -224,6 +224,8 @@ if __name__ == "__main__":
     print("\n", "-" * 64, "\n", "Training with following configuration:", "\n", "-" * 64)
     print()
     pprint(config.to_dict())
+
+    # Execute training
     train(
         algo=args.algo,
         config=config,
