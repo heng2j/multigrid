@@ -160,63 +160,63 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
             dtype=uint8)
     """
 
-    # NOTE - Answer
-    def __init__(self, env: MultiGridEnv):
-        """ """
-        super().__init__(env)
-        self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
-
-        # Update agent observation spaces
-        dim = sum(self.dim_sizes)
-        for agent in self.env.agents:
-            view_height, view_width, _ = agent.observation_space["image"].shape
-            agent.observation_space["image"] = spaces.Box(
-                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
-            )
-
-    def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
-        """
-        :meta private:
-        """
-        for agent_id in obs:
-            obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
-
-        return obs
-
-    # NOTE Questions
+    # # NOTE - Answer
     # def __init__(self, env: MultiGridEnv):
-    #     """
-    #     Initialize the wrapper class.
-    #     Note: Fill in the blanks with correct values for initializing the environment.
-    #     """
+    #     """ """
     #     super().__init__(env)
-    #     self.dim_sizes = np.array([
-    #         len(Type), len(Color), max(len(State), len(Direction))])
+    #     self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
     #     # Update agent observation spaces
     #     dim = sum(self.dim_sizes)
     #     for agent in self.env.agents:
-    #         view_height, view_width, _ = agent.observation_space['image'].shape
-    #         agent.observation_space['image'] = spaces.Box(
-    #             low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8)
+    #         view_height, view_width, _ = agent.observation_space["image"].shape
+    #         agent.observation_space["image"] = spaces.Box(
+    #             low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
+    #         )
 
     # def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
     #     """
-    #     Provide the observation.
+    #     :meta private:
     #     """
-    #     # HW1 TODO 1:
-    #     # For each agent_id in obs, update obs[agent_id]['image'] using the self.one_hot() method and 'image' from obs[agent_id].
-    #     # If there's a type mismatch or one of the sub-observations is out of bounds, you might encounter an error like this:
-    #     # ValueError: The observation collected from env.reset was not contained within your env's observation space.
-    #     #             Its possible that there was a typemismatch (for example observations of np.float32 and a space ofnp.float64 observations),
-    #     #             or that one of the sub-observations wasout of bounds.
-    #     # Make sure to handle this exception and implement the correct observation to avoid it.
-
     #     for agent_id in obs:
-    #         # Your code here
-    #         obs[agent_id]['image'] = self.one_hot(_____, _____)  # fill in the blanks with appropriate values
+    #         obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
 
     #     return obs
+
+    # NOTE Questions
+    def __init__(self, env: MultiGridEnv):
+        """
+        Initialize the wrapper class.
+        Note: Fill in the blanks with correct values for initializing the environment.
+        """
+        super().__init__(env)
+        self.dim_sizes = np.array([
+            len(Type), len(Color), max(len(State), len(Direction))])
+
+        # Update agent observation spaces
+        dim = sum(self.dim_sizes)
+        for agent in self.env.agents:
+            view_height, view_width, _ = agent.observation_space['image'].shape
+            agent.observation_space['image'] = spaces.Box(
+                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8)
+
+    def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
+        """
+        Provide the observation.
+        """
+        # HW1 TODO 1:
+        # For each agent_id in obs, update obs[agent_id]['image'] using the self.one_hot() method and 'image' from obs[agent_id].
+        # If there's a type mismatch or one of the sub-observations is out of bounds, you might encounter an error like this:
+        # ValueError: The observation collected from env.reset was not contained within your env's observation space.
+        #             Its possible that there was a typemismatch (for example observations of np.float32 and a space ofnp.float64 observations),
+        #             or that one of the sub-observations wasout of bounds.
+        # Make sure to handle this exception and implement the correct observation to avoid it.
+
+        for agent_id in obs:
+            # Your code here
+            obs[agent_id]['image'] = self.one_hot(_____, _____)  # fill in the blanks with appropriate values
+
+        return obs
 
     @staticmethod
     @nb.njit(cache=True)

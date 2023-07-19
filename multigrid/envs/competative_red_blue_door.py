@@ -179,7 +179,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
         # Place agents in the top-left corner
-        # TODO - update to encapsulate muti-agent positioning
+        # TODO - For Heng  - update to encapsulate muti-agent positioning
         for agent in self.agents:
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=room_size)
@@ -226,19 +226,13 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
                 if fwd_obj == self.red_door and self.red_door.is_open:
                     if self.red_door.is_open:
-                        # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
-                    # else:
-                    #     self.on_failure(agent, reward, terminated)
-                    #     self.blue_door.is_open = False  # close the door again
                 elif isinstance(fwd_obj, Agent):
-                    # TODO - Make this clean
                     fwd_obj.terminated = True
                     self.grid.set(*fwd_obj.pos, None)
                     fwd_obj.pos = (2, 2) if fwd_obj.color == "blue" else (10, 2)
                     reward[agent_id] += 0.5
 
-            # TODO - Add Sparse rewards
             elif action == Action.pickup:
                 if (
                     agent.carrying
@@ -555,7 +549,6 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
 
         # Place agents in the top-left corner
-        # TODO - update to encapsulate muti-agent positioning
         for agent in self.agents:
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=room_size)
@@ -583,13 +576,8 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                 fwd_obj = self.grid.get(*agent.front_pos)
                 if fwd_obj == self.red_door and self.red_door.is_open:
                     if self.red_door.is_open:
-                        # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
-                    # else:
-                    #     self.on_failure(agent, reward, terminated)
-                    #     self.blue_door.is_open = False  # close the door again
 
-            # TODO - Add Sparse rewards
             elif action == Action.pickup:
                 if (
                     agent.carrying
