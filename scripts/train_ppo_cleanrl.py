@@ -125,6 +125,7 @@ class Agent(nn.Module):
         )
 
     def get_value(self, x):
+        # FIXME Reshape the tensor to (batch_size, -1)
         x = x.view(x.size(0), -1) 
         return self.critic(x)
 

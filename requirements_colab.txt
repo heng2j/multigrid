@@ -13,3 +13,5 @@ numba
 Gymnasium
 black
 PyYAML
+stable_baselines3
+black
