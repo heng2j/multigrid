@@ -2,27 +2,19 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
+import random
+import numpy as np
 import ray
 
 from multigrid.utils.training_utilis import (
     algorithm_config,
-    can_use_gpu,
     get_checkpoint_dir,
-    policy_mapping_fn,
 )
-from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel
-from pathlib import Path
+
 from pprint import pprint
 from ray import tune
 from ray.rllib.algorithms import AlgorithmConfig
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ray.rllib.utils.from_config import NotProvided
-from ray.tune.registry import get_trainable_cls
 from ray.tune import CLIReporter
-from ray.rllib.policy.policy import Policy
-import ray.rllib.algorithms.callbacks as callbacks
-from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 
 import pathlib
@@ -36,18 +28,7 @@ import git
 reporter = CLIReporter(max_progress_rows=10)
 
 
-# policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
-# restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
-# restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
-
-# class RestoreWeightsCallback(DefaultCallbacks):
-#     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
-#         algorithm.set_weights({"default_policy": restored_policy_0_weights})
-
-
-tags = {"user_name": "John", "git_commit_hash": git.Repo(SCRIPT_PATH).head.commit}
-
-
+# Configurable Training Function
 def train(
     algo: str,
     config: AlgorithmConfig,
@@ -145,6 +126,12 @@ if __name__ == "__main__":
         help="Directory for saving checkpoints, results, and trained policies.",
     )
     parser.add_argument(
+        "--checkpoint-freq",
+        type=int,
+        default=20,
+        help="The frequency for saving Checkpoints in training iterations.",
+    )
+    parser.add_argument(
         "--user-name",
         type=str,
         default="<Your Namet>",
@@ -191,19 +178,30 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))
-    config.seed = args.seed
+    config.seed = args.seed # NOTE Can be tune.randint(0, 10000) if needed 
     stop_conditions = {"timesteps_total": args.num_timesteps}
 
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+
+    if args.framework == "torch":
+        import torch
+        torch.manual_seed(args.seed)
+    
     print()
     print(f"Running with following CLI options: {args}")
     print("\n", "-" * 64, "\n", "Training with following configuration:", "\n", "-" * 64)
     print()
     pprint(config.to_dict())
     train(
-        args.algo,
-        config,
-        stop_conditions,
-        args.save_dir,
-        args.load_dir,
-        args.local_mode,
+        algo=args.algo,
+        config=config,
+        stop_conditions=stop_conditions,
+        save_dir=args.save_dir,
+        user_name=args.user_name,
+        checkpoint_freq=args.checkpoint_freq,
+        load_dir=args.load_dir,
+        local_mode=args.local_mode,
+        experiment_name=args.experiment_name,
+        mlflow_tracking_uri=args.mlflow_tracking_uri
     )
