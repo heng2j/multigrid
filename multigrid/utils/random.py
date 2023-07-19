@@ -2,8 +2,7 @@ import numpy as np
 from typing import Iterable, TypeVar
 from ..core.constants import Color
 
-T = TypeVar('T')
-
+T = TypeVar("T")
 
 
 class RandomMixin:
@@ -90,8 +89,7 @@ class RandomMixin:
         """
         return self._rand_elem(Color)
 
-    def _rand_pos(
-        self, x_low: int, x_high: int, y_low: int, y_high: int) -> tuple[int, int]:
+    def _rand_pos(self, x_low: int, x_high: int, y_low: int, y_high: int) -> tuple[int, int]:
         """
         Generate a random (x, y) position tuple.
 

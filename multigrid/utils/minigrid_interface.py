@@ -8,7 +8,6 @@ from ..core.world_object import WorldObj
 from ..base import MultiGridEnv
 
 
-
 class MiniGridInterface(MultiGridEnv):
     """
     MultiGridEnv interface for compatibility with single-agent MiniGrid environments.
@@ -45,12 +44,7 @@ class MiniGridInterface(MultiGridEnv):
         result = super().reset(*args, **kwargs)
         return tuple(item[0] for item in result)
 
-    def step(self, action: ActType) -> tuple[
-        ObsType,
-        SupportsFloat,
-        bool,
-        bool,
-        dict[str, Any]]:
+    def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         """
         Run one timestep of the environment’s dynamics
         using the provided agent action.
@@ -64,8 +58,7 @@ class MiniGridInterface(MultiGridEnv):
         Get action space.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].action_space` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].action_space` instead."
         )
         return self.agents[0].action_space
 
@@ -75,8 +68,7 @@ class MiniGridInterface(MultiGridEnv):
         Set action space.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].action_space` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].action_space` instead."
         )
         self.agents[0].action_space = space
 
@@ -86,8 +78,7 @@ class MiniGridInterface(MultiGridEnv):
         Get observation space.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].observation_space` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].observation_space` instead."
         )
         return self.agents[0].observation_space
 
@@ -97,8 +88,7 @@ class MiniGridInterface(MultiGridEnv):
         Set observation space.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].observation_space` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].observation_space` instead."
         )
         self.agents[0].observation_space = space
 
@@ -108,8 +98,7 @@ class MiniGridInterface(MultiGridEnv):
         Get agent position.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].pos` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].pos` instead."
         )
         return self.agents[0].pos
 
@@ -119,8 +108,7 @@ class MiniGridInterface(MultiGridEnv):
         Set agent position.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].pos` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].pos` instead."
         )
         if value is not None:
             self.agents[0].pos = value
@@ -131,8 +119,7 @@ class MiniGridInterface(MultiGridEnv):
         Get agent direction.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].dir` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].dir` instead."
         )
         return self.agents[0].dir
 
@@ -142,8 +129,7 @@ class MiniGridInterface(MultiGridEnv):
         Set agent direction.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].dir` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].dir` instead."
         )
         self.agents[0].dir = value
 
@@ -153,8 +139,7 @@ class MiniGridInterface(MultiGridEnv):
         Get object carried by agent.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].carrying` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].carrying` instead."
         )
         return self.agents[0].carrying
 
@@ -165,8 +150,7 @@ class MiniGridInterface(MultiGridEnv):
         of forward movement.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].dir.to_vec()` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].dir.to_vec()` instead."
         )
         return self.agents[0].dir.to_vec()
 
@@ -176,8 +160,7 @@ class MiniGridInterface(MultiGridEnv):
         Get the position of the cell that is right in front of the agent.
         """
         assert len(self.agents) == 1, (
-           "This property is not supported for multi-agent envs. "
-           "Use `env.agents[i].front_pos` instead."
+            "This property is not supported for multi-agent envs. " "Use `env.agents[i].front_pos` instead."
         )
         return self.agents[0].front_pos
 

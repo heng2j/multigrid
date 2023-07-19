@@ -6,7 +6,6 @@ from multigrid.core.constants import Color
 from multigrid.core.world_object import Door
 
 
-
 class RedBlueDoorsEnv(MultiGridEnv):
     """
     .. image:: https://i.imgur.com/usbavAh.gif
@@ -19,7 +18,7 @@ class RedBlueDoorsEnv(MultiGridEnv):
     This environment is a room with one red and one blue door facing
     opposite directions. Agents must open the red door and then open the blue door,
     in that order.
-    
+
     The standard setting is cooperative, where all agents receive the reward
     upon completion of the task.
 
@@ -104,9 +103,10 @@ class RedBlueDoorsEnv(MultiGridEnv):
         size: int = 8,
         max_steps: int | None = None,
         joint_reward: bool = True,
-        success_termination_mode: str = 'any',
-        failure_termination_mode: str = 'any',
-        **kwargs):
+        success_termination_mode: str = "any",
+        failure_termination_mode: str = "any",
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -182,6 +182,6 @@ class RedBlueDoorsEnv(MultiGridEnv):
                         self.on_success(agent, reward, terminated)
                     else:
                         self.on_failure(agent, reward, terminated)
-                        self.blue_door.is_open = False # close the door again
+                        self.blue_door.is_open = False  # close the door again
 
         return obs, reward, terminated, truncated, info

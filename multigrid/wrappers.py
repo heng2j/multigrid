@@ -12,7 +12,6 @@ from .base import MultiGridEnv, AgentID, ObsType
 from .core.constants import Color, Direction, State, Type
 
 
-
 class OneHotObsWrapper(ObservationWrapper):
     """
     Wrapper to get a one-hot encoding of a partially observable
@@ -46,25 +45,24 @@ class OneHotObsWrapper(ObservationWrapper):
     """
 
     def __init__(self, env: MultiGridEnv):
-        """
-        """
+        """ """
         super().__init__(env)
-        self.dim_sizes = np.array([
-            len(Type), len(Color), max(len(State), len(Direction))])
+        self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent observation spaces
         dim = sum(self.dim_sizes)
         for agent in self.env.agents:
-            view_height, view_width, _ = agent.observation_space['image'].shape
-            agent.observation_space['image'] = spaces.Box(
-                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8)
+            view_height, view_width, _ = agent.observation_space["image"].shape
+            agent.observation_space["image"] = spaces.Box(
+                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
+            )
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         """
         :meta private:
         """
         for agent_id in obs:
-            obs[agent_id]['image'] = self.one_hot(obs[agent_id]['image'], self.dim_sizes)
+            obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
 
         return obs
 
@@ -110,8 +108,7 @@ class SingleAgentWrapper(gym.Wrapper):
     """
 
     def __init__(self, env: MultiGridEnv):
-        """
-        """
+        """ """
         super().__init__(env)
         self.observation_space = env.agents[0].observation_space
         self.action_space = env.agents[0].action_space
@@ -129,8 +126,6 @@ class SingleAgentWrapper(gym.Wrapper):
         """
         result = super().step({0: action})
         return tuple(item[0] for item in result)
-
-
 
 
 class CompetativeRedBlueDoorWrapper(ObservationWrapper):
@@ -167,39 +162,36 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
 
     # NOTE - Answer
     def __init__(self, env: MultiGridEnv):
-        """
-        """
+        """ """
         super().__init__(env)
-        self.dim_sizes = np.array([
-            len(Type), len(Color), max(len(State), len(Direction))])
+        self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent observation spaces
         dim = sum(self.dim_sizes)
         for agent in self.env.agents:
-            view_height, view_width, _ = agent.observation_space['image'].shape
-            agent.observation_space['image'] = spaces.Box(
-                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8)
+            view_height, view_width, _ = agent.observation_space["image"].shape
+            agent.observation_space["image"] = spaces.Box(
+                low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
+            )
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         """
         :meta private:
         """
         for agent_id in obs:
-            obs[agent_id]['image'] = self.one_hot(obs[agent_id]['image'], self.dim_sizes)
+            obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
 
         return obs
-
 
     # NOTE Questions
     # def __init__(self, env: MultiGridEnv):
     #     """
-    #     Initialize the wrapper class. 
-    #     Note: Fill in the blanks with correct values for initializing the environment. 
+    #     Initialize the wrapper class.
+    #     Note: Fill in the blanks with correct values for initializing the environment.
     #     """
     #     super().__init__(env)
     #     self.dim_sizes = np.array([
     #         len(Type), len(Color), max(len(State), len(Direction))])
-
 
     #     # Update agent observation spaces
     #     dim = sum(self.dim_sizes)
@@ -210,7 +202,7 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
 
     # def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
     #     """
-    #     Provide the observation. 
+    #     Provide the observation.
     #     """
     #     # HW1 TODO 1:
     #     # For each agent_id in obs, update obs[agent_id]['image'] using the self.one_hot() method and 'image' from obs[agent_id].

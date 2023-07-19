@@ -8,8 +8,8 @@ from numpy.typing import ArrayLike, NDArray as ndarray
 from typing import Any
 
 
-
 ### Helper Functions
+
 
 @functools.cache
 def _enum_array(enum_cls: enum.EnumMeta):
@@ -22,6 +22,7 @@ def _enum_array(enum_cls: enum.EnumMeta):
         Enum class
     """
     return np.array([item.value for item in enum_cls])
+
 
 @functools.cache
 def _enum_index(enum_item: enum.Enum):
@@ -36,8 +37,8 @@ def _enum_index(enum_item: enum.Enum):
     return list(enum_item.__class__).index(enum_item)
 
 
-
 ### Enumeration
+
 
 class IndexedEnum(enum.Enum):
     """

@@ -9,16 +9,13 @@ from gymnasium import Env
 from multigrid.envs import *
 from multigrid.core.actions import Action
 from multigrid.base import MultiGridEnv
-from multigrid.wrappers import SingleAgentWrapper  # ImgObsWrapper, RGBImgPartialObsWrapper
+from multigrid.wrappers import (
+    SingleAgentWrapper,
+)  # ImgObsWrapper, RGBImgPartialObsWrapper
 
 
 class ManualControl:
-    def __init__(
-        self,
-        env: Env,
-        seed=None,
-        agents=2
-    ) -> None:
+    def __init__(self, env: Env, seed=None, agents=2) -> None:
         self.env = env
         self.seed = seed
         self.closed = False
@@ -40,12 +37,14 @@ class ManualControl:
 
     def step(self, action: Action):
         _, reward, terminated, truncated, _ = self.env.step(action)
-        reward = reward if self.agents <2 else reward[0]
-        terminated = terminated if self.agents <2 else terminated[0]
-        truncated = truncated if self.agents <2 else truncated[0]
+        reward = reward if self.agents < 2 else reward[0]
+        terminated = terminated if self.agents < 2 else terminated[0]
+        truncated = truncated if self.agents < 2 else truncated[0]
 
-        self.total_episodic_rewards+= reward
-        print(f"step={self.env.step_count}, reward={reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} ")
+        self.total_episodic_rewards += reward
+        print(
+            f"step={self.env.step_count}, reward={reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} "
+        )
 
         if terminated:
             print(f"terminated! total episodic reward={self.total_episodic_rewards: .2f} ")
@@ -86,7 +85,7 @@ class ManualControl:
         }
         if key in key_to_action.keys():
             action = key_to_action[key]
-            if self.agents<2:
+            if self.agents < 2:
                 self.step(action)
             else:
                 actions = {0: action}
@@ -145,9 +144,12 @@ if __name__ == "__main__":
         help="",
     )
     parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int, default=[0],
-        help="List of agent ids to evaluate")
-
+        "--our-agent-ids",
+        nargs="+",
+        type=int,
+        default=[0],
+        help="List of agent ids to evaluate",
+    )
 
     args = parser.parse_args()
 

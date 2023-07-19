@@ -2,7 +2,7 @@
 
 ---
 
-# Assignment 1: Intro to Deep RL with Single Agent Training Environments
+# Homework 1: Intro to Deep RL with Single Agent Training Environments
 
 **Due Date:** September 14, 11:30 pm
 

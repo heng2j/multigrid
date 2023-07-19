@@ -3,7 +3,6 @@ from typing import Any
 from ..core.constants import Direction
 
 
-
 @functools.cache
 def front_pos(agent_x: int, agent_y: int, agent_dir: int):
     """
@@ -11,7 +10,6 @@ def front_pos(agent_x: int, agent_y: int, agent_dir: int):
     """
     dx, dy = Direction(agent_dir).to_vec()
     return (agent_x + dx, agent_y + dy)
-
 
 
 class PropertyAlias(property):

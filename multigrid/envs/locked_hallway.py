@@ -9,7 +9,6 @@ from multigrid.core.roomgrid import Room, RoomGrid
 from multigrid.core.world_object import Door, Key
 
 
-
 class LockedHallwayEnv(RoomGrid):
     """
     ***********
@@ -104,7 +103,8 @@ class LockedHallwayEnv(RoomGrid):
         max_keys_per_room: int = 2,
         max_steps: int | None = None,
         joint_reward: bool = True,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -131,7 +131,7 @@ class LockedHallwayEnv(RoomGrid):
         self.max_keys_per_room = max_keys_per_room
 
         if max_steps is None:
-            max_steps = 8 * (room_size * num_rooms)**2
+            max_steps = 8 * (room_size * num_rooms) ** 2
 
         super().__init__(
             mission_space=MissionSpace.from_string("open all the doors"),
@@ -146,9 +146,9 @@ class LockedHallwayEnv(RoomGrid):
     def _gen_grid(self, width, height):
         super()._gen_grid(width, height)
 
-        LEFT, HALLWAY, RIGHT = range(3) # columns
+        LEFT, HALLWAY, RIGHT = range(3)  # columns
         color_sequence = list(Color) * ceil(self.num_rooms / len(Color))
-        color_sequence = self._rand_perm(color_sequence)[:self.num_rooms]
+        color_sequence = self._rand_perm(color_sequence)[: self.num_rooms]
 
         # Create hallway
         for row in range(self.num_rows - 1):
@@ -161,8 +161,7 @@ class LockedHallwayEnv(RoomGrid):
             for col, dir in ((LEFT, Direction.right), (RIGHT, Direction.left)):
                 color = door_colors.pop()
                 self.rooms[color] = self.get_room(col, row)
-                self.add_door(
-                    col, row, dir=dir, color=color, locked=True, rand_pos=False)
+                self.add_door(col, row, dir=dir, color=color, locked=True, rand_pos=False)
 
         # Place keys in hallway
         num_hallway_keys = self._rand_int(1, self.max_hallway_keys + 1)
@@ -190,7 +189,7 @@ class LockedHallwayEnv(RoomGrid):
         """
         self.unlocked_doors = []
         return super().reset(**kwargs)
-    
+
     def step(self, actions):
         """
         :meta private:

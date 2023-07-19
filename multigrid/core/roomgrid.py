@@ -12,9 +12,7 @@ from .world_object import Door, WorldObj
 from ..base import MultiGridEnv
 
 
-
-T = TypeVar('T')
-
+T = TypeVar("T")
 
 
 def bfs(start_node: T, neighbor_fn: Callable[[T], Iterable[T]]) -> set[T]:
@@ -42,6 +40,7 @@ def bfs(start_node: T, neighbor_fn: Callable[[T], Iterable[T]]) -> set[T]:
 
     return visited
 
+
 def reject_next_to(env: MultiGridEnv, pos: tuple[int, int]):
     """
     Function to filter out object positions that are right next to
@@ -65,7 +64,7 @@ class Room:
             Room size as (width, height)
         """
         self.top, self.size = top, size
-        Point = tuple[int, int] # typing alias
+        Point = tuple[int, int]  # typing alias
 
         # Mapping of door objects and door positions
         self.doors: dict[Direction, Door | None] = {d: None for d in Direction}
@@ -84,10 +83,7 @@ class Room:
         """
         return any(door and door.is_locked for door in self.doors.values())
 
-    def set_door_pos(
-        self,
-        dir: Direction,
-        random: np.random.Generator | None = None) -> tuple[int, int]:
+    def set_door_pos(self, dir: Direction, random: np.random.Generator | None = None) -> tuple[int, int]:
         """
         Set door position in the given direction.
 
@@ -99,7 +95,10 @@ class Room:
             Random number generator (if provided, door position will be random)
         """
         left, top = self.top
-        right, bottom = self.top[0] + self.size[0] - 1, self.top[1] + self.size[1] - 1,
+        right, bottom = (
+            self.top[0] + self.size[0] - 1,
+            self.top[1] + self.size[1] - 1,
+        )
 
         if dir == Direction.right:
             if random:
@@ -142,12 +141,7 @@ class RoomGrid(MultiGridEnv):
     This is meant to serve as a base class for other environments.
     """
 
-    def __init__(
-        self,
-        room_size: int = 7,
-        num_rows: int = 3,
-        num_cols: int = 3,
-        **kwargs):
+    def __init__(self, room_size: int = 7, num_rows: int = 3, num_cols: int = 3, **kwargs):
         """
         Parameters
         ----------
@@ -213,7 +207,7 @@ class RoomGrid(MultiGridEnv):
                     (self.room_size, self.room_size),
                 )
                 self.room_grid[row][col] = room
-                self.grid.wall_rect(*room.top, *room.size) # generate walls
+                self.grid.wall_rect(*room.top, *room.size)  # generate walls
 
         # Create connections between rooms
         for row in range(self.num_rows):
@@ -235,8 +229,7 @@ class RoomGrid(MultiGridEnv):
             (self.num_rows // 2) * (self.room_size - 1) + (self.room_size // 2),
         )
 
-    def place_in_room(
-        self, col: int, row: int, obj: WorldObj) -> tuple[WorldObj, tuple[int, int]]:
+    def place_in_room(self, col: int, row: int, obj: WorldObj) -> tuple[WorldObj, tuple[int, int]]:
         """
         Add an existing object to the given room.
 
@@ -250,17 +243,13 @@ class RoomGrid(MultiGridEnv):
             Object to add
         """
         room = self.get_room(col, row)
-        pos = self.place_obj(
-            obj, room.top, room.size, reject_fn=reject_next_to, max_tries=1000)
+        pos = self.place_obj(obj, room.top, room.size, reject_fn=reject_next_to, max_tries=1000)
         room.objs.append(obj)
         return obj, pos
 
     def add_object(
-        self,
-        col: int,
-        row: int,
-        kind: Type | None = None,
-        color: Color | None = None) -> tuple[WorldObj, tuple[int, int]]:
+        self, col: int, row: int, kind: Type | None = None, color: Color | None = None
+    ) -> tuple[WorldObj, tuple[int, int]]:
         """
         Create a new object in the given room.
 
@@ -287,7 +276,8 @@ class RoomGrid(MultiGridEnv):
         dir: Direction | None = None,
         color: Color | None = None,
         locked: bool | None = None,
-        rand_pos: bool = True) -> tuple[Door, tuple[int, int]]:
+        rand_pos: bool = True,
+    ) -> tuple[Door, tuple[int, int]]:
         """
         Add a door to a room, connecting it to a neighbor.
 
@@ -375,7 +365,8 @@ class RoomGrid(MultiGridEnv):
         agent: Agent,
         col: int | None = None,
         row: int | None = None,
-        rand_dir: bool = True) -> tuple[int, int]:
+        rand_dir: bool = True,
+    ) -> tuple[int, int]:
         """
         Place an agent in a room.
 
@@ -403,10 +394,7 @@ class RoomGrid(MultiGridEnv):
 
         return agent.state.pos
 
-    def connect_all(
-        self,
-        door_colors: list[Color] = list(Color),
-        max_itrs: int = 5000) -> list[Door]:
+    def connect_all(self, door_colors: list[Color] = list(Color), max_itrs: int = 5000) -> list[Door]:
         """
         Make sure that all rooms are reachable by the agent from its
         starting position.
@@ -419,8 +407,7 @@ class RoomGrid(MultiGridEnv):
             Maximum number of iterations to try to connect all rooms
         """
         added_doors = []
-        neighbor_fn = lambda room: [
-            room.neighbors[dir] for dir in Direction if room.doors[dir] is not None]
+        neighbor_fn = lambda room: [room.neighbors[dir] for dir in Direction if room.doors[dir] is not None]
         start_room = self.get_room(0, 0)
 
         for i in range(max_itrs):
@@ -449,14 +436,15 @@ class RoomGrid(MultiGridEnv):
             door, _ = self.add_door(col, row, dir=dir, color=color, locked=False)
             added_doors.append(door)
 
-        raise RecursionError('connect_all() failed')
+        raise RecursionError("connect_all() failed")
 
     def add_distractors(
         self,
         col: int | None = None,
         row: int | None = None,
         num_distractors: int = 10,
-        all_unique: bool = True) -> list[WorldObj]:
+        all_unique: bool = True,
+    ) -> list[WorldObj]:
         """
         Add random objects that can potentially distract / confuse the agent.
 
@@ -473,7 +461,7 @@ class RoomGrid(MultiGridEnv):
         """
         # Collect keys for existing room objects
         room_objs = (obj for row in self.room_grid for room in row for obj in room.objs)
-        room_obj_keys = {(obj.type, obj.color) for obj in room_objs}  
+        room_obj_keys = {(obj.type, obj.color) for obj in room_objs}
 
         # Add distractors
         distractors = []

@@ -19,7 +19,6 @@ from ..utils.rendering import (
 )
 
 
-
 class Grid:
     """
     Class representing a grid of :class:`.WorldObj` objects.
@@ -50,7 +49,7 @@ class Grid:
         """
         assert width >= 3
         assert height >= 3
-        self.world_objects: dict[tuple[int, int], WorldObj] = {} # indexed by location
+        self.world_objects: dict[tuple[int, int], WorldObj] = {}  # indexed by location
         self.state: ndarray[np.int] = np.zeros((width, height, WorldObj.dim), dtype=int)
         self.state[...] = WorldObj.empty()
 
@@ -132,9 +131,11 @@ class Grid:
 
     def horz_wall(
         self,
-        x: int, y: int,
+        x: int,
+        y: int,
         length: int | None = None,
-        obj_type: Callable[[], WorldObj] = Wall):
+        obj_type: Callable[[], WorldObj] = Wall,
+    ):
         """
         Create a horizontal wall.
 
@@ -150,13 +151,15 @@ class Grid:
             Function that returns a WorldObj instance to use for the wall
         """
         length = self.width - x if length is None else length
-        self.state[x:x+length, y] = obj_type()
+        self.state[x : x + length, y] = obj_type()
 
     def vert_wall(
         self,
-        x: int, y: int,
+        x: int,
+        y: int,
         length: int | None = None,
-        obj_type: Callable[[], WorldObj] = Wall):
+        obj_type: Callable[[], WorldObj] = Wall,
+    ):
         """
         Create a vertical wall.
 
@@ -172,7 +175,7 @@ class Grid:
             Function that returns a WorldObj instance to use for the wall
         """
         length = self.height - y if length is None else length
-        self.state[x, y:y+length] = obj_type()
+        self.state[x, y : y + length] = obj_type()
 
     def wall_rect(self, x: int, y: int, w: int, h: int):
         """
@@ -201,7 +204,8 @@ class Grid:
         agent: Agent | None = None,
         highlight: bool = False,
         tile_size: int = TILE_PIXELS,
-        subdivs: int = 3) -> ndarray[np.uint8]:
+        subdivs: int = 3,
+    ) -> ndarray[np.uint8]:
         """
         Render a tile and cache the result.
 
@@ -229,8 +233,7 @@ class Grid:
         if key in cls._tile_cache:
             return cls._tile_cache[key]
 
-        img = np.zeros(
-            shape=(tile_size * subdivs, tile_size * subdivs, 3), dtype=np.uint8)
+        img = np.zeros(shape=(tile_size * subdivs, tile_size * subdivs, 3), dtype=np.uint8)
 
         # Draw the grid lines (top and left edges)
         fill_coords(img, point_in_rect(0, 0.031, 0, 1), (100, 100, 100))
@@ -260,7 +263,8 @@ class Grid:
         self,
         tile_size: int,
         agents: Iterable[Agent] = (),
-        highlight_mask: ndarray[np.bool] | None = None) -> ndarray[np.uint8]:
+        highlight_mask: ndarray[np.bool] | None = None,
+    ) -> ndarray[np.uint8]:
         """
         Render this grid at a given scale.
 
@@ -277,10 +281,7 @@ class Grid:
             highlight_mask = np.zeros(shape=(self.width, self.height), dtype=bool)
 
         # Get agent locations
-        location_to_agent = defaultdict(
-            type(None),
-            {tuple(agent.pos): agent for agent in agents}
-        )
+        location_to_agent = defaultdict(type(None), {tuple(agent.pos): agent for agent in agents})
 
         # Initialize pixel array
         width_px = self.width * tile_size
@@ -324,7 +325,7 @@ class Grid:
         return encoding
 
     @staticmethod
-    def decode(array: ndarray[np.int]) -> tuple['Grid', ndarray[np.bool]]:
+    def decode(array: ndarray[np.int]) -> tuple["Grid", ndarray[np.bool]]:
         """
         Decode an array grid encoding back into a `Grid` instance.
 
@@ -343,7 +344,7 @@ class Grid:
         width, height, dim = array.shape
         assert dim == WorldObj.dim
 
-        vis_mask = (array[..., WorldObj.TYPE] != Type.unseen.to_index())
+        vis_mask = array[..., WorldObj.TYPE] != Type.unseen.to_index()
         grid = Grid(width, height)
         grid.state[vis_mask] = array[vis_mask]
         return grid, vis_mask
