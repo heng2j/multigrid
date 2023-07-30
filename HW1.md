@@ -112,3 +112,15 @@ If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthe
 You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. Convert your notebook into HTML format and then push to your Github Classroom Github Page folder.
 
 During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
+
+
+
+## NOTE 
+
+## Make sure to make Repos public in Github Classroom
+
+# TODO 
+- Add instruction for how to log in to github via CoLab
+
+
+https://navan0.medium.com/how-to-push-files-into-github-from-google-colab-379fd0077aa8

@@ -1,7 +1,7 @@
 gym
 tensorboard
 moviepy
-pyvirtualdispla
+pyvirtualdisplay
 torch
 opencv-python
 swig
@@ -13,3 +13,4 @@ numba
 Gymnasium
 black
 PyYAML
+GitPython
