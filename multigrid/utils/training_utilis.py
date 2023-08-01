@@ -92,6 +92,7 @@ def algorithm_config(
     num_workers: int = 0,
     num_gpus: int = 0,
     lr: float | None = None,
+    policies_to_train: list[str] | None = None,
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
@@ -107,6 +108,7 @@ def algorithm_config(
         .multi_agent(
             policies={f'policy_{i}' for i in range(num_agents)},
             policy_mapping_fn=policy_mapping_fn,
+            # policies_to_train=policies_to_train
         )
         .training(
             model=model_config(framework=framework, lstm=lstm),

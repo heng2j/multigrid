@@ -50,13 +50,13 @@ def train(
     """
 
 
-    policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
-    restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
-    restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
+    # policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
+    # restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
+    # restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
 
-    class RestoreWeightsCallback(DefaultCallbacks):
-        def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
-            algorithm.set_weights({"default_policy": restored_policy_0_weights})
+    # class RestoreWeightsCallback(DefaultCallbacks):
+    #     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+    #         algorithm.set_weights({"default_policy": restored_policy_0_weights})
 
 
 
@@ -69,7 +69,7 @@ def train(
         local_dir=save_dir,
         verbose=1,
         restore=get_checkpoint_dir(load_dir),
-        checkpoint_freq=20,
+        checkpoint_freq=5,
         checkpoint_at_end=True,
         progress_reporter=reporter,
         callbacks=[MLflowLoggerCallback(
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lr', type=float, help="Learning rate for training.")
     parser.add_argument(
-        '--load-dir', type=str,
+        '--load-dir', type=str, default='/Users/zla0368/Documents/RL/RL_Class/code/multigrid/notebooks/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v0_52041_00000_0_2023-07-14_16-02-12',
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
         '--save-dir', type=str, default='submission/ray_results/',
@@ -127,12 +127,15 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--policies-to-train', nargs="+", type=str, default=["policy_0", "policy_1"], # "policy_0",
+        '--policies-to-train', nargs="+", type=str, default=["policy_0"], # "policy_1",
         help="List of agent ids to train")
 
 
     args = parser.parse_args()
+    # args.multiagent = {}
+    # args.multiagent["policies_to_train"] = args.policies_to_train
     config = algorithm_config(**vars(args))
+    # config.multiagent["policies_to_train"] =args.policies_to_train
     config.seed = args.seed
     stop_conditions = {'timesteps_total': args.num_timesteps}
 
@@ -141,4 +144,4 @@ if __name__ == "__main__":
     print('\n', '-' * 64, '\n', "Training with following configuration:", '\n', '-' * 64)
     print()
     pprint(config.to_dict())
-    train(algo=args.algo, config=config, stop_conditions=stop_conditions, save_dir=args.save_dir, load_dir=args.load_dir, local_mode=args.local_mode, experiment_name=args.experiment_name)
+    train(algo=args.algo, config=config, stop_conditions=stop_conditions, save_dir=args.save_dir, load_dir=args.load_dir, local_mode=args.local_mode, experiment_name=args.name)
