@@ -29,19 +29,6 @@ import git
 reporter = CLIReporter(max_progress_rows=10)
 
 
-
-
-# policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
-# restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
-# restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
-
-# class RestoreWeightsCallback(DefaultCallbacks):
-#     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
-#         algorithm.set_weights({"default_policy": restored_policy_0_weights})
-
-
-
-
 tags = { "user_name" : "John",
          "git_commit_hash" : git.Repo(SCRIPT_PATH).head.commit
          }
@@ -61,6 +48,19 @@ def train(
     """
     Train an RLlib algorithm.
     """
+
+
+    policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
+    restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
+    restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
+
+    class RestoreWeightsCallback(DefaultCallbacks):
+        def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+            algorithm.set_weights({"default_policy": restored_policy_0_weights})
+
+
+
+
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
     tune.run(
         algo,
@@ -127,8 +127,9 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--policies-to-train', nargs="+", type=str, default=[ "policy_1"], # "policy_0",
+        '--policies-to-train', nargs="+", type=str, default=["policy_0", "policy_1"], # "policy_0",
         help="List of agent ids to train")
+
 
     args = parser.parse_args()
     config = algorithm_config(**vars(args))
@@ -140,4 +141,4 @@ if __name__ == "__main__":
     print('\n', '-' * 64, '\n', "Training with following configuration:", '\n', '-' * 64)
     print()
     pprint(config.to_dict())
-    train(args.algo, config, stop_conditions, args.save_dir, args.load_dir, args.local_mode)
+    train(algo=args.algo, config=config, stop_conditions=stop_conditions, save_dir=args.save_dir, load_dir=args.load_dir, local_mode=args.local_mode, experiment_name=args.experiment_name)
