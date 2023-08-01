@@ -93,13 +93,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v2',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=1, help="Number of agents in environment.")
+        '--num-agents', type=int, default=2, help="Number of agents in environment.")
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
@@ -124,10 +124,10 @@ if __name__ == "__main__":
         '--local-mode', type=bool, default=True,
         help="Boolean value to set to use local mode for debugging")
     parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int, default=[0],
+        '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--policies-to-train', nargs="+", type=str, default=["policy_0"],
+        '--policies-to-train', nargs="+", type=str, default=[ "policy_1"], # "policy_0",
         help="List of agent ids to train")
 
     args = parser.parse_args()

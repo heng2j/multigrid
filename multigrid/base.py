@@ -86,7 +86,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
     def __init__(
         self,
         mission_space: MissionSpace | str = "maximize reward",
-        agents: Iterable[Agent] | int = 1,
+        agents: Iterable[Agent] | int = 2,
         grid_size: int | None = None,
         width: int | None = None,
         height: int | None = None,

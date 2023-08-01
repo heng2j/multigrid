@@ -623,7 +623,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence = ["red"] # ["red", "blue"]
+        color_sequence =  ["blue"] #  ["red"] #  ["red", "blue"]
 
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -656,7 +656,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
 
             else:
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
-                agent.state.pos = (red_door_x + 1, red_door_y)
+                agent.state.pos = (red_door_x + 2, red_door_y)
                 agent.state.dir = 0
 
 
@@ -677,7 +677,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         """
         obs, reward, terminated, truncated, info = super().step(actions)
 
-
+        # TODO - set Blue action
         for agent_id, action in actions.items():
             agent = self.agents[agent_id]
             fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
@@ -686,10 +686,12 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
                         fwd_obj = other_agent
 
-                if fwd_obj == self.red_door and self.red_door.is_open:
-                    if self.red_door.is_open:
+                if fwd_obj == self.red_door or fwd_obj == self.blue_door:
+                    if self.red_door.is_open or self.blue_door.is_open:
                         # TODO - Set Done Conditions
-                        self.on_success(agent, reward, terminated)
+
+                        if agent.color == "red":
+                            self.on_success(agent, reward, terminated)
 
                         # self.info["episode_done"].get("r", self.episodic_reward)
                         # self.info["episode_done"].get("l", self.step_count)
@@ -702,6 +704,13 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     self.grid.set(*fwd_obj.pos, None)
                     fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
                     reward[agent_id] += 0.5
+
+                    # Terminate the game if the another agent got caught 
+                    self.on_success(agent, reward, terminated)
+
+                    for other_agent in self.agents:
+                        if other_agent != agent:
+                            self.on_failure(other_agent, reward, terminated)
 
             
             # TODO - Add Sparse rewards

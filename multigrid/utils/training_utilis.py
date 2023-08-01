@@ -105,7 +105,7 @@ def algorithm_config(
         .rollouts(num_rollout_workers=num_workers)
         .resources(num_gpus=num_gpus if can_use_gpu() else 0)
         .multi_agent(
-            policies={f'policy_{i}' for i in range(1)},
+            policies={f'policy_{i}' for i in range(num_agents)},
             policy_mapping_fn=policy_mapping_fn,
         )
         .training(
