@@ -73,7 +73,7 @@ if __name__ == '__main__':
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=1, help="Number of agents in environment.")
+        '--num-agents', type=int, default=2, help="Number of agents in environment.")
     parser.add_argument(
         '--num-episodes', type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument(
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--gif', type=str, help="Store output as GIF at given path.")
     parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int, default=[0],
+        '--our-agent-ids', nargs="+", type=int, default=[0, 1],
         help="List of agent ids to evaluate")
 
 
