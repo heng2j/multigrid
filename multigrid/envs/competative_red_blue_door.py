@@ -646,10 +646,6 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         self.blue_door = Door(Color.blue, is_locked=True)
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
-        # # Block red door with a ball
-        # self.grid.set(red_door_x + 1, red_door_y, Ball(color=self._rand_color()))
-
-
         # Place agents in the top-left corner
         # TODO - update to encapsulate muti-agent positioning
         for agent in self.agents:
@@ -663,6 +659,12 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                 agent.state.pos = (red_door_x + 1, red_door_y)
                 agent.state.dir = 0
 
+
+
+        # Block red door with a ball
+        self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+
+    
         # Place keys in hallway
         for key_color in color_sequence:
             self.place_obj(Key(color=key_color), top=room_top, size=room_size)
@@ -675,21 +677,32 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         """
         obs, reward, terminated, truncated, info = super().step(actions)
 
+
         for agent_id, action in actions.items():
             agent = self.agents[agent_id]
-            if action == Action.toggle:
-                fwd_obj = self.grid.get(*agent.front_pos)
+            fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
+            if action == Action.toggle:                
+                for other_agent in self.agents:
+                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
+                        fwd_obj = other_agent
+
                 if fwd_obj == self.red_door and self.red_door.is_open:
                     if self.red_door.is_open:
                         # TODO - Set Done Conditions
                         self.on_success(agent, reward, terminated)
 
-                        # self.info["episode"].get("r", self.episodic_reward)
-                        # self.info["episode"].get("l", self.step_count)
-                        
+                        # self.info["episode_done"].get("r", self.episodic_reward)
+                        # self.info["episode_done"].get("l", self.step_count)
                     # else:
                     #     self.on_failure(agent, reward, terminated)
                     #     self.blue_door.is_open = False  # close the door again
+                elif isinstance(fwd_obj, Agent):
+                    # TODO - Make this clean
+                    fwd_obj.terminated = True
+                    self.grid.set(*fwd_obj.pos, None)
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    reward[agent_id] += 0.5
+
             
             # TODO - Add Sparse rewards
             elif action == Action.pickup:
@@ -698,16 +711,51 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
+                elif agent.carrying and (agent.carrying.type == "ball") and agent.front_pos == agent.carrying.init_pos:
+                    reward[agent_id] += 0.5 * agent.carrying.discount_factor
+                    agent.carrying.discount_factor *= agent.carrying.discount_factor
+
                 else:
                     # If we are grabbing bad stuff
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                    reward[agent_id] -= 0.2 # OG 0.001 
-
-            # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
-
-
+                    reward[agent_id] -= 0.001 # OG  0.2
+            
 
         return obs, reward, terminated, truncated, info
+
+
+
+    #    for agent_id, action in actions.items():
+    #         agent = self.agents[agent_id]
+    #         if action == Action.toggle:
+    #             fwd_obj = self.grid.get(*agent.front_pos)
+    #             if fwd_obj == self.red_door and self.red_door.is_open:
+    #                 if self.red_door.is_open:
+    #                     # TODO - Set Done Conditions
+    #                     self.on_success(agent, reward, terminated)
+
+    #                     # self.info["episode"].get("r", self.episodic_reward)
+    #                     # self.info["episode"].get("l", self.step_count)
+                        
+    #                 # else:
+    #                 #     self.on_failure(agent, reward, terminated)
+    #                 #     self.blue_door.is_open = False  # close the door again
+            
+    #         # TODO - Add Sparse rewards
+    #         elif action == Action.pickup:
+    #             if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
+    #                 # FIXME - make me elegant 
+    #                 agent.carrying.is_available = False
+    #                 agent.carrying.is_pickedup = True
+    #                 reward[agent_id] += 0.5
+    #             else:
+    #                 # If we are grabbing bad stuff
+    #                 # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
+    #                 reward[agent_id] -= 0.2 # OG 0.001 
+
+    #         # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
+
+
 
 
     def reward_scheme(self):

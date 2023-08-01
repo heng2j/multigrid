@@ -44,14 +44,17 @@ class ManualControl:
         terminated = terminated if self.agents <2 else terminated[0]
         truncated = truncated if self.agents <2 else truncated[0]
 
-        self.total_episodic_rewards+= reward
-        print(f"step={self.env.step_count}, reward={reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} ")
+        # FIXME - should be convertable between training scenario 
+        # self.total_episodic_rewards+= reward
+        self.total_episodic_rewards+= reward[0]
+        print(f"step={self.env.step_count}, reward={reward[0]:.2f}, total episodic reward={self.total_episodic_rewards: .2f} ")
 
-        if terminated:
+        # FIXME - should be convertable between training scenario 
+        if terminated[0]:
             print(f"terminated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
-        elif truncated:
+        elif truncated[0]:
             print(f"truncated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
@@ -106,7 +109,7 @@ if __name__ == "__main__":
         type=str,
         help="gym environment to load",
         choices=gym.envs.registry.keys(),
-        default="MultiGrid-CompetativeRedBlueDoor-v2",  #  MultiGrid-LockedHallway-2Rooms-v0
+        default="MultiGrid-CompetativeRedBlueDoor-v0",  #  MultiGrid-LockedHallway-2Rooms-v0
     )
     parser.add_argument(
         "--seed",
