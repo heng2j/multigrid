@@ -4,7 +4,7 @@ pyvirtualdisplay
 torch
 opencv-python
 swig
-box2d-py
+gymnasium[box2d]
 ray[rllib]
 scikit-image
 pygame
