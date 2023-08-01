@@ -1,4 +1,3 @@
-gym
 tensorboard
 moviepy
 pyvirtualdisplay
