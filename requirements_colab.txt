@@ -13,3 +13,5 @@ Gymnasium
 black
 PyYAML
 black
+GitPython
+tensorflow_probability
