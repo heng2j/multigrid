@@ -677,6 +677,9 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         """
         obs, reward, terminated, truncated, info = super().step(actions)
 
+        info[1]["red_got_caught_done"] = False
+        info[0]["blue_caught_RED_done"] = False
+
         # TODO - set Blue action
         for agent_id, action in actions.items():
             agent = self.agents[agent_id]
@@ -693,7 +696,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                         if agent.color == "red":
                             self.on_success(agent, reward, terminated)
 
-                        info["red_door_open_done"] = terminated
+                        info[1]["red_door_open_done"] = True
                         # self.info["episode_done"].get("l", self.step_count)
                     # else:
                     #     self.on_failure(agent, reward, terminated)
@@ -711,7 +714,8 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     for other_agent in self.agents:
                         if other_agent != agent:
                             self.on_failure(other_agent, reward, terminated)
-                            info["red_got_caught_done"] = terminated
+                            info[1]["red_got_caught_done"] = True
+                            info[0]["blue_caught_RED_done"] = True
 
             
             # TODO - Add Sparse rewards
