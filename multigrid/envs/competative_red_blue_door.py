@@ -656,7 +656,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
 
             else:
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
-                agent.state.pos = (red_door_x + 2, red_door_y)
+                agent.state.pos = (red_door_x + 4, red_door_y)
                 agent.state.dir = 0
 
 
@@ -666,7 +666,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
 
     
         # Place keys in hallway
-        for key_color in color_sequence:
+        for key_color in ["red"]: #color_sequence:
             self.place_obj(Key(color=key_color), top=room_top, size=room_size)
 
 
@@ -720,7 +720,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
-                elif agent.carrying and (agent.carrying.type == "ball") and agent.front_pos == agent.carrying.init_pos:
+                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
                     reward[agent_id] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
 
