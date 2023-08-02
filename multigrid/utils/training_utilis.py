@@ -92,7 +92,8 @@ def algorithm_config(
     num_workers: int = 0,
     num_gpus: int = 0,
     lr: float | None = None,
-    policies_to_train: list[str] | None = None,
+    policies_to_train: list[int] | None = None,
+    our_agent_ids: list[str] | None = None,
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
@@ -106,7 +107,7 @@ def algorithm_config(
         .rollouts(num_rollout_workers=num_workers)
         .resources(num_gpus=num_gpus if can_use_gpu() else 0)
         .multi_agent(
-            policies={f'policy_{i}' for i in range(num_agents)},
+            policies={f'policy_{i}' for i in our_agent_ids},
             policy_mapping_fn=policy_mapping_fn,
             # policies_to_train=policies_to_train
         )

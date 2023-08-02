@@ -82,7 +82,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--gif', type=str, help="Store output as GIF at given path.")
     parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int, default=[0, 1],
+        '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to evaluate")
 
 
@@ -93,16 +93,34 @@ if __name__ == '__main__':
         num_workers=0,
         num_gpus=0,
     )
+    config.environment(disable_env_checking=True)
     algorithm = config.build()
     checkpoint = get_checkpoint_dir(args.load_dir)
     if checkpoint:
+        from ray.rllib.policy.policy import Policy
+
         print(f"Loading checkpoint from {checkpoint}")
         algorithm.restore(checkpoint)
+
+        # # TODO update checkpoint loading method
+        # # New way
+        # policy_name = f"policy_{args.our_agent_ids[1]}"
+        # restored_policy_0 = Policy.from_checkpoint(checkpoint)
+        # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
+        # algorithm.set_weights({policy_name: restored_policy_0_weights})
+   
 
     frames = visualize(algorithm, num_episodes=args.num_episodes)
     if args.gif:
         import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
         print(f"Saving GIF to {filename}")
+
+        # Define your desired frames per second
+        fps = 60  # or any other number
+
+        # Calculate the duration for each frame to achieve the desired fps
+        duration = 1.0 / fps
+
         # write to file
-        imageio.mimsave(filename, frames)
+        imageio.mimsave(filename, frames, duration=duration)
