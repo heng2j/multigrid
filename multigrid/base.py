@@ -300,8 +300,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Step count since episode start
         self.step_count = 0
 
-        # # Episodic info since episode start
-        # self.info = defaultdict(dict)
+        # Episodic info since episode start
+        self.info = defaultdict(dict)
 
         # Return first observation
         observations = self.gen_obs()

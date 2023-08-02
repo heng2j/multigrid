@@ -126,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agent-view-size",
         type=int,
-        default=7,
+        default=5,
         help="set the number of grid spaces visible in agent-view ",
     )
     parser.add_argument(
@@ -144,11 +144,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agents",
         type=int,
-        default=1,
+        default=2,
         help="",
     )
     parser.add_argument(
-        '--our-agent-ids', nargs="+", type=int, default=[0],
+        '--our-agent-ids', nargs="+", type=int, default=[1],
         help="List of agent ids to evaluate")
 
 

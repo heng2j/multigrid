@@ -50,13 +50,22 @@ def train(
     """
 
 
-    # policy_0_checkpoint_path = "ray_results/Bruno/stunt_experinment_20230615/Increased_intrinsic_rewards_by_bringing_back_the_key_with_is_key_picked_up_obs_lstm/PPO_bruno-grid_110d2_00000_0_2023-06-18_22-50-36/checkpoint_000270"
-    # restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
-    # restored_policy_0_weights = restored_policy_0["default_policy"].get_weights()
 
-    # class RestoreWeightsCallback(DefaultCallbacks):
-    #     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
-    #         algorithm.set_weights({"default_policy": restored_policy_0_weights})
+    class RestoreWeightsCallback(DefaultCallbacks):
+
+        def __init__(
+                self,
+                load_dir: str,
+                policy_name: str,
+            ):
+            policy_0_checkpoint_path = get_checkpoint_dir(load_dir)
+            restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
+            self.restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
+            self.policy_name = policy_name
+
+
+        def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+            algorithm.set_weights({self.policy_name: self.restored_policy_0_weights})
 
 
 
@@ -79,8 +88,6 @@ def train(
             save_artifact=True)]
     )
     ray.shutdown()
-
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -127,7 +134,7 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--policies-to-train', nargs="+", type=str, default=["policy_0"], # "policy_1",
+        '--policies-to-train', nargs="+", type=str, default=["policy_1"], # "policy_1",
         help="List of agent ids to train")
 
 
