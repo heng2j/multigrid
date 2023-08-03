@@ -104,7 +104,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         tile_size: int = TILE_PIXELS,
         agent_pov: bool = False,
         our_agent_ids: list[int] = [0],
-        teams: dict[str, int] = {"red": 1}
+        teams: dict[str, int] = {"red": 1},
+        trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
+
         ):
         """
         Parameters
@@ -162,6 +164,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Initialize agents
         self.our_agent_ids = our_agent_ids
 
+        self.trianing_scheme = trianing_scheme
+
+
         if isinstance(agents, int):
             self.num_agents = agents
             self.agent_states = AgentState(agents) # joint agent state (vectorized)
@@ -172,6 +177,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     mission_space=self.mission_space,
                     view_size=agent_view_size,
                     see_through_walls=see_through_walls,
+                    trianing_scheme=trianing_scheme
                 )
                 agent.state = self.agent_states[i]
                 self.agents.append(agent)
@@ -228,11 +234,19 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         Return the joint observation space of all agents.
         """
-        # FIXME - should be convertable between training scenario 
-        return spaces.Dict({
-            agent.index: agent.observation_space
-            for agent in self.agents
-        })
+        if self.trianing_scheme == "CTCE":
+            return spaces.Tuple((agent.observation_space
+                for agent in self.agents ))
+        elif self.trianing_scheme == "DTDE":
+            # FIXME - should be convertable between training scenario 
+            return spaces.Dict({
+                agent.index: agent.observation_space
+                for agent in self.agents
+            })
+        elif self.trianing_scheme == "CTDE":
+            ...
+
+        # FIXME - for HW2
         # return self.agents[0].observation_space
 
     @cached_property
