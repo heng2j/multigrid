@@ -32,6 +32,7 @@ ObsType = dict[str, Any]
 
 
 
+
 ### Environment
 
 class MultiGridEnv(gym.Env, RandomMixin, ABC):
@@ -102,7 +103,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         highlight: bool = True,
         tile_size: int = TILE_PIXELS,
         agent_pov: bool = False,
-        our_agent_ids: list[int] = [0]
+        our_agent_ids: list[int] = [0],
+        teams: dict[str, int] = {"red": 1}
         ):
         """
         Parameters
@@ -183,6 +185,16 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 agent.state = self.agent_states[agent.index] # reference joint agent state
         else:
             raise ValueError(f"Invalid argument for agents: {agents}")
+
+
+        # TODO - Arrange Teams
+        assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
+        tmp_agent_idx = 0
+        for team_name, team_num in teams.items():
+            for _ in range(team_num):
+                self.agents[tmp_agent_idx].color = team_name
+                tmp_agent_idx += 1
+
 
         # Action enumeration for this environment
         self.actions = Action

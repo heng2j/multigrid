@@ -11,6 +11,52 @@ from numpy.typing import NDArray as ndarray
 
 from .base import MultiGridEnv, AgentID, ObsType
 from .core.constants import Color, Direction, State, Type
+from .core.world_object import WorldObj
+
+
+
+class FullyObsWrapper(ObservationWrapper):
+    """
+    Fully observable gridworld using a compact grid encoding instead of agent view.
+
+    Examples
+    --------
+    >>> import gymnasium as gym
+    >>> import multigrid.envs
+    >>> env = gym.make('MultiGrid-Empty-16x16-v0')
+    >>> obs, _ = env.reset()
+    >>> obs[0]['image'].shape
+    (7, 7, 3)
+
+    >>> from multigrid.wrappers import FullyObsWrapper
+    >>> env = FullyObsWrapper(env)
+    >>> obs, _ = env.reset()
+    >>> obs[0]['image'].shape
+    (16, 16, 3)
+    """
+
+    def __init__(self, env: MultiGridEnv):
+        """
+        """
+        super().__init__(env)
+
+        # Update agent observation spaces
+        for agent in self.env.agents:
+            agent.observation_space['image'] = spaces.Box(
+                low=0, high=255, shape=(env.height, env.width, WorldObj.dim), dtype=int)
+
+    def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
+        """
+        :meta private:
+        """
+        img = self.env.grid.encode()
+        for agent in self.env.agents:
+            img[agent.state.pos] = agent.encode()
+
+        for agent_id in obs:
+            obs[agent_id]['image'] = img
+
+        return obs
 
 
 

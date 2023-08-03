@@ -109,7 +109,7 @@ if __name__ == "__main__":
         type=str,
         help="gym environment to load",
         choices=gym.envs.registry.keys(),
-        default="MultiGrid-CompetativeRedBlueDoor-v0",  #  MultiGrid-LockedHallway-2Rooms-v0
+        default="MultiGrid-CompetativeRedBlueDoor-v3",  #  MultiGrid-LockedHallway-2Rooms-v0
     )
     parser.add_argument(
         "--seed",
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agent-view-size",
         type=int,
-        default=5,
+        default=3,
         help="set the number of grid spaces visible in agent-view ",
     )
     parser.add_argument(
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agents",
         type=int,
-        default=2,
+        default=4,
         help="",
     )
     parser.add_argument(

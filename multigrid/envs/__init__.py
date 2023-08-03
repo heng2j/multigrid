@@ -30,7 +30,7 @@ Configurations
 """
 
 from .blockedunlockpickup import BlockedUnlockPickupEnv
-from .competative_red_blue_door import CompetativeRedBlueDoorEnv, CompetativeRedBlueDoorEnvV2
+from .competative_red_blue_door import CompetativeRedBlueDoorEnv, CompetativeRedBlueDoorEnvV2, CompetativeRedBlueDoorEnvV3
 from .empty import EmptyEnv
 from .locked_hallway import LockedHallwayEnv
 from .playground import PlaygroundEnv
@@ -40,7 +40,9 @@ from .redbluedoors import RedBlueDoorsEnv
 CONFIGURATIONS = {
     'MultiGrid-BlockedUnlockPickup-v0': (BlockedUnlockPickupEnv, {}),
     'MultiGrid-CompetativeRedBlueDoor-v0': (CompetativeRedBlueDoorEnv, {'size': 8}),
+    'MultiGrid-CompetativeRedBlueDoor-v1': (CompetativeRedBlueDoorEnv, {'size': 8}),
     'MultiGrid-CompetativeRedBlueDoor-v2': (CompetativeRedBlueDoorEnvV2, {'size': 8, "allow_agent_overlap": False}),
+    'MultiGrid-CompetativeRedBlueDoor-v3': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2,  } }), # ,"blue": 2
     'MultiGrid-Empty-5x5-v0': (EmptyEnv, {'size': 5}),
     'MultiGrid-Empty-Random-5x5-v0': (EmptyEnv, {'size': 5, 'agent_start_pos': None}),
     'MultiGrid-Empty-6x6-v0': (EmptyEnv, {'size': 6}),

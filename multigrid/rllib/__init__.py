@@ -37,7 +37,7 @@ from ray.tune.registry import register_env
 
 from ..base import MultiGridEnv
 from ..envs import CONFIGURATIONS
-from ..wrappers import CompetativeRedBlueDoorWrapper # OneHotObsWrapper, 
+from ..wrappers import CompetativeRedBlueDoorWrapper, FullyObsWrapper # OneHotObsWrapper, 
 
 
 
@@ -107,4 +107,4 @@ def to_rllib_env(
 
 # Register environments with RLlib
 for name, (env_cls, config) in CONFIGURATIONS.items():
-    register_env(name, to_rllib_env(env_cls, CompetativeRedBlueDoorWrapper, default_config=config))
+    register_env(name, to_rllib_env(env_cls, FullyObsWrapper, default_config=config))
