@@ -144,7 +144,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agents",
         type=int,
-        default=1,
+        default=4,
         help="",
     )
     parser.add_argument(

@@ -209,6 +209,41 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
 
 
+    def gen_obs(self) -> dict[AgentID, ObsType]:
+        """
+        Generate observations for each agent (partially observable, low-res encoding).
+
+        Returns
+        -------
+        observations : dict[AgentID, ObsType]
+            Mapping from agent ID to observation dict, containing:
+                * 'image': partially observable view of the environment
+                * 'direction': agent's direction / orientation (acting as a compass)
+                * 'mission': textual mission string (instructions for the agent)
+        """
+        direction = self.agent_states.dir
+        image = gen_obs_grid_encoding(
+            self.grid.state,
+            self.agent_states,
+            self.agents[0].view_size,
+            self.agents[0].see_through_walls,
+        )
+
+        observations = {}
+
+        for team_name, agents in self.agents_teams.items():
+            for agent_id, agent  in enumerate(agents):
+                
+                observations[team_name] = {
+                'agent_id': agent_id,
+                'image': image[agent.index],
+                'direction': direction[agent.index],
+                'mission': self.agents[agent.index].mission,
+            }
+
+        return observations
+
+
     def step(self, actions):
         """
         :meta private:

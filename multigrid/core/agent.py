@@ -94,7 +94,6 @@ class Agent:
         # Observations are dictionaries containing an
         # encoding of the grid and a textual 'mission' string
 
-
         if self.trianing_scheme == "CTCE":
             
             self.observation_space = spaces.Dict({
@@ -108,6 +107,10 @@ class Agent:
                 'direction': spaces.Discrete(len(Direction)),
                 'mission': mission_space,
             })
+
+            # Actions are discrete integer values
+            self.action_space = spaces.Discrete(len(Action))
+
         elif self.trianing_scheme == "DTDE":
 
             ...
@@ -127,7 +130,7 @@ class Agent:
             
         # TODO - update action space
         # Actions are discrete integer values
-        self.action_space = spaces.Discrete(len(Action))
+        # self.action_space = spaces.Discrete(len(Action))
 
     # AgentState Properties
     color = PropertyAlias(

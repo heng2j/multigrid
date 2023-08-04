@@ -163,8 +163,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
         # Initialize agents
         self.our_agent_ids = our_agent_ids
-
         self.trianing_scheme = trianing_scheme
+        self.agent_index_dict = defaultdict(dict)
 
 
         if isinstance(agents, int):
@@ -194,6 +194,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     agent.color = team_name
                     self.agents.append(agent)
                     self.agents_teams[team_name].append(agent)
+                    self.agent_index_dict[team_name][team_idx] = tmp_agent_idx
                     tmp_agent_idx += 1
 
         elif isinstance(agents, Iterable):
@@ -795,7 +796,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         obs_shape = self.agents[0].observation_space['image'].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
         for i, agent_obs in self.gen_obs().items():
-            vis_masks[i] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
+            vis_masks[agent_obs["agent_id"]] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
 
         # Mask of which cells to highlight
         highlight_mask = np.zeros((self.width, self.height), dtype=bool)
