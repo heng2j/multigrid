@@ -232,14 +232,14 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         observations = {}
 
         for team_name, agents in self.agents_teams.items():
+            observations[team_name] = []
             for agent_id, agent  in enumerate(agents):
-                
-                observations[team_name] = {
+                 observations[team_name].append({
                 'agent_id': agent_id,
                 'image': image[agent.index],
                 'direction': direction[agent.index],
                 'mission': self.agents[agent.index].mission,
-            }
+            })
 
         return observations
 
@@ -250,9 +250,13 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         """
         obs, reward, terminated, truncated, info = super().step(actions)
 
-        info[1]["red_door_open_done"] = False
-        info[1]["red_got_caught_done"] = False
-        info[0]["blue_caught_red_done"] = False
+        team_info = {team: {
+
+                    "door_open_done" : False,
+                    "got_eliminated_done" : False,
+                    "eliminated_num" : 0
+                     } for team in list(self.team_index_dict.keys())}
+
 
         # TODO - set Blue action
         for agent_id, action in actions.items():
@@ -265,11 +269,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                     if self.red_door.is_open or self.blue_door.is_open:
-                        # TODO - Set Done Conditions
-
+                        # Set Done Conditions
                         if agent.color == "red":
                             self.on_success(agent, reward, terminated)
-                            info[1]["red_door_open_done"] = True
+                            team_info[agent.color]["door_open_done"] = True
                         # self.info["episode_done"].get("l", self.step_count)
                     # else:
                     #     self.on_failure(agent, reward, terminated)
@@ -288,7 +291,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         if other_agent != agent:
                             self.on_failure(other_agent, reward, terminated)
                             # info[1]["red_got_caught_done"] = True
-                            info[0]["blue_caught_red_done"] = True
+                            team_info[agent.color]["got_eliminated_done"] = True
 
             
             # TODO - Add Sparse rewards
@@ -308,7 +311,34 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     reward[agent_id] -= 0.001 # OG  0.2
             
 
-        return obs, reward, terminated, truncated, info
+
+        # Reformat reward, terminated, truncated and info 
+        team_rewards  = {}
+        for agent_idx, value in reward.items():
+            for team_name, _ in self.agent_index_dict[agent_idx].items():
+                if team_name in team_rewards:
+                    team_rewards[team_name] += value
+                else:
+                    team_rewards[team_name] = value
+
+        team_terminated = {}
+        for agent_idx, value in terminated.items():
+            for team_name, _ in self.agent_index_dict[agent_idx].items():
+                if team_name in team_terminated:
+                    team_terminated[team_name] = team_terminated[team_name] and value
+                else:
+                    team_terminated[team_name] = value
+
+        team_truncated = {}
+        for agent_idx, value in truncated.items():
+            for team_name, _ in self.agent_index_dict[agent_idx].items():
+                if team_name in team_truncated:
+                    team_truncated[team_name] = team_truncated[team_name] and value
+                else:
+                    team_truncated[team_name] = value
+
+
+        return obs, team_rewards, team_terminated, team_truncated, team_info
 
 
 

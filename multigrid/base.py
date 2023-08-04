@@ -164,8 +164,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Initialize agents
         self.our_agent_ids = our_agent_ids
         self.trianing_scheme = trianing_scheme
-        self.agent_index_dict = defaultdict(dict)
-
+        self.team_index_dict = defaultdict(dict)
 
         if isinstance(agents, int):
             self.num_agents = agents
@@ -194,8 +193,15 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     agent.color = team_name
                     self.agents.append(agent)
                     self.agents_teams[team_name].append(agent)
-                    self.agent_index_dict[team_name][team_idx] = tmp_agent_idx
+                    self.team_index_dict[team_name][team_idx] = tmp_agent_idx
                     tmp_agent_idx += 1
+
+            self.agent_index_dict = defaultdict(dict)
+
+            for team_name, team_idx_dict in self.team_index_dict.items():
+                for team_idx, agent_idx in team_idx_dict.items():
+                    self.agent_index_dict[agent_idx] = {team_name: team_idx}
+                        
 
         elif isinstance(agents, Iterable):
             assert {agent.index for agent in agents} == set(range(len(agents)))
@@ -795,8 +801,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Compute agent visibility masks
         obs_shape = self.agents[0].observation_space['image'].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
-        for i, agent_obs in self.gen_obs().items():
-            vis_masks[agent_obs["agent_id"]] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
+        for team_name, agent_obs_list in self.gen_obs().items():
+            for agent_obs in agent_obs_list:
+                vis_masks[self.team_index_dict[team_name][agent_obs["agent_id"]]] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
 
         # Mask of which cells to highlight
         highlight_mask = np.zeros((self.width, self.height), dtype=bool)
