@@ -44,11 +44,23 @@ def can_use_gpu() -> bool:
 
     return False
 
-def policy_mapping_fn(agent_id: int, *args, **kwargs) -> str:
+def single_policy_mapping_fn(agent_id: int, *args, **kwargs) -> str:
     """
     Map an environment agent ID to an RLlib policy ID.
     """
-    return f'policy_{agent_id}'
+    return   "red" if agent_id.startswith("red") else "blue" #f'policy_{agent_id}'
+
+def marl_policy_mapping_fn(agent_id: str, trianing_scheme:str, *args, **kwargs) -> str:
+    """
+    Map an environment agent ID to an RLlib policy ID.
+    """
+    if trianing_scheme == "DTDE":
+        ...
+    elif trianing_scheme == "CTDE":
+        ...
+
+
+   
 
 def model_config(
     framework: str = 'torch',
@@ -94,6 +106,8 @@ def algorithm_config(
     lr: float | None = None,
     policies_to_train: list[int] | None = None,
     our_agent_ids: list[str] | None = None,
+    teams: dict[str, int] = {"red": 1},
+    trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
@@ -107,8 +121,9 @@ def algorithm_config(
         .rollouts(num_rollout_workers=num_workers)
         .resources(num_gpus=num_gpus if can_use_gpu() else 0)
         .multi_agent(
-            policies={f'policy_{i}' for i in our_agent_ids},
-            policy_mapping_fn=policy_mapping_fn,
+            # policies={f'policy_{i}' for i in our_agent_ids},
+            policies={ team_name for team_name in list(teams.keys())},
+            policy_mapping_fn=single_policy_mapping_fn if trianing_scheme == "CTCE" else marl_policy_mapping_fn,
             # policies_to_train=policies_to_train
         )
         .training(

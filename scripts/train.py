@@ -5,7 +5,7 @@ import json
 import os
 import ray
 
-from multigrid.utils.training_utilis import algorithm_config, can_use_gpu,  get_checkpoint_dir, policy_mapping_fn
+from multigrid.utils.training_utilis import algorithm_config, can_use_gpu,  get_checkpoint_dir
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel
 from pathlib import Path
 from pprint import pprint
@@ -27,6 +27,7 @@ from ray.rllib.evaluation.episode import Episode
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.rllib.utils.typing import AgentID, EnvType, PolicyID
 import numpy as np
+import json
 
 import pathlib
 SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
@@ -126,7 +127,7 @@ def train(
         config=config,
         local_dir=save_dir,
         verbose=1,
-        restore=get_checkpoint_dir(load_dir),
+       restore=get_checkpoint_dir(load_dir),
         checkpoint_freq=5,
         checkpoint_at_end=True,
         progress_reporter=reporter,
@@ -169,7 +170,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lr', type=float, help="Learning rate for training.")
     parser.add_argument(
-        '--load-dir', type=str, default='/Users/zla0368/Documents/RL/RL_Class/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v0_5dfa1_00000_0_2023-08-01_23-12-09',
+        '--load-dir', type=str, #default='/Users/zla0368/Documents/RL/RL_Class/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v0_5dfa1_00000_0_2023-08-01_23-12-09',
         help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument(
         '--save-dir', type=str, default='submission/ray_results/',
@@ -183,6 +184,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
+    parser.add_argument(
+        '--teams', type=json.loads, default={"red": 1},
+        help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["policy_1"], # "policy_0",
         help="List of agent ids to train")

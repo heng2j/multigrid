@@ -195,11 +195,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
         # TODO - Arrange Teams
         assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
+        self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
+        
         tmp_agent_idx = 0
         for team_name, team_num in teams.items():
             for _ in range(team_num):
                 self.agents[tmp_agent_idx].color = team_name
                 tmp_agent_idx += 1
+                self.agents_teams[team_name].append(self.agents[tmp_agent_idx])
 
 
         # Action enumeration for this environment
@@ -235,8 +238,13 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         Return the joint observation space of all agents.
         """
         if self.trianing_scheme == "CTCE":
-            return spaces.Tuple((agent.observation_space
-                for agent in self.agents ))
+
+            return spaces.Dict({
+                team_name: spaces.Tuple((agent.observation_space
+                for agent in agents )) for team_name, agents in self.agents_teams.items()
+            })
+            # return spaces.Tuple((agent.observation_space
+            #     for agent in self.agents ))
         elif self.trianing_scheme == "DTDE":
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
@@ -254,10 +262,30 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         Return the joint action space of all agents.
         """
-        return spaces.Dict({
-            agent.index: agent.action_space
-            for agent in self.agents
-        })
+
+        
+        if self.trianing_scheme == "CTCE":
+
+            # return spaces.Dict({
+            #     agent.index: agent.action_space
+            #     for agent in self.agents
+            # })
+
+            return spaces.Dict({
+                team_name: spaces.Tuple((agent.action_space
+                for agent in agents )) for team_name, agents in self.agents_teams.items()
+            })
+
+        elif self.trianing_scheme == "DTDE":
+
+            # FIXME - should be convertable between training scenario 
+            return spaces.Dict({
+                agent.index: agent.observation_space
+                for agent in self.agents
+            })
+        elif self.trianing_scheme == "CTDE":
+            ...
+
 
 
     @abstractmethod
