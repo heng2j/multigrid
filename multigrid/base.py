@@ -171,16 +171,31 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             self.num_agents = agents
             self.agent_states = AgentState(agents) # joint agent state (vectorized)
             self.agents: list[Agent] = []
-            for i in range(agents):
-                agent = Agent(
-                    index=i,
-                    mission_space=self.mission_space,
-                    view_size=agent_view_size,
-                    see_through_walls=see_through_walls,
-                    trianing_scheme=trianing_scheme
-                )
-                agent.state = self.agent_states[i]
-                self.agents.append(agent)
+
+
+            # Arrange Teams
+            assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
+            self.agents_teams: dict[str,list[Agent]] = defaultdict(list)
+
+            tmp_agent_idx = 0
+            for team_name, team_num in teams.items():
+                for team_idx in range(team_num):
+
+                    agent = Agent(
+                        index=tmp_agent_idx,
+                        name=f"{team_name}_{team_idx}",
+                        mission_space=self.mission_space,
+                        view_size=agent_view_size,
+                        see_through_walls=see_through_walls,
+                        team_number=team_num,
+                        trianing_scheme=trianing_scheme,
+                    )
+                    agent.state = self.agent_states[tmp_agent_idx]
+                    agent.color = team_name
+                    self.agents.append(agent)
+                    self.agents_teams[team_name].append(agent)
+                    tmp_agent_idx += 1
+
         elif isinstance(agents, Iterable):
             assert {agent.index for agent in agents} == set(range(len(agents)))
             self.num_agents = len(agents)
@@ -193,16 +208,16 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             raise ValueError(f"Invalid argument for agents: {agents}")
 
 
-        # TODO - Arrange Teams
-        assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
-        self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
+        # # TODO - Arrange Teams
+        # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
+        # self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
         
-        tmp_agent_idx = 0
-        for team_name, team_num in teams.items():
-            for _ in range(team_num):
-                self.agents[tmp_agent_idx].color = team_name
-                tmp_agent_idx += 1
-                self.agents_teams[team_name].append(self.agents[tmp_agent_idx])
+        # tmp_agent_idx = 0
+        # for team_name, team_num in teams.items():
+        #     for _ in range(team_num):
+        #         self.agents[tmp_agent_idx].color = team_name
+        #         tmp_agent_idx += 1
+        #         self.agents_teams[team_name].append(self.agents[tmp_agent_idx])
 
 
         # Action enumeration for this environment

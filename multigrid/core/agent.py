@@ -55,6 +55,7 @@ class Agent:
     def __init__(
         self,
         index: int,
+        name: str,
         mission_space: MissionSpace = MissionSpace.from_string('maximize reward'),
         view_size: int = 7,
         see_through_walls: bool = False,
@@ -74,8 +75,10 @@ class Agent:
             Whether the agent can see through walls
         """
         self.index: int = index
+        self.name: str = name
         self.state: AgentState = AgentState()
         self.mission: Mission = None
+        self.trianing_scheme: str = trianing_scheme
 
         self.view_size = view_size
         self.mission_space = mission_space
@@ -122,6 +125,7 @@ class Agent:
         #         dtype=int,
         #     )
             
+        # TODO - update action space
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(Action))
 
@@ -137,36 +141,37 @@ class Agent:
     carrying = PropertyAlias(
         'state', 'carrying', doc='Alias for :attr:`AgentState.carrying`.')
 
-    @property
-    def observation_space(self):
+    # @property
+    # def observation_space(self):
 
-        if self.trianing_scheme == "CTCE":
-            return spaces.Dict({
-                'agent_id': spaces.Discrete(self.team_number),
-                'image': spaces.Box(
-                    low=0,
-                    high=255,
-                    shape=(self.view_size, self.view_size, WorldObj.dim),
-                    dtype=int,
-                ),
-                'direction': spaces.Discrete(len(Direction)),
-                'mission': self.mission_space,
-            })
-        elif self.trianing_scheme == "DTDE":
-            # FIXME - should be convertable between training scenario 
-            return spaces.Dict({
-                agent.index: agent.observation_space
-                for agent in self.agents
-            })
-        elif self.trianing_scheme == "CTDE":
-            ...
+    #     if self.trianing_scheme == "CTCE":
+    #         return spaces.Dict({
+    #             'agent_id': spaces.Discrete(self.team_number),
+    #             'image': spaces.Box(
+    #                 low=0,
+    #                 high=255,
+    #                 shape=(self.view_size, self.view_size, WorldObj.dim),
+    #                 dtype=int,
+    #             ),
+    #             'direction': spaces.Discrete(len(Direction)),
+    #             'mission': self.mission_space,
+    #         })
+    #     elif self.trianing_scheme == "DTDE":
+    #         # FIXME - should be convertable between training scenario 
+    #         return spaces.Dict({
+    #             agent.index: agent.observation_space
+    #             for agent in self.agents
+    #         })
+    #     elif self.trianing_scheme == "CTDE":
+    #         ...
 
 
-    def set_observation_space(self):
-        ...
 
-    def set_action_space(self):
-        ...
+    # def set_observation_space(self):
+    #     ...
+
+    # def set_action_space(self):
+    #     ...
 
 
     @property
