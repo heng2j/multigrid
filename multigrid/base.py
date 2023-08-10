@@ -483,6 +483,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Randomize agent action order
         if self.num_agents == 1:
             order = (0,)
+            
         else:
             order = self.np_random.random(size=self.num_agents).argsort()
 

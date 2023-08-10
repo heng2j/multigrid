@@ -54,7 +54,11 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
         MultiAgentEnv.__init__(self)
 
     def get_agent_ids(self):
-        return {agent.index for agent in self.agents}
+
+        if self.trianing_scheme == "CTCE":
+            return { team for team in list(self.teams.keys())}
+        else: 
+            return {agent.index for agent in self.agents}
 
     def step(self, *args, **kwargs):
 

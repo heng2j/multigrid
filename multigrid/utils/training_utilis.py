@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import itertools
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.algorithms import AlgorithmConfig
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel
@@ -44,20 +45,31 @@ def can_use_gpu() -> bool:
 
     return False
 
-def single_policy_mapping_fn(agent_id: str, *args, **kwargs) -> str:
-    """
-    Map an environment agent ID to an RLlib policy ID.
-    """
-    return   "red" if agent_id.startswith("red") else "blue" #f'policy_{agent_id}'
 
-def marl_policy_mapping_fn(agent_id: str, trianing_scheme:str, *args, **kwargs) -> str:
-    """
-    Map an environment agent ID to an RLlib policy ID.
-    """
-    if trianing_scheme == "DTDE":
-        ...
-    elif trianing_scheme == "CTDE":
-        ...
+
+def policy_mapping_fn(trianing_scheme:str, teams: dict[str, int], agent_index_dict: dict[int, str]):
+
+    def single_policy_mapping_fn(agent_id, *args,  **kwargs) -> str:
+        """
+        Map an environment agent ID to an RLlib policy ID.
+        """
+        return   agent_id #agent_index_dict[agent_id] #f'policy_{agent_id}'
+
+    def marl_policy_mapping_fn(agent_id, *args, **kwargs) -> str:
+        """
+        Map an environment agent ID to an RLlib policy ID.
+        """
+        if trianing_scheme == "DTDE":
+            ...
+        elif trianing_scheme == "CTDE":
+            ...
+
+
+   
+
+    return  single_policy_mapping_fn  if trianing_scheme == "CTCE" else marl_policy_mapping_fn
+
+
 
 
    
@@ -113,6 +125,7 @@ def algorithm_config(
     Return the RL algorithm configuration dictionary.
     """
     env_config = {**env_config, 'agents': num_agents}
+    agent_index_dict = {agent_id: next(team for team, count in teams.items() if sum(teams[t] for t in itertools.takewhile(lambda x: x != team, teams)) + count > agent_id) for agent_id in range(num_agents)}
     return (
         get_trainable_cls(algo)
         .get_default_config()
@@ -123,7 +136,7 @@ def algorithm_config(
         .multi_agent(
             # policies={f'policy_{i}' for i in our_agent_ids},
             policies={ team_name for team_name in list(teams.keys())},
-            policy_mapping_fn=single_policy_mapping_fn if trianing_scheme == "CTCE" else marl_policy_mapping_fn,
+            policy_mapping_fn=policy_mapping_fn(trianing_scheme=trianing_scheme,teams=teams, agent_index_dict=agent_index_dict),
             # policies_to_train=policies_to_train
         )
         .training(
