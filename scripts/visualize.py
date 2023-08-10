@@ -1,18 +1,20 @@
 import argparse
 import json
 import numpy as np
+import itertools
 
 from ray.rllib.algorithms import Algorithm
 from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, policy_mapping_fn
 
 
 
-def visualize(algorithm: Algorithm, num_episodes: int = 100) -> list[np.ndarray]:
+def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, int] = {"red": 1}, trianing_scheme: str = "CTCE", num_agents: int = 2) -> list[np.ndarray]:
     """
     Visualize trajectories from trained agents.
     """
     frames = []
     env = algorithm.env_creator(algorithm.config.env_config)
+    agent_index_dict = {agent_id: next(team for team, count in teams.items() if sum(teams[t] for t in itertools.takewhile(lambda x: x != team, teams)) + count > agent_id) for agent_id in range(num_agents)}
 
     for episode in range(num_episodes):
         print('\n', '-' * 32, '\n', 'Episode', episode, '\n', '-' * 32)
@@ -21,7 +23,7 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100) -> list[np.ndarray]
         terminations, truncations = {'__all__': False}, {'__all__': False}
         observations, infos = env.reset()
         states = {
-            agent_id: algorithm.get_policy(policy_mapping_fn(agent_id)).get_initial_state()
+            agent_id: algorithm.get_policy(agent_id).get_initial_state()
             for agent_id in env.get_agent_ids()
         }
         while not terminations['__all__'] and not truncations['__all__']:
@@ -34,7 +36,7 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100) -> list[np.ndarray]
                 actions[agent_id] = algorithm.compute_single_action(
                     observations[agent_id],
                     states[agent_id],
-                    policy_id=policy_mapping_fn(agent_id)
+                    policy_id=agent_id
                 )
 
                 # # Multi-agent
@@ -67,13 +69,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=4, help="Number of agents in environment.")
     parser.add_argument(
         '--num-episodes', type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument(
@@ -84,7 +86,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to evaluate")
-
+    parser.add_argument(
+        '--teams', type=json.loads, default={"red": 2, "blue": 2},
+        help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
+    parser.add_argument(
+        '--trianing-scheme', type=str, default='CTCE',
+        help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()
     args.env_config.update(render_mode='human')
@@ -96,6 +103,7 @@ if __name__ == '__main__':
     config.environment(disable_env_checking=True)
     algorithm = config.build()
     checkpoint = get_checkpoint_dir(args.load_dir)
+
     if checkpoint:
         from ray.rllib.policy.policy import Policy
 
@@ -109,8 +117,7 @@ if __name__ == '__main__':
         # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
         # algorithm.set_weights({policy_name: restored_policy_0_weights})
    
-
-    frames = visualize(algorithm, num_episodes=args.num_episodes)
+    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, trianing_scheme=args.trianing_scheme, num_agents=args.num_agents)
     if args.gif:
         import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'

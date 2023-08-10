@@ -143,15 +143,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
 
-
-        # if trianing_scheme == "CTCE":
-        
-
-        
-        # TODO "DTDE" and "CTDE"
-
-
-
         super().__init__(
             mission_space=mission_space,
             width=(2 * size),
@@ -210,8 +201,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
 
         # Block red door with a ball
-        self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
-        self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
+        if "red" in set(self.teams.keys()):
+            self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+        if "blue" in set(self.teams.keys()):
+            self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
     
         # Place keys in hallway
@@ -310,9 +303,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         # FIXME - make me elegant 
                         agent.carrying.is_available = False
                         agent.carrying.is_pickedup = True
-                        reward[agent_id] += 0.5
+                        reward[agent_id] += 1
                     elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
-                        reward[agent_id] += 0.5 * agent.carrying.discount_factor
+                        reward[agent_id] += 1 * agent.carrying.discount_factor
                         agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                     else:
@@ -1205,10 +1198,10 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
+                    # agent.carrying.discount_factor *= agent.carrying.discount_factor
                 elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
                     reward[agent_id] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
-
                 else:
                     # If we are grabbing bad stuff
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward

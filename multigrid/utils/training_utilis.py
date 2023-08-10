@@ -119,7 +119,7 @@ def algorithm_config(
     policies_to_train: list[int] | None = None,
     our_agent_ids: list[str] | None = None,
     teams: dict[str, int] = {"red": 1},
-    trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
+    trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"  # FIXME - this need to be coming from argument parser or config
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
