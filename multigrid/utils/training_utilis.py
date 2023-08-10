@@ -44,7 +44,7 @@ def can_use_gpu() -> bool:
 
     return False
 
-def single_policy_mapping_fn(agent_id: int, *args, **kwargs) -> str:
+def single_policy_mapping_fn(agent_id: str, *args, **kwargs) -> str:
     """
     Map an environment agent ID to an RLlib policy ID.
     """

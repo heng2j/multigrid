@@ -142,6 +142,16 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.trianing_scheme = trianing_scheme
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
+
+
+        # if trianing_scheme == "CTCE":
+        
+        self._agent_ids = { team for team in list(teams.keys())}
+        
+        # TODO "DTDE" and "CTDE"
+
+
+
         super().__init__(
             mission_space=mission_space,
             width=(2 * size),
@@ -160,7 +170,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence =  list(self.teams.keys()) 
+        color_sequence = list(self.teams.keys())  #  ["red"] #
 
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -189,7 +199,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=(4,4))
                 # self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
-                agent.state.pos = (blue_door_x - (1+idx), blue_door_y)
+                agent.state.pos = (blue_door_x - (idx + 2), blue_door_y)
                 agent.state.dir = 2
 
             else:
@@ -201,6 +211,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         # Block red door with a ball
         self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+        self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
     
         # Place keys in hallway

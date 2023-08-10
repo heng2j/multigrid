@@ -136,7 +136,7 @@ def train(
         experiment_name=experiment_name,
             tags=tags,
             save_artifact=True),
-            RestoreWeightsCallback(load_dir=load_dir,policy_name="policy_0"),]
+          ] #   RestoreWeightsCallback(load_dir=load_dir,policy_name="policy_0"),
     )
     ray.shutdown()
 
@@ -151,17 +151,17 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v0',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.")
+        '--num-agents', type=int, default=1, help="Number of agents in environment.")
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=0, help="Number of rollout workers.")
+        '--num-workers', type=int, default=1, help="Number of rollout workers.")
     parser.add_argument(
         '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         '--teams', type=json.loads, default={"red": 1},
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
-        '--policies-to-train', nargs="+", type=str, default=["policy_1"], # "policy_0",
+        '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
         help="List of agent ids to train")
 
 
@@ -199,7 +199,8 @@ if __name__ == "__main__":
     # config.multiagent["policies_to_train"] =args.policies_to_train
     config.seed = args.seed
     config.callbacks(EvaluationCallbacks)
-    stop_conditions = {'timesteps_total': args.num_timesteps}
+    config.environment(disable_env_checking=True) # FIXME 
+    stop_conditions = {'timesteps_total': args.num_timesteps} 
 
     print()
     print(f"Running with following CLI options: {args}")
