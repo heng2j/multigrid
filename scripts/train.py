@@ -163,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--num-workers', type=int, default=4, help="Number of rollout workers.")
     parser.add_argument(
-        '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
+        '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument(
         '--num-timesteps', type=int, default=1e7,
         help="Total number of timesteps to train.")

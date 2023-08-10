@@ -132,7 +132,7 @@ def algorithm_config(
         .environment(env=env, env_config=env_config)
         .framework(framework)
         .rollouts(num_rollout_workers=num_workers)
-        .resources(num_gpus=num_gpus if can_use_gpu() else 0)
+        .resources(num_gpus=num_gpus) #if can_use_gpu() else 0)
         .multi_agent(
             # policies={f'policy_{i}' for i in our_agent_ids},
             policies={ team_name for team_name in list(teams.keys())},
