@@ -516,6 +516,7 @@ class Key(WorldObj):
         key = super().__new__(cls, color=color)
         key.is_pickedup = is_pickedup
         key.is_available = is_available
+        key.discount_factor = 0.9
         return key
 
     @property
@@ -576,7 +577,7 @@ class Ball(WorldObj):
     Ball object that can be picked up by agents.
     """
 
-    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0,0)):
+    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0,0)): # TODO add discount_factor
         """
         Parameters
         ----------

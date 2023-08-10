@@ -303,9 +303,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         # FIXME - make me elegant 
                         agent.carrying.is_available = False
                         agent.carrying.is_pickedup = True
-                        reward[agent_id] += 0.5
+                        reward[agent_id] += 1
                     elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
-                        reward[agent_id] += 0.5 * agent.carrying.discount_factor
+                        reward[agent_id] += 1 * agent.carrying.discount_factor
                         agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                     else:
@@ -1198,10 +1198,10 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_id] += 0.5
+                    # agent.carrying.discount_factor *= agent.carrying.discount_factor
                 elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
                     reward[agent_id] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
-
                 else:
                     # If we are grabbing bad stuff
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
