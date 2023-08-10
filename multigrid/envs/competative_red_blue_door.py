@@ -143,15 +143,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
 
-
-        # if trianing_scheme == "CTCE":
-        
-
-        
-        # TODO "DTDE" and "CTDE"
-
-
-
         super().__init__(
             mission_space=mission_space,
             width=(2 * size),
@@ -210,8 +201,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
 
         # Block red door with a ball
-        self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
-        self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
+        if "red" in set(self.teams.keys()):
+            self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+        if "blue" in set(self.teams.keys()):
+            self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
     
         # Place keys in hallway
