@@ -185,8 +185,7 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2, "blue": 2}
-        ,
+        '--teams', type=json.loads, default={"red": 2, "blue": 2},
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
