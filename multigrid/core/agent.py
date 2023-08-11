@@ -113,7 +113,20 @@ class Agent:
 
         elif self.trianing_scheme == "DTDE":
 
-            ...
+            self.observation_space = spaces.Dict({
+                'image': spaces.Box(
+                    low=0,
+                    high=255,
+                    shape=(view_size, view_size, WorldObj.dim),
+                    dtype=int,
+                ),
+                'direction': spaces.Discrete(len(Direction)),
+                'mission': mission_space,
+            })
+
+            # Actions are discrete integer values
+            self.action_space = spaces.Discrete(len(Action))
+
         elif self.trianing_scheme == "CTDE":
             ...
 
