@@ -235,24 +235,29 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         observations = {}
 
-        for team_name, agents in self.agents_teams.items():
-            observations[team_name] = []
-            for agent_id, agent  in enumerate(agents):
-                 observations[team_name].append({
-                'agent_id': agent_id,
-                'image': image[agent.index],
-                'direction': direction[agent.index],
-                'mission': self.agents[agent.index].mission,
-            })
-
+        if self.trianing_scheme == "CTCE":
+            for team_name, agents in self.agents_teams.items():
+                observations[team_name] = []
+                for agent_id, agent  in enumerate(agents):
+                    observations[team_name].append({
+                    'agent_id': agent_id,
+                    'image': image[agent.index],
+                    'direction': direction[agent.index],
+                    'mission': self.agents[agent.index].mission,
+                })
+        elif self.trianing_scheme == "DTDE":
+            for agent in self.agents:
+                observations[ f"{agent.color.value}_{agent.index}" ] = {
+                    'image': image[agent.index],
+                    'direction': direction[agent.index],
+                    'mission': self.agents[agent.index].mission,
+                }
         return observations
 
 
-    def step(self, actions):
-        """
-        :meta private:
-        """
-        obs, reward, terminated, truncated, info = super().step(actions)
+
+    def ctce_step(self, actions, obs, reward, terminated,truncated, info):
+
 
         team_info = {team: {
                     "door_open_done" : False,
@@ -303,9 +308,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         # FIXME - make me elegant 
                         agent.carrying.is_available = False
                         agent.carrying.is_pickedup = True
-                        reward[agent_id] += 1
+                        reward[agent_id] += 0.5
                     elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
-                        reward[agent_id] += 1 * agent.carrying.discount_factor
+                        reward[agent_id] += 0.5 * agent.carrying.discount_factor
                         agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                     else:
@@ -343,6 +348,172 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         return obs, team_rewards, team_terminated, team_truncated, team_info
 
+    def dtde_step(self, actions, obs, reward, terminated, truncated, info):
+
+        info = {f"{agent.color.value}_{agent.index}" : {
+            "door_open_done" : False,
+            "got_eliminated_done" : False,
+            "eliminated_num" : 0
+                } for agent in self.agents}
+
+        for agent_id, action in actions.items():
+            team_name, agent_index = tuple(agent_id.split("_"))
+            agent_index = self.team_index_dict[team_name][int(agent_index)]
+            agent = self.agents[agent_index]
+            fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
+            
+            if action == Action.toggle:                
+                for other_agent in self.agents:
+                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
+                        fwd_obj = other_agent
+
+                if fwd_obj == self.red_door or fwd_obj == self.blue_door:
+                    if self.red_door.is_open or self.blue_door.is_open:
+                        # Set Done Conditions
+                        # if agent.color == "red":
+                        self.on_success(agent, reward, terminated)
+                        info[f'{agent_id}']["door_open_done"] = True
+                        # self.info["episode_done"].get("l", self.step_count)
+                    # else:
+                    #     self.on_failure(agent, reward, terminated)
+                    #     self.blue_door.is_open = False  # close the door again
+                elif isinstance(fwd_obj, Agent):
+                    # TODO - Make this clean
+                    fwd_obj.terminated = True
+                    self.grid.set(*fwd_obj.pos, None)
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    reward[agent_index] += 0.5
+
+                    # # Terminate the game if the another agent got caught 
+                    # self.on_success(agent, reward, terminated)
+
+                    for other_agent in self.agents:
+                        if (other_agent != agent) and (other_agent.color != agent.color):
+                            self.on_failure(other_agent, reward, terminated)
+                            info[f'{agent_id}']["got_eliminated_done"] = True
+
+            
+            # TODO - Add Sparse rewards
+            elif action == Action.pickup:
+                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
+                    # FIXME - make me elegant 
+                    agent.carrying.is_available = False
+                    agent.carrying.is_pickedup = True
+                    reward[agent_index] += 0.5
+                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
+                    reward[agent_index] += 0.5 * agent.carrying.discount_factor
+                    agent.carrying.discount_factor *= agent.carrying.discount_factor
+
+                else:
+                    # If we are grabbing bad stuff
+                    # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
+                    reward[agent_index] -= 0.001 # OG  0.2
+
+        # f"{agent.color.value}_{agent.index}"
+
+
+
+        # Reformat reward, terminated, truncated and info 
+        reformated_reward  = {}
+        for agent_idx, value in reward.items():
+            for team_name, team_index in self.agent_index_dict[agent_idx].items():
+                 reformated_reward[f"{team_name}_{team_index}"] = value
+
+        reformated_terminated = {}
+        for agent_idx, value in terminated.items():
+            for team_name, team_index in self.agent_index_dict[agent_idx].items():
+                 reformated_terminated[f"{team_name}_{team_index}"] = value
+
+        reformated_truncated = {}
+        for agent_idx, value in terminated.items():
+            for team_name, team_index in self.agent_index_dict[agent_idx].items():
+                 reformated_truncated[f"{team_name}_{team_index}"] = value
+
+        return obs, reformated_reward, reformated_terminated, reformated_truncated, info
+
+    def step(self, actions):
+        """
+        :meta private:
+        """
+        obs, reward, terminated, truncated, info = super().step(actions)
+
+        if self.trianing_scheme == "CTCE":
+            return self.ctce_step(actions, obs, reward, terminated, truncated, info)
+
+        elif self.trianing_scheme == "DTDE":
+            return self.dtde_step(actions, obs, reward, terminated, truncated, info)
+
+
+    def handle_agent_actions(self, agent, action, rewards):
+
+        if agent.state.terminated:
+            return
+
+        # Rotate left
+        if action == Action.left:
+            agent.state.dir = (agent.state.dir - 1) % 4
+
+        # Rotate right
+        elif action == Action.right:
+            agent.state.dir = (agent.state.dir + 1) % 4
+
+        # Move forward
+        elif action == Action.forward:
+            fwd_pos = agent.front_pos
+            fwd_obj = self.grid.get(*fwd_pos)
+
+            if fwd_obj is None or fwd_obj.can_overlap():
+                if not self.allow_agent_overlap:
+                    agent_present = np.bitwise_and.reduce(
+                        self.agent_states.pos == fwd_pos, axis=1).any()
+                    if agent_present:
+                        return
+
+                agent.state.pos = fwd_pos
+                if fwd_obj is not None:
+                    if fwd_obj.type == Type.goal:
+                        self.on_success(agent, rewards, {})
+                    if fwd_obj.type == Type.lava:
+                        self.on_failure(agent, rewards, {})
+
+        # Pick up an object
+        elif action == Action.pickup:
+            fwd_pos = agent.front_pos
+            fwd_obj = self.grid.get(*fwd_pos)
+
+            if fwd_obj is not None and fwd_obj.can_pickup():
+                if agent.state.carrying is None:
+                    agent.state.carrying = fwd_obj
+                    self.grid.set(*fwd_pos, None)
+
+        # Drop an object
+        elif action == Action.drop:
+            fwd_pos = agent.front_pos
+            fwd_obj = self.grid.get(*fwd_pos)
+
+            if agent.state.carrying and fwd_obj is None:
+                agent_present = np.bitwise_and.reduce(
+                    self.agent_states.pos == fwd_pos, axis=1).any()
+                if not agent_present:
+                    self.grid.set(*fwd_pos, agent.state.carrying)
+                    agent.state.carrying.cur_pos = fwd_pos
+                    agent.state.carrying = None
+
+        # Toggle/activate an object
+        elif action == Action.toggle:
+            fwd_pos = agent.front_pos
+            fwd_obj = self.grid.get(*fwd_pos)
+
+            if fwd_obj is not None:
+                fwd_obj.toggle(self, agent, fwd_pos)
+
+        # Done action (not used by default)
+        elif action == Action.done:
+            pass
+
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
 
     def handle_actions(
         self, actions: dict[AgentID, Action]) -> dict[AgentID, SupportsFloat]:
@@ -365,87 +536,27 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             order = (0,)
         elif (self.num_agents == 1) and (self.trianing_scheme == "CTCE"):
             order = ("red",)
-            rewards = {agent_index: 0 for agent_index in list(order)}
         elif (self.num_agents > 1) and (self.trianing_scheme == "CTCE"):
             order = ("red", "blue")
         else:
             order = self.np_random.random(size=self.num_agents).argsort()
         
-        
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
-        # Update agent states, grid states, and reward from actions
-        for team, agent_actions in actions.items():
-            for idx, action in enumerate(agent_actions):
-                agent = self.agents[self.team_index_dict[team][idx]]
-
-                if agent.state.terminated:
-                    continue
-
-                # Rotate left
-                if action == Action.left:
-                    agent.state.dir = (agent.state.dir - 1) % 4
-
-                # Rotate right
-                elif action == Action.right:
-                    agent.state.dir = (agent.state.dir + 1) % 4
-
-                # Move forward
-                elif action == Action.forward:
-                    fwd_pos = agent.front_pos
-                    fwd_obj = self.grid.get(*fwd_pos)
-
-                    if fwd_obj is None or fwd_obj.can_overlap():
-                        if not self.allow_agent_overlap:
-                            agent_present = np.bitwise_and.reduce(
-                                self.agent_states.pos == fwd_pos, axis=1).any()
-                            if agent_present:
-                                continue
-
-                        agent.state.pos = fwd_pos
-                        if fwd_obj is not None:
-                            if fwd_obj.type == Type.goal:
-                                self.on_success(agent, rewards, {})
-                            if fwd_obj.type == Type.lava:
-                                self.on_failure(agent, rewards, {})
-
-                # Pick up an object
-                elif action == Action.pickup:
-                    fwd_pos = agent.front_pos
-                    fwd_obj = self.grid.get(*fwd_pos)
-
-                    if fwd_obj is not None and fwd_obj.can_pickup():
-                        if agent.state.carrying is None:
-                            agent.state.carrying = fwd_obj
-                            self.grid.set(*fwd_pos, None)
-
-                # Drop an object
-                elif action == Action.drop:
-                    fwd_pos = agent.front_pos
-                    fwd_obj = self.grid.get(*fwd_pos)
-
-                    if agent.state.carrying and fwd_obj is None:
-                        agent_present = np.bitwise_and.reduce(
-                            self.agent_states.pos == fwd_pos, axis=1).any()
-                        if not agent_present:
-                            self.grid.set(*fwd_pos, agent.state.carrying)
-                            agent.state.carrying.cur_pos = fwd_pos
-                            agent.state.carrying = None
-
-                # Toggle/activate an object
-                elif action == Action.toggle:
-                    fwd_pos = agent.front_pos
-                    fwd_obj = self.grid.get(*fwd_pos)
-
-                    if fwd_obj is not None:
-                        fwd_obj.toggle(self, agent, fwd_pos)
-
-                # Done action (not used by default)
-                elif action == Action.done:
-                    pass
-
-                else:
-                    raise ValueError(f"Unknown action: {action}")
+        if self.trianing_scheme == "CTCE":
+            # Update agent states, grid states, and reward from actions
+            for team, agent_actions in actions.items():
+                for idx, action in enumerate(agent_actions):
+                    agent = self.agents[self.team_index_dict[team][idx]]
+                    self.handle_agent_actions(agent=agent,action=action, rewards=rewards)
+                    
+        elif self.trianing_scheme == "DTDE":
+            # Update agent states, grid states, and reward from actions
+            for agent_id_str, action in actions.items():
+                team_name, agent_index = tuple(agent_id_str.split("_"))
+                agent_index = self.team_index_dict[team_name][int(agent_index)]
+                # agent, action = self.agents[agent_index], actions[i]
+                self.handle_agent_actions(agent=self.agents[agent_index],action=action, rewards=rewards)
 
         return rewards
 

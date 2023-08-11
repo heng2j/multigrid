@@ -44,6 +44,7 @@ CONFIGURATIONS = {
     'MultiGrid-CompetativeRedBlueDoor-v2': (CompetativeRedBlueDoorEnvV2, {'size': 8, "allow_agent_overlap": False}),
     'MultiGrid-CompetativeRedBlueDoor-v3': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2, "blue": 2}, "agents": 4 }), # ,"blue": 2
     'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2}, "agents": 2, "trianing_scheme" : "CTCE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2}, "agents": 2, "trianing_scheme" : "DTDE" }), # ,"blue": 2
     'MultiGrid-Empty-5x5-v0': (EmptyEnv, {'size': 5}),
     'MultiGrid-Empty-Random-5x5-v0': (EmptyEnv, {'size': 5, 'agent_start_pos': None}),
     'MultiGrid-Empty-6x6-v0': (EmptyEnv, {'size': 6}),
