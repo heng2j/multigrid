@@ -357,8 +357,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 } for agent in self.agents}
 
         for agent_id, action in actions.items():
-            team_name, agent_index = tuple(agent_id.split("_"))
-            agent_index = self.team_index_dict[team_name][int(agent_index)]
+            team_name, agent_team_idx = tuple(agent_id.split("_"))
+            agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
             agent = self.agents[agent_index]
             fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
             
@@ -553,8 +553,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         elif self.trianing_scheme == "DTDE":
             # Update agent states, grid states, and reward from actions
             for agent_id_str, action in actions.items():
-                team_name, agent_index = tuple(agent_id_str.split("_"))
-                agent_index = self.team_index_dict[team_name][int(agent_index)]
+                team_name, agent_team_idx = tuple(agent_id_str.split("_"))
+                agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
                 # agent, action = self.agents[agent_index], actions[i]
                 self.handle_agent_actions(agent=self.agents[agent_index],action=action, rewards=rewards)
 
