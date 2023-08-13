@@ -60,6 +60,7 @@ class Agent:
         view_size: int = 7,
         see_through_walls: bool = False,
         team_index: int = 0,
+        team_number: int = 0,
         trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         ):
         """
@@ -83,6 +84,7 @@ class Agent:
         self.view_size = view_size
         self.mission_space = mission_space
         self.team_index = team_index
+        self.team_number = team_number
 
 
         # Number of cells (width and height) in the agent view
@@ -97,7 +99,7 @@ class Agent:
         if self.trianing_scheme == "CTCE":
             
             self.observation_space = spaces.Dict({
-                'agent_id': spaces.Discrete(team_index),
+                'agent_id': spaces.Discrete(self.team_number),
                 'image': spaces.Box(
                     low=0,
                     high=255,

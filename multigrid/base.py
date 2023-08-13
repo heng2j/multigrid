@@ -190,6 +190,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                         view_size=agent_view_size,
                         see_through_walls=see_through_walls,
                         team_index=team_idx,
+                        team_number=team_num,
                         trianing_scheme=trianing_scheme,
                     )
                     agent.state = self.agent_states[tmp_agent_idx]
