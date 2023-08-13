@@ -87,7 +87,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
     def __init__(
         self,
         mission_space: MissionSpace | str = "maximize reward",
-        agents: Iterable[Agent] | int = 2,
+        agents: Iterable[Agent] | int = 1,
         grid_size: int | None = None,
         width: int | None = None,
         height: int | None = None,
@@ -166,23 +166,24 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.trianing_scheme = trianing_scheme
         self.team_index_dict = defaultdict(dict)
 
-        if isinstance(agents, int):
-            self.num_agents = agents
-            self.agent_states = AgentState(agents) # joint agent state (vectorized)
+        if (isinstance(agents, int) and (agents is not None)) or teams:
+            if agents == 1:
+                self.num_agents = agents
+            else:
+                self.num_agents = sum( [ team_num for team_name, team_num in teams.items()])
+
+            self.agent_states = AgentState(self.num_agents) # joint agent state (vectorized)
             self.agents: list[Agent] = []
 
 
             # Arrange Teams
-            assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
+            # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
             self.agents_teams: dict[str,list[Agent]] = defaultdict(list)
 
-            tmp_red_agent_idx = 0
-            tmp_blue_agent_idx = 0
             tmp_agent_idx = 0
             for team_name, team_num in teams.items():
                 for team_idx in range(team_num):
-                    
-                    # tmp_agent_idx = tmp_red_agent_idx if team_name == "red" else tmp_blue_agent_idx
+                
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
@@ -198,10 +199,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     self.agents.append(agent)
                     self.agents_teams[team_name].append(agent)
                     self.team_index_dict[team_name][team_idx] = tmp_agent_idx
-                    # if team_name == "red":
-                    #     tmp_red_agent_idx+= 1
-                    # else:
-                    #     tmp_blue_agent_idx+=1
                     tmp_agent_idx +=1
 
             self.agent_index_dict = defaultdict(dict)

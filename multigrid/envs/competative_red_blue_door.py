@@ -195,7 +195,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
             else:
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=(4,4))
-                agent.state.pos = (red_door_x + idx, red_door_y)
+                agent.state.pos = (red_door_x + (idx + 1 if idx == 1 else idx) , red_door_y)
                 agent.state.dir = 0
 
 
