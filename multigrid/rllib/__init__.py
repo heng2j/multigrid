@@ -59,7 +59,7 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
             return { team for team in list(self.teams.keys())}
         elif self.trianing_scheme == "DTDE":
 
-            return { f"{agent.color.value}_{agent.index}" for agent in self.agents}
+            return { f"{agent.color.value}_{agent.team_index}" for agent in self.agents}
         else: 
             return {agent.index for agent in self.agents}
 

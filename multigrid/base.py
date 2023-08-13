@@ -176,17 +176,20 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
             self.agents_teams: dict[str,list[Agent]] = defaultdict(list)
 
+            tmp_red_agent_idx = 0
+            tmp_blue_agent_idx = 0
             tmp_agent_idx = 0
             for team_name, team_num in teams.items():
                 for team_idx in range(team_num):
-
+                    
+                    # tmp_agent_idx = tmp_red_agent_idx if team_name == "red" else tmp_blue_agent_idx
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
                         mission_space=self.mission_space,
                         view_size=agent_view_size,
                         see_through_walls=see_through_walls,
-                        team_number=team_num,
+                        team_index=team_idx,
                         trianing_scheme=trianing_scheme,
                     )
                     agent.state = self.agent_states[tmp_agent_idx]
@@ -194,7 +197,11 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     self.agents.append(agent)
                     self.agents_teams[team_name].append(agent)
                     self.team_index_dict[team_name][team_idx] = tmp_agent_idx
-                    tmp_agent_idx += 1
+                    # if team_name == "red":
+                    #     tmp_red_agent_idx+= 1
+                    # else:
+                    #     tmp_blue_agent_idx+=1
+                    tmp_agent_idx +=1
 
             self.agent_index_dict = defaultdict(dict)
 
@@ -270,7 +277,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         elif self.trianing_scheme == "DTDE":
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
-                f"{agent.color.value}_{agent.index}" : agent.observation_space
+                f"{agent.color.value}_{agent.team_index}" : agent.observation_space
                 for agent in self.agents
             })
         elif self.trianing_scheme == "CTDE":
@@ -302,7 +309,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
-            f"{agent.color.value}_{agent.index}" : agent.action_space
+            f"{agent.color.value}_{agent.team_index}" : agent.action_space
             for agent in self.agents
         })
         elif self.trianing_scheme == "CTDE":

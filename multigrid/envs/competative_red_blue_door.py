@@ -195,7 +195,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
             else:
                 self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=(4,4))
-                agent.state.pos = (red_door_x + (idx), red_door_y)
+                agent.state.pos = (red_door_x + (idx+1), red_door_y)
                 agent.state.dir = 0
 
 
@@ -207,9 +207,14 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
     
+        # Fixed Key Positions
+        key_positions = {'red': (7, 4), 'blue': (8, 3)}
+
         # Place keys in hallway
         for key_color in color_sequence:
-            self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+            # key = self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+            key_position = key_positions[key_color]
+            self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
 
 
 
@@ -247,7 +252,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 })
         elif self.trianing_scheme == "DTDE":
             for agent in self.agents:
-                observations[ f"{agent.color.value}_{agent.index}" ] = {
+                observations[ f"{agent.color.value}_{agent.team_index}" ] = {
                     'image': image[agent.index],
                     'direction': direction[agent.index],
                     'mission': self.agents[agent.index].mission,
@@ -350,7 +355,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
 
-        info = {f"{agent.color.value}_{agent.index}" : {
+        info = {f"{agent.color.value}_{agent.team_index}" : {
             "door_open_done" : False,
             "got_eliminated_done" : False,
             "eliminated_num" : 0
@@ -409,7 +414,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
                     reward[agent_index] -= 0.001 # OG  0.2
 
-        # f"{agent.color.value}_{agent.index}"
 
 
 
