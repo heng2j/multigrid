@@ -151,7 +151,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=4, help="Number of rollout workers.") 
+        '--num-workers', type=int, default=40, help="Number of rollout workers.") 
     parser.add_argument(
         '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument(
@@ -191,7 +191,7 @@ if __name__ == "__main__":
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
         help="List of agent ids to train")
     parser.add_argument(
-        '--trianing-scheme', type=str, default='DTDE',
+        '--training-scheme', type=str, default='CTCE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()

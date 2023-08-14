@@ -116,7 +116,7 @@ def algorithm_config(
     policies_to_train: list[int] | None = None,
     our_agent_ids: list[str] | None = None,
     teams: dict[str, int] = {"red": 1},
-    training_scheme: str = "DTDE", # Can be either "CTCE", "DTDE" or "CTDE"  
+    training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"  
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
