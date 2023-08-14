@@ -47,7 +47,7 @@ def can_use_gpu() -> bool:
 
 
 
-def policy_mapping_fn(trianing_scheme:str, teams: dict[str, int], agent_index_dict: dict[int, str]):
+def policy_mapping_fn(training_scheme:str, teams: dict[str, int], agent_index_dict: dict[int, str]):
 
     def single_policy_mapping_fn(agent_id, *args,  **kwargs) -> str:
         """
@@ -59,12 +59,12 @@ def policy_mapping_fn(trianing_scheme:str, teams: dict[str, int], agent_index_di
         """
         Map an environment agent ID to an RLlib policy ID.
         """
-        if trianing_scheme == "DTDE":
+        if training_scheme == "DTDE":
             return agent_id
-        elif trianing_scheme == "CTDE":
+        elif training_scheme == "CTDE":
             ...
 
-    return  single_policy_mapping_fn  if trianing_scheme == "CTCE" else marl_policy_mapping_fn
+    return  single_policy_mapping_fn  if training_scheme == "CTCE" else marl_policy_mapping_fn
 
 
 
@@ -116,7 +116,7 @@ def algorithm_config(
     policies_to_train: list[int] | None = None,
     our_agent_ids: list[str] | None = None,
     teams: dict[str, int] = {"red": 1},
-    trianing_scheme: str = "DTDE", # Can be either "CTCE", "DTDE" or "CTDE"  
+    training_scheme: str = "DTDE", # Can be either "CTCE", "DTDE" or "CTDE"  
     **kwargs) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
@@ -132,8 +132,8 @@ def algorithm_config(
         .resources(num_gpus=num_gpus if can_use_gpu() else 0)
         .multi_agent(
             # policies={f'policy_{i}' for i in our_agent_ids},
-            policies={ team_name for team_name in list(teams.keys())} if trianing_scheme == "CTCE" else {f'{team_name}_{i}' for team_name, team_num in teams.items() for i in range(team_num)},
-            policy_mapping_fn=policy_mapping_fn(trianing_scheme=trianing_scheme,teams=teams, agent_index_dict=agent_index_dict),
+            policies={ team_name for team_name in list(teams.keys())} if training_scheme == "CTCE" else {f'{team_name}_{i}' for team_name, team_num in teams.items() for i in range(team_num)},
+            policy_mapping_fn=policy_mapping_fn(training_scheme=training_scheme,teams=teams, agent_index_dict=agent_index_dict),
             # policies_to_train=policies_to_train
         )
         .training(

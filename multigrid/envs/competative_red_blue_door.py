@@ -117,7 +117,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         success_termination_mode: str = "any",
         failure_termination_mode: str = "any",
         teams: dict[str, int] = {"red": 1},
-        trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
+        training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         **kwargs,
     ):
         """
@@ -139,7 +139,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             See :attr:`multigrid.base.MultiGridEnv.__init__`
         """
         self.teams = teams
-        self.trianing_scheme = trianing_scheme
+        self.training_scheme = training_scheme
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
 
@@ -152,7 +152,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             success_termination_mode=success_termination_mode,
             failure_termination_mode=failure_termination_mode,
             teams=self.teams,
-            trianing_scheme=self.trianing_scheme, 
+            training_scheme=self.training_scheme, 
             **kwargs,
         )
 
@@ -161,7 +161,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence = list(self.teams.keys())  #  ["red"] #
+        color_sequence = list(self.teams.keys())  
 
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -199,18 +199,17 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 agent.state.dir = 0
 
 
-
-        # Block red door with a ball
+        # Block doors with a ball
         if "red" in set(self.teams.keys()):
             self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
         if "blue" in set(self.teams.keys()):
             self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
     
-        # Fixed Key Positions
-        key_positions = {'red': (7, 4), 'blue': (8, 3)}
 
         # Place keys in hallway
+        # Fixed Key Positions
+        key_positions = {'red': (7, 4), 'blue': (8, 3)}
         for key_color in color_sequence:
             # key = self.place_obj(Key(color=key_color), top=room_top, size=room_size)
             key_position = key_positions[key_color]
@@ -240,7 +239,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         observations = {}
 
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
             for team_name, agents in self.agents_teams.items():
                 observations[team_name] = []
                 for agent_id, agent  in enumerate(agents):
@@ -250,7 +249,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     'direction': direction[agent.index],
                     'mission': self.agents[agent.index].mission,
                 })
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
             for agent in self.agents:
                 observations[ f"{agent.color.value}_{agent.team_index}" ] = {
                     'image': image[agent.index],
@@ -263,8 +262,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
     def ctce_step(self, actions, obs, reward, terminated,truncated, info):
 
-
-        team_info = {team: {
+        
+        info = {team: {
                     "door_open_done" : False,
                     "got_eliminated_done" : False,
                     "eliminated_num" : 0
@@ -272,59 +271,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         for team, agent_actions in actions.items():
             for idx, action in enumerate(agent_actions):
-                agent_id =  self.team_index_dict[team][idx]
-                agent = self.agents[agent_id]
-                fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
-                
-                if action == Action.toggle:                
-                    for other_agent in self.agents:
-                        if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
-                            fwd_obj = other_agent
+                agent_index =  self.team_index_dict[team][idx]
+                agent = self.agents[agent_index]
+                self._handle_steps(agent, agent_index,action,reward,terminated,info)
 
-                    if fwd_obj == self.red_door or fwd_obj == self.blue_door:
-                        if self.red_door.is_open or self.blue_door.is_open:
-                            # Set Done Conditions
-                            # if agent.color == "red":
-                            self.on_success(agent, reward, terminated)
-                            team_info[agent.color]["door_open_done"] = True
-                            # self.info["episode_done"].get("l", self.step_count)
-                        # else:
-                        #     self.on_failure(agent, reward, terminated)
-                        #     self.blue_door.is_open = False  # close the door again
-                    elif isinstance(fwd_obj, Agent):
-                        # TODO - Make this clean
-                        fwd_obj.terminated = True
-                        self.grid.set(*fwd_obj.pos, None)
-                        fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
-                        reward[agent_id] += 0.5
-
-                        # # Terminate the game if the another agent got caught 
-                        # self.on_success(agent, reward, terminated)
-
-                        for other_agent in self.agents:
-                            if (other_agent != agent) and (other_agent.color != agent.color):
-                                self.on_failure(other_agent, reward, terminated)
-                                team_info[agent.color]["got_eliminated_done"] = True
-
-                
-                # TODO - Add Sparse rewards
-                elif action == Action.pickup:
-                    if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
-                        # FIXME - make me elegant 
-                        agent.carrying.is_available = False
-                        agent.carrying.is_pickedup = True
-                        reward[agent_id] += 0.5
-                    elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
-                        reward[agent_id] += 0.5 * agent.carrying.discount_factor
-                        agent.carrying.discount_factor *= agent.carrying.discount_factor
-
-                    else:
-                        # If we are grabbing bad stuff
-                        # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                        reward[agent_id] -= 0.001 # OG  0.2
-                
-
-
+            
         # Reformat reward, terminated, truncated and info 
         team_rewards  = {}
         for agent_idx, value in reward.items():
@@ -351,7 +302,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     team_truncated[team_name] = value
 
 
-        return obs, team_rewards, team_terminated, team_truncated, team_info
+        return obs, team_rewards, team_terminated, team_truncated, info
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
 
@@ -364,57 +315,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         for agent_id, action in actions.items():
             team_name, agent_team_idx = tuple(agent_id.split("_"))
             agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
-            agent = self.agents[agent_index]
-            fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
-            
-            if action == Action.toggle:                
-                for other_agent in self.agents:
-                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
-                        fwd_obj = other_agent
-
-                if fwd_obj == self.red_door or fwd_obj == self.blue_door:
-                    if self.red_door.is_open or self.blue_door.is_open:
-                        # Set Done Conditions
-                        # if agent.color == "red":
-                        self.on_success(agent, reward, terminated)
-                        info[f'{agent_id}']["door_open_done"] = True
-                        # self.info["episode_done"].get("l", self.step_count)
-                    # else:
-                    #     self.on_failure(agent, reward, terminated)
-                    #     self.blue_door.is_open = False  # close the door again
-                elif isinstance(fwd_obj, Agent):
-                    # TODO - Make this clean
-                    fwd_obj.terminated = True
-                    self.grid.set(*fwd_obj.pos, None)
-                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
-                    reward[agent_index] += 0.5
-
-                    # # Terminate the game if the another agent got caught 
-                    # self.on_success(agent, reward, terminated)
-
-                    for other_agent in self.agents:
-                        if (other_agent != agent) and (other_agent.color != agent.color):
-                            self.on_failure(other_agent, reward, terminated)
-                            info[f'{agent_id}']["got_eliminated_done"] = True
-
-            
-            # TODO - Add Sparse rewards
-            elif action == Action.pickup:
-                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
-                    # FIXME - make me elegant 
-                    agent.carrying.is_available = False
-                    agent.carrying.is_pickedup = True
-                    reward[agent_index] += 0.5
-                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
-                    reward[agent_index] += 0.5 * agent.carrying.discount_factor
-                    agent.carrying.discount_factor *= agent.carrying.discount_factor
-
-                else:
-                    # If we are grabbing bad stuff
-                    # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                    reward[agent_index] -= 0.001 # OG  0.2
-
-
+            agent = self.agents[agent_index]            
+            self._handle_steps(agent, agent_index,action,reward,terminated,info)
 
 
         # Reformat reward, terminated, truncated and info 
@@ -435,16 +337,70 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
+
+    def _handle_steps(self,agent, agent_index,action,reward,terminated,info):
+
+
+            fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
+            
+            if action == Action.toggle:                
+                for other_agent in self.agents:
+                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
+                        fwd_obj = other_agent
+
+                if fwd_obj == self.red_door or fwd_obj == self.blue_door:
+                    if self.red_door.is_open or self.blue_door.is_open:
+                        # Set Done Conditions
+                        # if agent.color == "red":
+                        self.on_success(agent, reward, terminated)
+                        info[agent.color if self.training_scheme == "CTCE" else agent.name ]["door_open_done"] = True
+                        # self.info["episode_done"].get("l", self.step_count)
+                    # else:
+                    #     self.on_failure(agent, reward, terminated)
+                    #     self.blue_door.is_open = False  # close the door again
+                elif isinstance(fwd_obj, Agent):
+                    # TODO - Make this clean
+                    fwd_obj.terminated = True
+                    self.grid.set(*fwd_obj.pos, None)
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    reward[agent_index] += 0.5
+
+                    # # Terminate the game if the another agent got caught 
+                    # self.on_success(agent, reward, terminated)
+
+                    for other_agent in self.agents:
+                        if (other_agent != agent) and (other_agent.color != agent.color):
+                            self.on_failure(other_agent, reward, terminated)
+                            info[agent.color if self.training_scheme == "CTCE" else agent.name ]["got_eliminated_done"] = True
+
+            
+            # TODO - Add Sparse rewards
+            elif action == Action.pickup:
+                if agent.carrying and (agent.carrying.type == "key") and (agent.carrying.is_available == True) and (agent.color == agent.carrying.color):
+                    # FIXME - make me elegant 
+                    agent.carrying.is_available = False
+                    agent.carrying.is_pickedup = True
+                    reward[agent_index] += 0.5
+                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
+                    reward[agent_index] += 0.5 * agent.carrying.discount_factor
+                    agent.carrying.discount_factor *= agent.carrying.discount_factor
+
+                else:
+                    # If we are grabbing bad stuff
+                    # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
+                    reward[agent_index] -= 0.001 # OG  0.2
+
+
     def step(self, actions):
         """
         :meta private:
         """
         obs, reward, terminated, truncated, info = super().step(actions)
 
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
             return self.ctce_step(actions, obs, reward, terminated, truncated, info)
 
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
             return self.dtde_step(actions, obs, reward, terminated, truncated, info)
 
 
@@ -536,25 +492,25 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         """
 
         # Randomize agent action order
-        if (self.num_agents == 1) and (self.trianing_scheme == "DTDE"):
+        if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
             order = (0,)
-        elif (self.num_agents == 1) and (self.trianing_scheme == "CTCE"):
+        elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
             order = ("red",)
-        elif (self.num_agents > 1) and (self.trianing_scheme == "CTCE"):
+        elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
             order = ("red", "blue")
         else:
             order = self.np_random.random(size=self.num_agents).argsort()
         
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
             # Update agent states, grid states, and reward from actions
             for team, agent_actions in actions.items():
                 for idx, action in enumerate(agent_actions):
                     agent = self.agents[self.team_index_dict[team][idx]]
                     self.handle_agent_actions(agent=agent,action=action, rewards=rewards)
                     
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
             # Update agent states, grid states, and reward from actions
             for agent_id_str, action in actions.items():
                 team_name, agent_team_idx = tuple(agent_id_str.split("_"))

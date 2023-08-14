@@ -105,7 +105,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         agent_pov: bool = False,
         our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
-        trianing_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
+        training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
 
         ):
         """
@@ -163,7 +163,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
         # Initialize agents
         self.our_agent_ids = our_agent_ids
-        self.trianing_scheme = trianing_scheme
+        self.training_scheme = training_scheme
         self.team_index_dict = defaultdict(dict)
 
         if (isinstance(agents, int) and (agents is not None)) or teams:
@@ -192,7 +192,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                         see_through_walls=see_through_walls,
                         team_index=team_idx,
                         team_number=team_num,
-                        trianing_scheme=trianing_scheme,
+                        training_scheme=training_scheme,
                     )
                     agent.state = self.agent_states[tmp_agent_idx]
                     agent.color = team_name
@@ -264,7 +264,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         Return the joint observation space of all agents.
         """
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
 
             return spaces.Dict({
                 team_name: spaces.Tuple((agent.observation_space
@@ -272,13 +272,13 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             })
             # return spaces.Tuple((agent.observation_space
             #     for agent in self.agents ))
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
                 f"{agent.color.value}_{agent.team_index}" : agent.observation_space
                 for agent in self.agents
             })
-        elif self.trianing_scheme == "CTDE":
+        elif self.training_scheme == "CTDE":
             ...
 
         # FIXME - for HW2
@@ -291,7 +291,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
 
         
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
 
             # return spaces.Dict({
             #     agent.index: agent.action_space
@@ -303,14 +303,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 for agent in agents )) for team_name, agents in self.agents_teams.items()
             })
 
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
 
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
             f"{agent.color.value}_{agent.team_index}" : agent.action_space
             for agent in self.agents
         })
-        elif self.trianing_scheme == "CTDE":
+        elif self.training_scheme == "CTDE":
             ...
 
 
@@ -808,11 +808,11 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         obs_shape = self.agents[0].observation_space['image'].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 
-        if self.trianing_scheme == "CTCE":
+        if self.training_scheme == "CTCE":
             for team_name, agent_obs_list in self.gen_obs().items():
                 for agent_obs in agent_obs_list:
                     vis_masks[self.team_index_dict[team_name][agent_obs["agent_id"]]] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
-        elif self.trianing_scheme == "DTDE":
+        elif self.training_scheme == "DTDE":
             for agent_id_str, agent_obs in self.gen_obs().items():
                 team_name, agent_team_idx = tuple(agent_id_str.split("_"))
                 agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
