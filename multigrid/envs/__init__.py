@@ -41,14 +41,14 @@ CONFIGURATIONS = {
     'MultiGrid-BlockedUnlockPickup-v0': (BlockedUnlockPickupEnv, {}),
     'MultiGrid-CompetativeRedBlueDoor-v0': (CompetativeRedBlueDoorEnv, {'size': 8}),
     'MultiGrid-CompetativeRedBlueDoor-v1': (CompetativeRedBlueDoorEnv, {'size': 8}),
-    'MultiGrid-CompetativeRedBlueDoor-v1-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 1}, "agents": 1, "training_scheme" : "DTDE" }), 
+    'MultiGrid-CompetativeRedBlueDoor-v1-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "teams":{"red": 1}, "agents": 1, "training_scheme" : "DTDE" }), 
     'MultiGrid-CompetativeRedBlueDoor-v2': (CompetativeRedBlueDoorEnvV2, {'size': 8, "allow_agent_overlap": False}),
-    'MultiGrid-CompetativeRedBlueDoor-v3': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2, "blue": 2}, "agents": 4 }), # ,"blue": 2
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2}, "agents": 2, "training_scheme" : "CTCE" }), # ,"blue": 2
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2}, "agents": 2, "training_scheme" : "DTDE" }), # ,"blue": 2
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 1, "blue": 1}, "agents": 2, "training_scheme" : "DTDE" }), # ,"blue": 2
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTCE" }), # ,"blue": 2
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "DTDE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "teams":{"red": 2, "blue": 2}, "agents": 4 }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,"teams":{"red": 2}, "agents": 2, "training_scheme" : "CTCE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,"teams":{"red": 2}, "agents": 2, "training_scheme" : "DTDE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "teams":{"red": 1, "blue": 1}, "agents": 2, "training_scheme" : "DTDE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,"teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTCE" }), # ,"blue": 2
+    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,"teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "DTDE" }), # ,"blue": 2
     'MultiGrid-Empty-5x5-v0': (EmptyEnv, {'size': 5}),
     'MultiGrid-Empty-Random-5x5-v0': (EmptyEnv, {'size': 5, 'agent_start_pos': None}),
     'MultiGrid-Empty-6x6-v0': (EmptyEnv, {'size': 6}),

@@ -118,6 +118,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         failure_termination_mode: str = "any",
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
+        has_obsticle: bool = False,
         **kwargs,
     ):
         """
@@ -140,6 +141,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         """
         self.teams = teams
         self.training_scheme = training_scheme
+        self.has_obsticle =  has_obsticle
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
 
@@ -200,12 +202,13 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
 
         # Block doors with a ball
-        if "red" in set(self.teams.keys()):
-            self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
-        if "blue" in set(self.teams.keys()):
-            self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
+        if self.has_obsticle:
+            if "red" in set(self.teams.keys()):
+                self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+            if "blue" in set(self.teams.keys()):
+                self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
 
-    
+        
 
         # Place keys in hallway
         # Fixed Key Positions
