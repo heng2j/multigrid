@@ -46,16 +46,16 @@ class ManualControl:
 
         # FIXME - should be convertable between training scenario 
         # self.total_episodic_rewards+= reward
-        red_reward = reward["red"]
+        red_reward = reward["red_0"]
         self.total_episodic_rewards+= red_reward
         print(f"step={self.env.step_count}, reward={red_reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} ")
 
         # FIXME - should be convertable between training scenario 
-        if terminated["red"]:
+        if terminated["red_0"]:
             print(f"terminated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
-        elif truncated["red"]:
+        elif truncated["red_0"]:
             print(f"truncated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--agents",
         type=int,
-        default=2,
+        default=1,
         help="",
     )
     parser.add_argument(
