@@ -177,7 +177,7 @@ class SingleAgentWrapper(gym.Wrapper):
         """
         :meta private:
         """
-        result = super().step({0: action})
+        result = super().step({self.agents[0].name: action})
         return tuple(item for item in result)
 
 

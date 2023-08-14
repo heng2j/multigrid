@@ -308,6 +308,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
         info = {f"{agent.color.value}_{agent.team_index}" : {
             "door_open_done" : False,
+            "eliminated_opponents_done" : False,
             "got_eliminated_done" : False,
             "eliminated_num" : 0
                 } for agent in self.agents}
@@ -343,35 +344,38 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
             fwd_obj = self.grid.get(*agent.front_pos) # TODO - get opponent agent
             
-            if action == Action.toggle:                
-                for other_agent in self.agents:
-                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
-                        fwd_obj = other_agent
+            if action == Action.toggle:      
 
+                # for other_agent in self.agents:
+                #     if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
+                #         fwd_obj = other_agent
+
+                # If fwd_obj is a door
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                     if self.red_door.is_open or self.blue_door.is_open:
-                        # Set Done Conditions
-                        # if agent.color == "red":
-                        self.on_success(agent, reward, terminated)
-                        info[agent.color if self.training_scheme == "CTCE" else agent.name ]["door_open_done"] = True
+                        # Set Done Conditions for winning team
+                        for this_agent in self.agents:
+                            if this_agent.color == agent.color:
+                                self.on_success(this_agent, reward, terminated)
+                                info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["door_open_done"] = True
                         # self.info["episode_done"].get("l", self.step_count)
-                    # else:
-                    #     self.on_failure(agent, reward, terminated)
-                    #     self.blue_door.is_open = False  # close the door again
+
+                # If fwd_obj is an agent 
                 elif isinstance(fwd_obj, Agent):
-                    # TODO - Make this clean
-                    fwd_obj.terminated = True
+                    # Terminate the other agent and set it's position inside the room
+                    self.on_failure(fwd_obj, reward, terminated)
+                    info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name ]["got_eliminated_done"] = True
                     self.grid.set(*fwd_obj.pos, None)
                     fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
                     reward[agent_index] += 0.5
 
-                    # # Terminate the game if the another agent got caught 
-                    # self.on_success(agent, reward, terminated)
-
-                    for other_agent in self.agents:
-                        if (other_agent != agent) and (other_agent.color != agent.color):
-                            self.on_failure(other_agent, reward, terminated)
-                            info[agent.color if self.training_scheme == "CTCE" else agent.name ]["got_eliminated_done"] = True
+                    # Terminate the game if the rest of the other agents in the same team also got terminated 
+                    all_opponents_terminated = all([ agent.terminated for other_agent in self.agents if (other_agent != agent) and (other_agent.color != agent.color) ])
+                    if all_opponents_terminated:
+                        for this_agent in self.agents:
+                            if this_agent.color == agent.color:
+                                self.on_success(this_agent, reward, terminated)
+                                info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["eliminated_opponents_done"] = True
 
             
             # TODO - Add Sparse rewards
@@ -512,9 +516,13 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     
         elif self.training_scheme == "DTDE":
             # Update agent states, grid states, and reward from actions
-            for agent_id_str, action in actions.items():
-                team_name, agent_team_idx = tuple(agent_id_str.split("_"))
+            for agent_id, action in actions.items():
+            # if isinstance(agent_id, str):
+                team_name, agent_team_idx = tuple(agent_id.split("_"))
                 agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
+                # elif isinstance(agent_id, int):
+                #     agent_index = agent_id
+                    
                 # agent, action = self.agents[agent_index], actions[i]
                 self.handle_agent_actions(agent=self.agents[agent_index],action=action, rewards=rewards)
 
