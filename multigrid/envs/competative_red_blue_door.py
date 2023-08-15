@@ -113,7 +113,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self,
         size: int = 8,
         max_steps: int | None = None,
-        joint_reward: bool = True,
+        joint_reward: bool = False,
         success_termination_mode: str = "any",
         failure_termination_mode: str = "any",
         teams: dict[str, int] = {"red": 1},
@@ -371,6 +371,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     self.grid.set(*fwd_obj.pos, None)
                     fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
                     reward[agent_index] += 0.5
+                    reward[fwd_obj.index] -= 1
+
 
                     # Terminate the game if the rest of the other agents in the same team also got terminated 
                     all_opponents_terminated = all([ agent.terminated for other_agent in self.agents if (other_agent != agent) and (other_agent.color != agent.color) ])
