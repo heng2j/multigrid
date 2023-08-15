@@ -128,7 +128,7 @@ def train(
         local_dir=save_dir,
         verbose=1,
        restore=get_checkpoint_dir(load_dir),
-        checkpoint_freq=5,
+        checkpoint_freq=10,
         checkpoint_at_end=True,
         progress_reporter=reporter,
         callbacks=[MLflowLoggerCallback(
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument(
-        '--num-timesteps', type=int, default=1e7,
+        '--num-timesteps', type=int, default=1e6,
         help="Total number of timesteps to train.")
     parser.add_argument(
         '--lr', type=float, help="Learning rate for training.")
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2 }, # "blue": 2
+        '--teams', type=json.loads, default={"red": 1, "blue": 1 }, # "blue": 2
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
