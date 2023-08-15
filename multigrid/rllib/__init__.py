@@ -114,4 +114,4 @@ def to_rllib_env(
 
 # Register environments with RLlib
 for name, (env_cls, config) in CONFIGURATIONS.items():
-    register_env(name, to_rllib_env(env_cls, CompetativeRedBlueDoorWrapper_v3, default_config=config))
+    register_env(name, to_rllib_env(env_cls, CompetativeRedBlueDoorWrapper, default_config=config))
