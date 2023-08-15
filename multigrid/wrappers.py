@@ -1,4 +1,5 @@
 from __future__ import annotations
+import itertools
 from typing_extensions import assert_type
 
 import gymnasium as gym
@@ -360,7 +361,13 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         :meta private:
         """
         for agent_id in obs:
-            obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
+            agent_observations =  obs[agent_id]
+            if isinstance(agent_observations,list):
+                for observation in agent_observations:
+                    observation["image"] = self.one_hot(observation["image"], self.dim_sizes)
+            else:
+                agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
+
 
         return obs
 
