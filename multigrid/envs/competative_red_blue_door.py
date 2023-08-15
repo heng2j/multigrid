@@ -5,7 +5,7 @@ from multigrid.base import MultiGridEnv
 from multigrid.core import Action, Grid, MissionSpace, Type
 from multigrid.core.constants import Color
 from multigrid.core.world_object import Door, Key, Ball
-from multigrid.core.agent import Agent
+from multigrid.core.agent import Agent, Mission
 from multigrid.utils.obs import gen_obs_grid_encoding
 
 import numpy as np
@@ -359,17 +359,24 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 # If fwd_obj is a door
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                     if self.red_door.is_open or self.blue_door.is_open:
+                        
+                        # TODO - Mimic communiations
+                        agent.mission = Mission("We won!")
+
                         # Set Done Conditions for winning team
                         for this_agent in self.agents:
                             if this_agent.color == agent.color:
+                                this_agent.mission = Mission("We won!")
                                 self.on_success(this_agent, reward, terminated)
                                 info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["door_open_done"] = True
+                               
                         # self.info["episode_done"].get("l", self.step_count)
 
                 # If fwd_obj is an agent 
                 elif isinstance(fwd_obj, Agent) and self.death_match:
 
                     # Terminate the other agent and set it's position inside the room
+                    fwd_obj.mission = Mission("I died!")
                     self.on_failure(fwd_obj, reward, terminated)
                     info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name ]["got_eliminated_done"] = True
                     self.grid.set(*fwd_obj.pos, None)
@@ -394,9 +401,30 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_index] += 0.5
+
+                    # TODO - Mimic communiations
+                    agent.mission = Mission("Open the Door that match your color")
+                    for this_agent in self.agents:
+                        if (this_agent.color == agent.color) and (this_agent != agent):
+                            if this_agent.carrying and this_agent.carrying.type == "ball":
+                                this_agent.mission = Mission("Move and take the ball away from the door that match your color")
+                            else: 
+                                this_agent.mission = Mission("Go pick up the ball if it is blocking the door that match your color")
+
+
                 elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color != agent.carrying.color):
                     reward[agent_index] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
+
+                    # TODO - Mimic communiations
+                    agent.mission = Mission("Move and take the ball away from the door that match your color")
+                    for this_agent in self.agents:
+                        if (this_agent.color == agent.color) and (this_agent != agent):
+                            if this_agent.carrying and this_agent.carrying.type == "key" and this_agent.carrying.color == this_agent.color:
+                                this_agent.mission =  Mission("Open the Door that match your color")
+                            else: 
+                                this_agent.mission = Mission("Go pick up the key that match your color")
+
 
                 else:
                     # If we are grabbing bad stuff
