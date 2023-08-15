@@ -388,7 +388,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent.carrying.is_available = False
                     agent.carrying.is_pickedup = True
                     reward[agent_index] += 0.5
-                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color == "red"):
+                elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color != agent.carrying.color):
                     reward[agent_index] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
 
