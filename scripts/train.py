@@ -151,7 +151,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 1, "blue": 1 }, # "blue": 2
+        '--teams', type=json.loads, default={"red": 2 }, # "blue": 2
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",

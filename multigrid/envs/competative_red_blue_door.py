@@ -146,8 +146,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.death_match = death_match
         self.size = size
         # mission_space = MissionSpace.from_string("Open the door that match your agents' color")
-        mission_space = MissionSpace(mission_func=lambda subtask: f"Go {subtask}.",
-                                        ordered_placeholders=[["pick up the key or the ball" ,"pick up the key", "move away the ball", "open the door with the key"]])
+        mission_space = MissionSpace(mission_func=lambda subtask: f"{subtask}",
+                                        ordered_placeholders=[["Go pick up the key or the ball for opening the door" ,"Go pick up the key", "Go move away the ball", "Go open the door with the key"]])
 
         super().__init__(
             mission_space=mission_space,
