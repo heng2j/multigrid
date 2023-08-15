@@ -8,7 +8,7 @@ from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
 
 
 
-def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, int] = {"red": 1}, trianing_scheme: str = "CTCE", num_agents: int = 2) -> list[np.ndarray]:
+def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, int] = {"red": 1}, training_scheme: str = "CTCE", num_agents: int = 2) -> list[np.ndarray]:
     """
     Visualize trajectories from trained agents.
     """
@@ -87,10 +87,10 @@ if __name__ == '__main__':
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to evaluate")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2}, #  "blue": 2
+        '--teams', type=json.loads, default={"red": 1, "blue": 1}, #  "blue": 2 # TODO - map this with env config
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
-        '--trianing-scheme', type=str, default='CTCE',
+        '--training-scheme', type=str, default='CTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
         # algorithm.set_weights({policy_name: restored_policy_0_weights})
    
-    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, trianing_scheme=args.trianing_scheme, num_agents=args.num_agents)
+    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, training_scheme=args.training_scheme, num_agents=args.num_agents)
     if args.gif:
         import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'

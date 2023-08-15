@@ -52,13 +52,14 @@ class Color(str, IndexedEnum):
     """
     Enumeration of object colors.
     """
-
-    blue = 'blue'
+    
     red = 'red'
     green = 'green'
+    blue = 'blue'
     purple = 'purple'
     yellow = 'yellow'
     grey = 'grey'
+
 
     @classmethod
     def add_color(cls, name: str, rgb: ndarray[np.uint8]):

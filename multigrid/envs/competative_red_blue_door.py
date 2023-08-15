@@ -349,9 +349,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             
             if action == Action.toggle:      
 
-                # for other_agent in self.agents:
-                #     if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
-                #         fwd_obj = other_agent
+                for other_agent in self.agents:
+                    if (agent.front_pos == other_agent.pos) and other_agent.color != agent.color:
+                        fwd_obj = other_agent
 
                 # If fwd_obj is a door
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
