@@ -119,6 +119,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         has_obsticle: bool = False,
+        death_match: bool = False,
         **kwargs,
     ):
         """
@@ -142,6 +143,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.teams = teams
         self.training_scheme = training_scheme
         self.has_obsticle =  has_obsticle
+        self.death_match = death_match
         self.size = size
         mission_space = MissionSpace.from_string("open the door that match your agent's color")
 
@@ -269,6 +271,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         info = {team: {
                     "door_open_done" : False,
                     "got_eliminated_done" : False,
+                    "eliminated_opponents_done" : False,
                     "eliminated_num" : 0
                      } for team in list(self.team_index_dict.keys())}
 
@@ -364,7 +367,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         # self.info["episode_done"].get("l", self.step_count)
 
                 # If fwd_obj is an agent 
-                elif isinstance(fwd_obj, Agent):
+                elif isinstance(fwd_obj, Agent) and self.death_match:
+
                     # Terminate the other agent and set it's position inside the room
                     self.on_failure(fwd_obj, reward, terminated)
                     info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name ]["got_eliminated_done"] = True
