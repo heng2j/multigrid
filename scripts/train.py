@@ -151,13 +151,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2-Death-Match',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=2, help="Number of agents in environment.") # FIXME - streamline this with teams
+        '--num-agents', type=int, default=4, help="Number of agents in environment.") # FIXME - streamline this with teams
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2 }, # "blue": 2
+        '--teams', type=json.loads, default={"red": 2, "blue": 2}, # "blue": 2
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
