@@ -115,7 +115,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         max_steps: int | None = None,
         joint_reward: bool = False,
         success_termination_mode: str = "any",
-        failure_termination_mode: str = "any",
+        failure_termination_mode: str = "all",
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         has_obsticle: bool = False,
@@ -388,7 +388,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
 
                     # Terminate the game if the rest of the other agents in the same team also got terminated 
-                    all_opponents_terminated = all([ agent.terminated for other_agent in self.agents if (other_agent != agent) and (other_agent.color != agent.color) ])
+                    all_opponents_terminated = all([ other_agent.terminated for other_agent in self.agents if (other_agent != agent) and (other_agent.color != agent.color) ])
                     if all_opponents_terminated:
                         for this_agent in self.agents:
                             if this_agent.color == agent.color:
