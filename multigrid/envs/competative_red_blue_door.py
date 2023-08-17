@@ -396,7 +396,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     self.on_failure(fwd_obj, reward)
                     info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name ]["got_eliminated_done"] = True
                     self.grid.set(*fwd_obj.pos, None)
-                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (13,2) # This is not scalabe and only works in 2v2 at most
                     reward[agent_index] += 0.5
                     reward[fwd_obj.index] -= 1
 
