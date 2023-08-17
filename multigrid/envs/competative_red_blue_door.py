@@ -375,13 +375,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                         
                         # TODO - Mimic communiations
                         # agent.mission = Mission("We won!")
-
-                        # self.on_success(agent, reward, terminated)
                         # info[agent.color if self.training_scheme == "CTCE" else agent.name ]["door_open_done"] = True
 
                         # Set Done Conditions for winning team
                         for this_agent in self.agents:
-                            if this_agent.color == agent.color and this_agent != agent and not this_agent.terminated:
+                            if this_agent.color == agent.color and not this_agent.terminated:
                                 # this_agent.mission = Mission("We won!")
                                 self.on_success(this_agent, reward, terminated) # reward the rest of the teammembers who are still standing 
                                 info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["door_open_done"] = True
