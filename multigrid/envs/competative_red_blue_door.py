@@ -371,7 +371,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
                 # If fwd_obj is a door
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
-                    if self.red_door.is_open or self.blue_door.is_open:
+                    if (self.red_door.is_open or self.blue_door.is_open) and (fwd_obj.color == agent.color):
                         
                         # TODO - Mimic communiations
                         # agent.mission = Mission("We won!")
