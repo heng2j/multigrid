@@ -90,7 +90,7 @@ if __name__ == '__main__':
         '--teams', type=json.loads, default={"red": 2, "blue": 2}, #  "blue": 2 # TODO - map this with env config
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
-        '--training-scheme', type=str, default='CTCE',
+        '--training-scheme', type=str, default='DTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()

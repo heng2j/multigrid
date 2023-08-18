@@ -71,6 +71,14 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
         obs, rewards, terminations, truncations, infos = super().step(*args, **kwargs)
         terminations['__all__'] = all(terminations.values())
         truncations['__all__'] = all(truncations.values())
+
+        # if all(terminations.values()):
+        #     print("here")
+
+        # if all(truncations.values()):
+        #     print("here")
+
+
         return obs, rewards, terminations, truncations, infos
 
 

@@ -314,6 +314,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
 
+        # FIXME - Temp work around for RLLlib's "Batches sent to postprocessing must only contain steps from a single trajectory." that caused by early dones
+        if any([term_state for agent, term_state in terminated.items()]) and not all([term_state for agent, term_state in terminated.items()]) :
+            # print("here")
+            terminated = {agent_index: False for agent_index, _  in terminated.items()}
+
         info = {f"{agent.color.value}_{agent.team_index}" : {
             "door_open_done" : False,
             "eliminated_opponents_done" : False,
@@ -340,9 +345,15 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                  reformated_terminated[f"{team_name}_{team_index}"] = value
 
         reformated_truncated = {}
-        for agent_idx, value in terminated.items():
+        for agent_idx, value in truncated.items():
             for team_name, team_index in self.agent_index_dict[agent_idx].items():
                  reformated_truncated[f"{team_name}_{team_index}"] = value
+
+        # if all([term_state for agent, term_state in reformated_terminated.items()]):
+        #     print("here")
+
+        # if all([truncated_state for agent, truncated_state in reformated_truncated.items()]):
+        #     print("here")
 
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
@@ -360,16 +371,17 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
                 # If fwd_obj is a door
                 if fwd_obj == self.red_door or fwd_obj == self.blue_door:
-                    if self.red_door.is_open or self.blue_door.is_open:
+                    if (self.red_door.is_open or self.blue_door.is_open) and (fwd_obj.color == agent.color):
                         
                         # TODO - Mimic communiations
                         # agent.mission = Mission("We won!")
+                        # info[agent.color if self.training_scheme == "CTCE" else agent.name ]["door_open_done"] = True
 
                         # Set Done Conditions for winning team
                         for this_agent in self.agents:
-                            if this_agent.color == agent.color:
+                            if this_agent.color == agent.color and not this_agent.terminated:
                                 # this_agent.mission = Mission("We won!")
-                                self.on_success(this_agent, reward, terminated)
+                                self.on_success(this_agent, reward, terminated) # reward the rest of the teammembers who are still standing 
                                 info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["door_open_done"] = True
                                
                         # self.info["episode_done"].get("l", self.step_count)
@@ -379,19 +391,23 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
                     # Terminate the other agent and set it's position inside the room
                     # fwd_obj.mission = Mission("I died!")
-                    self.on_failure(fwd_obj, reward, terminated)
+                    self.on_failure(fwd_obj, reward)
                     info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name ]["got_eliminated_done"] = True
                     self.grid.set(*fwd_obj.pos, None)
-                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (10,2) 
+                    fwd_obj.pos = (2,2) if fwd_obj.color == "blue" else (13,2) # This is not scalabe and only works in 2v2 at most
                     reward[agent_index] += 0.5
                     reward[fwd_obj.index] -= 1
 
 
                     # Terminate the game if the rest of the other agents in the same team also got terminated 
-                    all_opponents_terminated = all([ other_agent.terminated for other_agent in self.agents if (other_agent != agent) and (other_agent.color != agent.color) ])
+                    all_opponents_terminated = all([ other_agent.terminated for other_agent in self.agents if other_agent.color != agent.color])
                     if all_opponents_terminated:
+                        # self.on_success(agent, reward, terminated)
+
+                        # info[agent.color if self.training_scheme == "CTCE" else agent.name ]["eliminated_opponents_done"] = True
+
                         for this_agent in self.agents:
-                            if this_agent.color == agent.color:
+                            if this_agent.color == agent.color and not this_agent.terminated:
                                 self.on_success(this_agent, reward, terminated)
                                 info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name ]["eliminated_opponents_done"] = True
 
@@ -482,9 +498,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             fwd_obj = self.grid.get(*fwd_pos)
 
             if fwd_obj is not None and fwd_obj.can_pickup():
-                if agent.state.carrying is None:
-                    agent.state.carrying = fwd_obj
-                    self.grid.set(*fwd_pos, None)
+                if (fwd_obj.type == "key" and fwd_obj.color == agent.color) or (fwd_obj.type == "ball"  and fwd_obj.color != agent.color):
+                    if agent.state.carrying is None:
+                        agent.state.carrying = fwd_obj
+                        self.grid.set(*fwd_pos, None)
 
         # Drop an object
         elif action == Action.drop:
