@@ -570,7 +570,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self,
         agent: Agent,
         rewards: dict[AgentID, SupportsFloat],
-        terminations: dict[AgentID, bool]):
+        terminations: dict[AgentID, bool]= None) :
         """
         Callback for when an agent completes its mission.
 
@@ -584,12 +584,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             Termination dictionary to be updated
         """
         if self.success_termination_mode == 'any':
-            self.agent_states.terminated = True # terminate all agents
-            for i in range(self.num_agents):
-                terminations[i] = True
+            if terminations:
+                self.agent_states.terminated = True # terminate all agents
+                for i in range(self.num_agents):
+                    terminations[i] = True
         else:
             agent.state.terminated = True # terminate this agent only
-            terminations[agent.index] = True
+            if terminations:
+                terminations[agent.index] = True
 
         if self.joint_reward:
             for i in range(self.num_agents):
@@ -601,7 +603,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self,
         agent: Agent,
         rewards: dict[AgentID, SupportsFloat],
-        terminations: dict[AgentID, bool]):
+        terminations: dict[AgentID, bool]= None):
         """
         Callback for when an agent fails its mission prematurely.
 
@@ -615,12 +617,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             Termination dictionary to be updated
         """
         if self.failure_termination_mode == 'any':
-            self.agent_states.terminated = True # terminate all agents
-            for i in range(self.num_agents):
-                terminations[i] = True
+            if terminations:
+                self.agent_states.terminated = True # terminate all agents
+                for i in range(self.num_agents):
+                    terminations[i] = True
         else:
             agent.state.terminated = True # terminate this agent only
-            terminations[agent.index] = True
+            if terminations:
+                terminations[agent.index] = True
 
 
     def is_done(self) -> bool:
