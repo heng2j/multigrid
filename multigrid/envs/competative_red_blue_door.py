@@ -498,7 +498,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             fwd_obj = self.grid.get(*fwd_pos)
 
             if fwd_obj is not None and fwd_obj.can_pickup():
-                if (fwd_obj.type == "key" and fwd_obj.color == agent.color) or (fwd_obj.type == "ball" ):
+                if (fwd_obj.type == "key" and fwd_obj.color == agent.color) or (fwd_obj.type == "ball"  and fwd_obj.color != agent.color):
                     if agent.state.carrying is None:
                         agent.state.carrying = fwd_obj
                         self.grid.set(*fwd_pos, None)
