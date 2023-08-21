@@ -38,13 +38,21 @@ import git
 reporter = CLIReporter(max_progress_rows=10)
 
 
+
+
+
+
+
+
 tags = { "user_name" : "John",
          "git_commit_hash" : git.Repo(SCRIPT_PATH).head.commit
          }
 
 
-# TODO - Set Evaluation
 
+
+
+# TODO - Set Evaluation
 class EvaluationCallbacks(DefaultCallbacks, Callback):
     def on_episode_step(
         self,
@@ -151,19 +159,19 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2-Death-Match',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=4, help="Number of agents in environment.") # FIXME - streamline this with teams
+        '--num-agents', type=int, default=2, help="Number of agents in environment.") # FIXME - streamline this with teams
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=40, help="Number of rollout workers.") 
+        '--num-workers', type=int, default=1, help="Number of rollout workers.") 
     parser.add_argument(
-        '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
+        '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument(
         '--num-timesteps', type=int, default=1e6,
         help="Total number of timesteps to train.")
@@ -179,19 +187,19 @@ if __name__ == "__main__":
         '--name', type=str, default='<my_experinemnt>',
         help="Distinct name to track your experinemnt in save-dir")
     parser.add_argument(
-        '--local-mode', type=bool, default=False,
+        '--local-mode', type=bool, default=True,
         help="Boolean value to set to use local mode for debugging")
     parser.add_argument(
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to train")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2, "blue": 2}, # "blue": 2
+        '--teams', type=json.loads, default={"red": 2}, # "blue": 2
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
         help="List of agent ids to train")
     parser.add_argument(
-        '--training-scheme', type=str, default='DTDE',
+        '--training-scheme', type=str, default='CTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()

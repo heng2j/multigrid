@@ -256,7 +256,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     'direction': direction[agent.index],
                     'mission': self.agents[agent.index].mission,
                 })
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             for agent in self.agents:
                 observations[ f"{agent.color.value}_{agent.team_index}" ] = {
                     'image': image[agent.index],
@@ -456,7 +456,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         if self.training_scheme == "CTCE":
             return self.ctce_step(actions, obs, reward, terminated, truncated, info)
 
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             return self.dtde_step(actions, obs, reward, terminated, truncated, info)
 
 
@@ -548,15 +548,15 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             Reward for each agent
         """
 
-        # Randomize agent action order
-        if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
-            order = (0,)
-        elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
-            order = ("red",)
-        elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
-            order = ("red", "blue")
-        else:
-            order = self.np_random.random(size=self.num_agents).argsort()
+        # # Randomize agent action order
+        # if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
+        #     order = (0,)
+        # elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
+        #     order = ("red",)
+        # elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
+        #     order = ("red", "blue")
+        # else:
+        #     order = self.np_random.random(size=self.num_agents).argsort()
         
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
@@ -567,7 +567,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent = self.agents[self.team_index_dict[team][idx]]
                     self.handle_agent_actions(agent=agent,action=action, rewards=rewards)
                     
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             # Update agent states, grid states, and reward from actions
             for agent_id, action in actions.items():
             # if isinstance(agent_id, str):

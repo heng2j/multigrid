@@ -57,7 +57,7 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
 
         if self.training_scheme == "CTCE":
             return { team for team in list(self.teams.keys())}
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
 
             return { f"{agent.color.value}_{agent.team_index}" for agent in self.agents}
         else: 

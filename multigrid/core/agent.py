@@ -113,7 +113,7 @@ class Agent:
             # Actions are discrete integer values
             self.action_space = spaces.Discrete(len(Action))
 
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
 
             self.observation_space = spaces.Dict({
                 'image': spaces.Box(
@@ -128,10 +128,6 @@ class Agent:
 
             # Actions are discrete integer values
             self.action_space = spaces.Discrete(len(Action))
-
-        elif self.training_scheme == "CTDE":
-            ...
-
 
 
 
