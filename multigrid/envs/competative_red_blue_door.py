@@ -420,25 +420,28 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent.carrying.is_pickedup = True
                     reward[agent_index] += 0.5
 
-                    # TODO - Mimic communiations
-                    agent.mission = Mission("Go open the door with the key")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            this_agent.mission = Mission("Go move away the ball")
+
+                    if self.training_scheme == "DTDE":
+                        # TODO - Mimic communiations
+                        agent.mission = Mission("Go open the door with the key")
+                        for this_agent in self.agents:
+                            if (this_agent.color == agent.color) and (this_agent != agent):
+                                this_agent.mission = Mission("Go move away the ball")
 
 
                 elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color != agent.carrying.color):
                     reward[agent_index] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
 
-                    # TODO - Mimic communiations
-                    agent.mission = Mission("Go move away the ball")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            if this_agent.carrying and this_agent.carrying.type == "key" and this_agent.carrying.color == this_agent.color:
-                                this_agent.mission =  Mission("Go open the door with the key")
-                            else: 
-                                this_agent.mission = Mission("Go pick up the key")
+                    if self.training_scheme == "DTDE":
+                        # TODO - Mimic communiations
+                        agent.mission = Mission("Go move away the ball")
+                        for this_agent in self.agents:
+                            if (this_agent.color == agent.color) and (this_agent != agent):
+                                if this_agent.carrying and this_agent.carrying.type == "key" and this_agent.carrying.color == this_agent.color:
+                                    this_agent.mission =  Mission("Go open the door with the key")
+                                else: 
+                                    this_agent.mission = Mission("Go pick up the key")
 
 
                 else:

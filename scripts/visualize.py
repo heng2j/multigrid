@@ -75,7 +75,7 @@ if __name__ == '__main__':
         '--env-config', type=json.loads, default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')")
     parser.add_argument(
-        '--num-agents', type=int, default=4, help="Number of agents in environment.") # FIXME - streamline this with
+        '--num-agents', type=int, default=2, help="Number of agents in environment.") # FIXME - streamline this with
     parser.add_argument(
         '--num-episodes', type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument(
@@ -87,10 +87,10 @@ if __name__ == '__main__':
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
         help="List of agent ids to evaluate")
     parser.add_argument(
-        '--teams', type=json.loads, default={"red": 2, "blue": 2}, #  "blue": 2 # TODO - map this with env config
+        '--teams', type=json.loads, default={"red": 2}, #  "blue": 2 # TODO - map this with env config
         help='A dictionary containing team name and counts, e.g. \'{"red": 2, "blue": 2}\'')
     parser.add_argument(
-        '--training-scheme', type=str, default='DTDE',
+        '--training-scheme', type=str, default='CTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()
