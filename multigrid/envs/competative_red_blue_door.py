@@ -425,7 +425,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     reward[agent_index] += 0.5
 
 
-                    if self.training_scheme == "DTDE":
+                    if self.training_scheme == "DTDE" or "CTDE":
                         # TODO - Mimic communiations
                         agent.mission = Mission("Go open the door with the key")
                         for this_agent in self.agents:
@@ -437,7 +437,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     reward[agent_index] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
 
-                    if self.training_scheme == "DTDE":
+                    if self.training_scheme == "DTDE" or "CTDE":
                         # TODO - Mimic communiations
                         agent.mission = Mission("Go move away the ball")
                         for this_agent in self.agents:
