@@ -35,9 +35,7 @@ SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import git
 
 # Limit the number of rows.
-reporter = CLIReporter(max_progress_rows=10)
-
-
+reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
 
 
 
@@ -127,9 +125,6 @@ from ray.rllib.utils.torch_utils import convert_to_torch_tensor
 from ray.rllib.algorithms.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing
 from ray.rllib.algorithms.ppo.ppo import PPO, PPOConfig
-
-GLOBAL_TEAM_OBS = "opponent_obs"
-GLOBAL_TEAM_ACTION = "opponent_action"
 
 
 GLOBAL_TEAM_OBS = "global_team_obs"
@@ -309,7 +304,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--lstm', action='store_true', help="Use LSTM model.")
     parser.add_argument(
-        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red',
+        '--env', type=str, default='MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red',
         help="MultiGrid environment to use.")
     parser.add_argument(
         '--env-config', type=json.loads, default={},
@@ -319,9 +314,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '--seed', type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible")
     parser.add_argument(
-        '--num-workers', type=int, default=1, help="Number of rollout workers.") 
+        '--num-workers', type=int, default=40, help="Number of rollout workers.") 
     parser.add_argument(
-        '--num-gpus', type=int, default=0, help="Number of GPUs to train on.")
+        '--num-gpus', type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument(
         '--num-timesteps', type=int, default=1e6,
         help="Total number of timesteps to train.")
@@ -337,7 +332,7 @@ if __name__ == "__main__":
         '--name', type=str, default='<my_experinemnt>',
         help="Distinct name to track your experinemnt in save-dir")
     parser.add_argument(
-        '--local-mode', type=bool, default=True,
+        '--local-mode', type=bool, default=False,
         help="Boolean value to set to use local mode for debugging")
     parser.add_argument(
         '--our-agent-ids', nargs="+", type=int, default=[0,1],
@@ -349,7 +344,7 @@ if __name__ == "__main__":
         '--policies-to-train', nargs="+", type=str, default=["red"], # "blue",
         help="List of agent ids to train")
     parser.add_argument(
-        '--training-scheme', type=str, default='CTDE',
+        '--training-scheme', type=str, default='DTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()
