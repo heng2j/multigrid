@@ -1,6 +1,7 @@
 import argparse
 import json
 import numpy as np
+import pandas as pd
 import itertools
 
 from ray.rllib.algorithms import Algorithm
@@ -8,13 +9,15 @@ from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
 
 
 
-def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, int] = {"red": 1}, training_scheme: str = "CTCE", num_agents: int = 2) -> list[np.ndarray]:
+def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, int] = {"red": 1}, training_scheme: str = "CTCE", num_agents: int = 2, save_dir: str = None) -> list[np.ndarray]:
     """
     Visualize trajectories from trained agents.
     """
     frames = []
+    episodes_data = []
     env = algorithm.env_creator(algorithm.config.env_config)
     agent_index_dict = {agent_id: next(team for team, count in teams.items() if sum(teams[t] for t in itertools.takewhile(lambda x: x != team, teams)) + count > agent_id) for agent_id in range(num_agents)}
+
 
     for episode in range(num_episodes):
         print('\n', '-' * 32, '\n', 'Episode', episode, '\n', '-' * 32)
@@ -51,9 +54,26 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, i
                 episode_rewards[agent_id] += rewards[agent_id]
 
         frames.append(env.get_frame())
-        print('Rewards:', episode_rewards)
-
+        solved = all([env.env.env.red_door.is_open,(env.env.env.step_count < env.max_steps)])
+        print('\n', 'Rewards:', episode_rewards)
+        print('\n', 'Total Time Steps:', env.env.env.step_count)
+        print('\n', 'Solved:', solved)
+    
+        # Set episode data
+        episodes_data.append({**episode_rewards, **{"Episode Length": env.env.env.step_count, "Solved": solved}})
+    
     env.close()
+    episodes_df = pd.DataFrame(episodes_data)
+    episodes_df.to_csv(f"{save_dir}/episodes_data.csv", index=False)
+
+    mean_values = episodes_df[list(episodes_df.columns[:-1])].mean()
+    solved_ratio = episodes_df['Solved'].sum() / len(episodes_df)
+
+    eval_summary_df = pd.DataFrame(mean_values).T  
+    eval_summary_df['Solved Ratio'] = solved_ratio
+    eval_summary_df.to_csv(f"{save_dir}/eval_summary.csv", index=False)
+
+
     return frames
 
 
@@ -92,9 +112,16 @@ if __name__ == '__main__':
     parser.add_argument(
         '--training-scheme', type=str, default='CTDE',
         help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
+    parser.add_argument(
+        '--render-mode', type=str, default=None, #'rgb_array',
+        help="Can be either 'human' or 'rgb_array'")
+    parser.add_argument(
+        '--save-dir', type=str, default='submission/evaluation_reports/',
+        help="Directory for saving evaluation results.")
+    
 
     args = parser.parse_args()
-    args.env_config.update(render_mode='human')
+    args.env_config.update(render_mode=args.render_mode)
     config = algorithm_config(
         **vars(args),
         num_workers=0,
@@ -117,10 +144,11 @@ if __name__ == '__main__':
         # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
         # algorithm.set_weights({policy_name: restored_policy_0_weights})
    
-    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, training_scheme=args.training_scheme, num_agents=args.num_agents)
+    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, training_scheme=args.training_scheme, num_agents=args.num_agents, save_dir=args.save_dir)
     if args.gif:
         import imageio
         filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
+        saved_file_path = f"{args.save_dir}/{filename}"
         print(f"Saving GIF to {filename}")
 
         # Define your desired frames per second

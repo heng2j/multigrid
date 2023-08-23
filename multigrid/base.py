@@ -102,7 +102,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         screen_size: int | None = 640,
         highlight: bool = True,
         tile_size: int = TILE_PIXELS,
-        agent_pov: bool = False,
+        agent_pov: bool = True,
         our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
