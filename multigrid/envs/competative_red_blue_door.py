@@ -120,6 +120,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         has_obsticle: bool = False,
         death_match: bool = False,
+        randomization: bool = False,
         **kwargs,
     ):
         """
@@ -145,6 +146,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.has_obsticle =  has_obsticle
         self.death_match = death_match
         self.size = size
+        self.randomization = randomization
         # mission_space = MissionSpace.from_string("Open the door that match your agents' color")
         mission_space = MissionSpace(mission_func=lambda subtask: f"{subtask}",
                                         ordered_placeholders=[["Go pick up the key or the ball for opening the door" ,"Go pick up the key", "Go move away the ball", "Go open the door with the key"]])
@@ -218,9 +220,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         # Fixed Key Positions
         key_positions = {'red': (7, 4), 'blue': (8, 3)}
         for key_color in color_sequence:
-            # key = self.place_obj(Key(color=key_color), top=room_top, size=room_size)
-            key_position = key_positions[key_color]
-            self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
+            if self.randomization:
+                self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+            else:
+                key_position = key_positions[key_color]
+                self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
 
 
 
