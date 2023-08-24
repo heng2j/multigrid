@@ -102,7 +102,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         screen_size: int | None = 640,
         highlight: bool = True,
         tile_size: int = TILE_PIXELS,
-        agent_pov: bool = False,
+        agent_pov: bool = True,
         our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
@@ -272,14 +272,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             })
             # return spaces.Tuple((agent.observation_space
             #     for agent in self.agents ))
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
                 f"{agent.color.value}_{agent.team_index}" : agent.observation_space
                 for agent in self.agents
             })
-        elif self.training_scheme == "CTDE":
-            ...
+        # elif self.training_scheme == "CTDE":
+        #     ...
 
         # FIXME - for HW2
         # return self.agents[0].observation_space
@@ -303,15 +303,13 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 for agent in agents )) for team_name, agents in self.agents_teams.items()
             })
 
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
 
             # FIXME - should be convertable between training scenario 
             return spaces.Dict({
             f"{agent.color.value}_{agent.team_index}" : agent.action_space
             for agent in self.agents
         })
-        elif self.training_scheme == "CTDE":
-            ...
 
 
 

@@ -120,6 +120,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
         has_obsticle: bool = False,
         death_match: bool = False,
+        randomization: bool = False,
         **kwargs,
     ):
         """
@@ -145,6 +146,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.has_obsticle =  has_obsticle
         self.death_match = death_match
         self.size = size
+        self.randomization = randomization
         # mission_space = MissionSpace.from_string("Open the door that match your agents' color")
         mission_space = MissionSpace(mission_func=lambda subtask: f"{subtask}",
                                         ordered_placeholders=[["Go pick up the key or the ball for opening the door" ,"Go pick up the key", "Go move away the ball", "Go open the door with the key"]])
@@ -218,9 +220,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         # Fixed Key Positions
         key_positions = {'red': (7, 4), 'blue': (8, 3)}
         for key_color in color_sequence:
-            # key = self.place_obj(Key(color=key_color), top=room_top, size=room_size)
-            key_position = key_positions[key_color]
-            self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
+            if self.randomization:
+                self.place_obj(Key(color=key_color), top=room_top, size=room_size)
+            else:
+                key_position = key_positions[key_color]
+                self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
 
 
 
@@ -256,7 +260,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     'direction': direction[agent.index],
                     'mission': self.agents[agent.index].mission,
                 })
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             for agent in self.agents:
                 observations[ f"{agent.color.value}_{agent.team_index}" ] = {
                     'image': image[agent.index],
@@ -420,25 +424,28 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent.carrying.is_pickedup = True
                     reward[agent_index] += 0.5
 
-                    # TODO - Mimic communiations
-                    agent.mission = Mission("Go open the door with the key")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            this_agent.mission = Mission("Go move away the ball")
+
+                    if self.training_scheme == "DTDE" or "CTDE":
+                        # TODO - Mimic communiations
+                        agent.mission = Mission("Go open the door with the key")
+                        for this_agent in self.agents:
+                            if (this_agent.color == agent.color) and (this_agent != agent):
+                                this_agent.mission = Mission("Go move away the ball")
 
 
                 elif agent.carrying and (agent.carrying.type == "ball") and (agent.front_pos == agent.carrying.init_pos) and (agent.color != agent.carrying.color):
                     reward[agent_index] += 0.5 * agent.carrying.discount_factor
                     agent.carrying.discount_factor *= agent.carrying.discount_factor
 
-                    # TODO - Mimic communiations
-                    agent.mission = Mission("Go move away the ball")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            if this_agent.carrying and this_agent.carrying.type == "key" and this_agent.carrying.color == this_agent.color:
-                                this_agent.mission =  Mission("Go open the door with the key")
-                            else: 
-                                this_agent.mission = Mission("Go pick up the key")
+                    if self.training_scheme == "DTDE" or "CTDE":
+                        # TODO - Mimic communiations
+                        agent.mission = Mission("Go move away the ball")
+                        for this_agent in self.agents:
+                            if (this_agent.color == agent.color) and (this_agent != agent):
+                                if this_agent.carrying and this_agent.carrying.type == "key" and this_agent.carrying.color == this_agent.color:
+                                    this_agent.mission =  Mission("Go open the door with the key")
+                                else: 
+                                    this_agent.mission = Mission("Go pick up the key")
 
 
                 else:
@@ -456,7 +463,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         if self.training_scheme == "CTCE":
             return self.ctce_step(actions, obs, reward, terminated, truncated, info)
 
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             return self.dtde_step(actions, obs, reward, terminated, truncated, info)
 
 
@@ -548,15 +555,15 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             Reward for each agent
         """
 
-        # Randomize agent action order
-        if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
-            order = (0,)
-        elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
-            order = ("red",)
-        elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
-            order = ("red", "blue")
-        else:
-            order = self.np_random.random(size=self.num_agents).argsort()
+        # # Randomize agent action order
+        # if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
+        #     order = (0,)
+        # elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
+        #     order = ("red",)
+        # elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
+        #     order = ("red", "blue")
+        # else:
+        #     order = self.np_random.random(size=self.num_agents).argsort()
         
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
@@ -567,7 +574,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     agent = self.agents[self.team_index_dict[team][idx]]
                     self.handle_agent_actions(agent=agent,action=action, rewards=rewards)
                     
-        elif self.training_scheme == "DTDE":
+        elif self.training_scheme == "DTDE" or "CTDE":
             # Update agent states, grid states, and reward from actions
             for agent_id, action in actions.items():
             # if isinstance(agent_id, str):
