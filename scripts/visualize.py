@@ -42,13 +42,6 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, i
                     policy_id=agent_id
                 )
 
-                # # Multi-agent
-                # actions[agent_id], states[agent_id], _ = algorithm.compute_single_action(
-                #     observations[agent_id],
-                #     states[agent_id],
-                #     policy_id=policy_mapping_fn(agent_id)
-                # )
-
             observations, rewards, terminations, truncations, infos = env.step(actions)
             for agent_id in rewards:
                 episode_rewards[agent_id] += rewards[agent_id]
@@ -75,6 +68,48 @@ def visualize(algorithm: Algorithm, num_episodes: int = 100,  teams: dict[str, i
 
 
     return frames
+
+
+def main_evaluation(args):
+    
+    args.env_config.update(render_mode=args.render_mode)
+    config = algorithm_config(
+        **vars(args),
+        num_workers=0,
+        num_gpus=0,
+    )
+    config.environment(disable_env_checking=True)
+    algorithm = config.build()
+    checkpoint = get_checkpoint_dir(args.load_dir)
+
+    if checkpoint:
+        from ray.rllib.policy.policy import Policy
+
+        print(f"Loading checkpoint from {checkpoint}")
+        algorithm.restore(checkpoint)
+
+        # # TODO update checkpoint loading method
+        # # New way
+        # policy_name = f"policy_{args.our_agent_ids[1]}"
+        # restored_policy_0 = Policy.from_checkpoint(checkpoint)
+        # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
+        # algorithm.set_weights({policy_name: restored_policy_0_weights})
+   
+    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, training_scheme=args.training_scheme, num_agents=args.num_agents, save_dir=args.save_dir)
+    if args.gif:
+        import imageio
+        filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
+        saved_file_path = f"{args.save_dir}/{filename}"
+        print(f"Saving GIF to {filename}")
+
+        # Define your desired frames per second
+        fps = 60  # or any other number
+
+        # Calculate the duration for each frame to achieve the desired fps
+        duration = 1.0 / fps
+
+        # write to file
+        imageio.mimsave(filename, frames, duration=duration)
 
 
 
@@ -120,42 +155,10 @@ if __name__ == '__main__':
         help="Directory for saving evaluation results.")
     
 
-    args = parser.parse_args()
-    args.env_config.update(render_mode=args.render_mode)
-    config = algorithm_config(
-        **vars(args),
-        num_workers=0,
-        num_gpus=0,
-    )
-    config.environment(disable_env_checking=True)
-    algorithm = config.build()
-    checkpoint = get_checkpoint_dir(args.load_dir)
+    parsed_args = parser.parse_args()
+    main_evaluation(args=parsed_args)
 
-    if checkpoint:
-        from ray.rllib.policy.policy import Policy
 
-        print(f"Loading checkpoint from {checkpoint}")
-        algorithm.restore(checkpoint)
 
-        # # TODO update checkpoint loading method
-        # # New way
-        # policy_name = f"policy_{args.our_agent_ids[1]}"
-        # restored_policy_0 = Policy.from_checkpoint(checkpoint)
-        # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
-        # algorithm.set_weights({policy_name: restored_policy_0_weights})
-   
-    frames = visualize(algorithm, num_episodes=args.num_episodes,teams=args.teams, training_scheme=args.training_scheme, num_agents=args.num_agents, save_dir=args.save_dir)
-    if args.gif:
-        import imageio
-        filename = args.gif if args.gif.endswith('.gif') else f'{args.gif}.gif'
-        saved_file_path = f"{args.save_dir}/{filename}"
-        print(f"Saving GIF to {filename}")
 
-        # Define your desired frames per second
-        fps = 60  # or any other number
 
-        # Calculate the duration for each frame to achieve the desired fps
-        duration = 1.0 / fps
-
-        # write to file
-        imageio.mimsave(filename, frames, duration=duration)
