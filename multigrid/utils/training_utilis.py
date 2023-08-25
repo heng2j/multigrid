@@ -8,7 +8,6 @@ from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
 
 
-
 def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
     """
     Recursively search for checkpoints within the given directory.
@@ -21,11 +20,12 @@ def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
         The directory to search for checkpoints within
     """
     if search_dir:
-        checkpoints = Path(search_dir).expanduser().glob('**/*.is_checkpoint')
+        checkpoints = Path(search_dir).expanduser().glob("**/*.is_checkpoint")
         if checkpoints:
             return sorted(checkpoints, key=os.path.getmtime)[-1].parent
 
     return None
+
 
 def can_use_gpu() -> bool:
     """
@@ -46,15 +46,13 @@ def can_use_gpu() -> bool:
     return False
 
 
-
-def policy_mapping_fn(training_scheme:str, teams: dict[str, int], agent_index_dict: dict[int, str]):
-
+def policy_mapping_fn(training_scheme: str, teams: dict[str, int], agent_index_dict: dict[int, str]):
     # FIXME
-    def single_policy_mapping_fn(agent_id, *args,  **kwargs) -> str:
+    def single_policy_mapping_fn(agent_id, *args, **kwargs) -> str:
         """
         Map an environment agent ID to an RLlib policy ID.
         """
-        return   agent_id #agent_index_dict[agent_id] # f'policy_{agent_id}'
+        return agent_id  # agent_index_dict[agent_id] # f'policy_{agent_id}'
 
     def marl_policy_mapping_fn(agent_id, *args, **kwargs) -> str:
         """
@@ -63,23 +61,14 @@ def policy_mapping_fn(training_scheme:str, teams: dict[str, int], agent_index_di
         if training_scheme == "DTDE" or "CTDE":
             return agent_id
 
-
-    return  single_policy_mapping_fn  if training_scheme == "CTCE" else marl_policy_mapping_fn
-
+    return single_policy_mapping_fn if training_scheme == "CTCE" else marl_policy_mapping_fn
 
 
-
-   
-
-def model_config(
-    framework: str = 'torch',
-    lstm: bool = False,
-    custom_model_config: dict = {}
-    ):
+def model_config(framework: str = "torch", lstm: bool = False, custom_model_config: dict = {}):
     """
     Return a model configuration dictionary for RLlib.
     """
-    if framework == 'torch':
+    if framework == "torch":
         if lstm:
             model = TorchLSTMModel
         elif custom_model_config["training_scheme"] == "CTDE":
@@ -93,17 +82,17 @@ def model_config(
             model = TFModel
 
     return {
-        'custom_model': model,
-        'custom_model_config': custom_model_config,
-        'conv_filters': [
+        "custom_model": model,
+        "custom_model_config": custom_model_config,
+        "conv_filters": [
             [16, [3, 3], 1],
             [32, [3, 3], 1],
             [64, [3, 3], 1],
         ],
-        'fcnet_hiddens': [64, 64],
-        'post_fcnet_hiddens': [],
-        'lstm_cell_size': 256,
-        'max_seq_len': 20,
+        "fcnet_hiddens": [64, 64],
+        "post_fcnet_hiddens": [],
+        "lstm_cell_size": 256,
+        "max_seq_len": 20,
     }
 
 
@@ -121,17 +110,13 @@ from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessi
 from ray.rllib.algorithms.ppo.ppo import PPO, PPOConfig
 
 from ray.rllib.models.torch.fcnet import FullyConnectedNetwork as TorchFC
-from ray.rllib.models.torch.complex_input_net import (
-    ComplexInputNetwork as TorchComplexInputNetwork
-)
+from ray.rllib.models.torch.complex_input_net import ComplexInputNetwork as TorchComplexInputNetwork
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_utils import convert_to_torch_tensor
 
 OPPONENT_OBS = "opponent_obs"
 OPPONENT_ACTION = "opponent_action"
-
-
 
 
 # ModelCatalog.register_custom_model(
@@ -144,7 +129,6 @@ OPPONENT_ACTION = "opponent_action"
 
 #     def __init__(self):
 #         self.compute_central_vf = self.model.central_value_function
-
 
 
 # # Grabs the opponent obs/act and includes it in the experience train_batch,
@@ -251,14 +235,12 @@ OPPONENT_ACTION = "opponent_action"
 #         return CTDEPPOTorchPolicy
 
 
-
-
 def algorithm_config(
-    algo: str = 'PPO',
-    env: str = 'MultiGrid-Empty-8x8-v0',
+    algo: str = "PPO",
+    env: str = "MultiGrid-Empty-8x8-v0",
     env_config: dict = {},
     num_agents: int = 2,
-    framework: str = 'torch',
+    framework: str = "torch",
     lstm: bool = False,
     num_workers: int = 0,
     num_gpus: int = 0,
@@ -266,28 +248,42 @@ def algorithm_config(
     policies_to_train: list[int] | None = None,
     our_agent_ids: list[str] | None = None,
     teams: dict[str, int] = {"red": 1},
-    training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"  
-    **kwargs) -> AlgorithmConfig:
+    training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
+    **kwargs,
+) -> AlgorithmConfig:
     """
     Return the RL algorithm configuration dictionary.
     """
-    env_config = {**env_config, 'agents': num_agents, "teams": teams, "training_scheme": training_scheme}
-    agent_index_dict = {agent_id: next(team for team, count in teams.items() if sum(teams[t] for t in itertools.takewhile(lambda x: x != team, teams)) + count > agent_id) for agent_id in range(num_agents)}
+    env_config = {**env_config, "agents": num_agents, "teams": teams, "training_scheme": training_scheme}
+    agent_index_dict = {
+        agent_id: next(
+            team
+            for team, count in teams.items()
+            if sum(teams[t] for t in itertools.takewhile(lambda x: x != team, teams)) + count > agent_id
+        )
+        for agent_id in range(num_agents)
+    }
     return (
-        get_trainable_cls(algo) # CentralizedCritic #FIXME if training_scheme == "CTDE" else 
+        get_trainable_cls(algo)  # CentralizedCritic #FIXME if training_scheme == "CTDE" else
         .get_default_config()
         .environment(env=env, env_config=env_config)
         .framework(framework)
         .rollouts(num_rollout_workers=num_workers)
-        .resources(num_gpus=num_gpus) #if can_use_gpu() else 0)
+        .resources(num_gpus=num_gpus)  # if can_use_gpu() else 0)
         .multi_agent(
             # policies={f'policy_{i}' for i in our_agent_ids},
-            policies={ team_name for team_name in list(teams.keys())} if training_scheme == "CTCE" else {f'{team_name}_{i}' for team_name, team_num in teams.items() for i in range(team_num)},
-            policy_mapping_fn=policy_mapping_fn(training_scheme=training_scheme,teams=teams, agent_index_dict=agent_index_dict),
+            policies={team_name for team_name in list(teams.keys())}
+            if training_scheme == "CTCE"
+            else {f"{team_name}_{i}" for team_name, team_num in teams.items() for i in range(team_num)},
+            policy_mapping_fn=policy_mapping_fn(
+                training_scheme=training_scheme, teams=teams, agent_index_dict=agent_index_dict
+            ),
             # policies_to_train=policies_to_train
         )
         .training(
-            model=model_config(framework=framework, lstm=lstm, custom_model_config={ "teams": teams, "training_scheme": training_scheme}),
+            model=model_config(
+                framework=framework, lstm=lstm, custom_model_config={"teams": teams, "training_scheme": training_scheme}
+            ),
             lr=(lr or NotProvided),
         )
     )

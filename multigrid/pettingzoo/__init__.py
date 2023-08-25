@@ -32,7 +32,6 @@ from typing import Any
 from ..base import AgentID, MultiGridEnv
 
 
-
 class PettingZooWrapper(ParallelEnv):
     """
     Wrapper for a ``MultiGridEnv`` environment that implements the
@@ -71,11 +70,9 @@ class PettingZooWrapper(ParallelEnv):
         return self.env.action_space[agent_id]
 
 
-
 def to_pettingzoo_env(
-    env_cls: type[MultiGridEnv],
-    *wrappers: gym.Wrapper,
-    metadata: dict[str, Any] = {}) -> type[ParallelEnv]:
+    env_cls: type[MultiGridEnv], *wrappers: gym.Wrapper, metadata: dict[str, Any] = {}
+) -> type[ParallelEnv]:
     """
     Convert a ``MultiGridEnv`` environment class to a PettingZoo ``ParallelEnv`` class.
 
@@ -96,6 +93,7 @@ def to_pettingzoo_env(
     pettingzoo_env_cls : type[ParallelEnv]
         PettingZoo ``ParallelEnv`` environment class
     """
+
     class PettingZooEnv(PettingZooWrapper):
         def __init__(self, *args, **kwargs):
             env = env_cls(*args, **kwargs)

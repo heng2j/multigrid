@@ -37,8 +37,11 @@ from ray.tune.registry import register_env
 
 from ..base import MultiGridEnv
 from ..envs import CONFIGURATIONS
-from ..wrappers import CompetativeRedBlueDoorWrapper, CompetativeRedBlueDoorWrapper_v3, FullyObsWrapper # OneHotObsWrapper, 
-
+from ..wrappers import (
+    CompetativeRedBlueDoorWrapper,
+    CompetativeRedBlueDoorWrapper_v3,
+    FullyObsWrapper,
+)  # OneHotObsWrapper,
 
 
 class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
@@ -54,23 +57,20 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
         MultiAgentEnv.__init__(self)
 
     def get_agent_ids(self):
-
         if self.training_scheme == "CTCE":
-            return { team for team in list(self.teams.keys())}
+            return {team for team in list(self.teams.keys())}
         elif self.training_scheme == "DTDE" or "CTDE":
-
-            return { f"{agent.color.value}_{agent.team_index}" for agent in self.agents}
-        else: 
+            return {f"{agent.color.value}_{agent.team_index}" for agent in self.agents}
+        else:
             return {agent.index for agent in self.agents}
 
     def step(self, *args, **kwargs):
-
         # if len(args[0]) < 2:
         #     print("here")
 
         obs, rewards, terminations, truncations, infos = super().step(*args, **kwargs)
-        terminations['__all__'] = all(terminations.values())
-        truncations['__all__'] = all(truncations.values())
+        terminations["__all__"] = all(terminations.values())
+        truncations["__all__"] = all(truncations.values())
 
         # if all(terminations.values()):
         #     print("here")
@@ -78,15 +78,10 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
         # if all(truncations.values()):
         #     print("here")
 
-
         return obs, rewards, terminations, truncations, infos
 
 
-
-def to_rllib_env(
-    env_cls: type[MultiGridEnv],
-    *wrappers: gym.Wrapper,
-    default_config: dict = {}) -> type[MultiAgentEnv]:
+def to_rllib_env(env_cls: type[MultiGridEnv], *wrappers: gym.Wrapper, default_config: dict = {}) -> type[MultiAgentEnv]:
     """
     Convert a ``MultiGridEnv`` environment class to an RLLib ``MultiAgentEnv`` class.
 
@@ -107,6 +102,7 @@ def to_rllib_env(
     rllib_env_cls : type[MultiAgentEnv]
         RLlib ``MultiAgentEnv`` environment class
     """
+
     class RLlibEnv(RLlibWrapper):
         def __init__(self, config: dict = {}):
             config = {**default_config, **config}
@@ -117,7 +113,6 @@ def to_rllib_env(
 
     RLlibEnv.__name__ = f"RLlib_{env_cls.__name__}"
     return RLlibEnv
-
 
 
 # Register environments with RLlib

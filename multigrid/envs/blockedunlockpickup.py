@@ -6,7 +6,6 @@ from multigrid.core.roomgrid import RoomGrid
 from multigrid.core.world_object import Ball
 
 
-
 class BlockedUnlockPickupEnv(RoomGrid):
     """
     .. image:: https://i.imgur.com/uSFi059.gif
@@ -101,12 +100,7 @@ class BlockedUnlockPickupEnv(RoomGrid):
     * ``MultiGrid-BlockedUnlockPickup-v0``
     """
 
-    def __init__(
-        self,
-        room_size: int = 6,
-        max_steps: int | None = None,
-        joint_reward: bool = True,
-        **kwargs):
+    def __init__(self, room_size: int = 6, max_steps: int | None = None, joint_reward: bool = True, **kwargs):
         """
         Parameters
         ----------
@@ -131,7 +125,7 @@ class BlockedUnlockPickupEnv(RoomGrid):
             room_size=room_size,
             max_steps=max_steps or (16 * room_size**2),
             joint_reward=joint_reward,
-            success_termination_mode='any',
+            success_termination_mode="any",
             **kwargs,
         )
 

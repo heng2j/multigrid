@@ -18,7 +18,6 @@ from ..utils.rendering import (
 )
 
 
-
 class Agent:
     """
     Class representing an agent in the environment.
@@ -56,13 +55,13 @@ class Agent:
         self,
         index: int,
         name: str,
-        mission_space: MissionSpace = MissionSpace.from_string('maximize reward'),
+        mission_space: MissionSpace = MissionSpace.from_string("maximize reward"),
         view_size: int = 7,
         see_through_walls: bool = False,
         team_index: int = 0,
         team_number: int = 0,
-        training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
-        ):
+        training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
+    ):
         """
         Parameters
         ----------
@@ -86,7 +85,6 @@ class Agent:
         self.team_index = team_index
         self.team_number = team_number
 
-
         # Number of cells (width and height) in the agent view
         assert view_size % 2 == 1
         assert view_size >= 3
@@ -97,63 +95,58 @@ class Agent:
         # encoding of the grid and a textual 'mission' string
 
         if self.training_scheme == "CTCE":
-            
-            self.observation_space = spaces.Dict({
-                'agent_id': spaces.Discrete(self.team_number),
-                'image': spaces.Box(
-                    low=0,
-                    high=255,
-                    shape=(view_size, view_size, WorldObj.dim),
-                    dtype=int,
-                ),
-                'direction': spaces.Discrete(len(Direction)),
-                'mission': mission_space,
-            })
+            self.observation_space = spaces.Dict(
+                {
+                    "agent_id": spaces.Discrete(self.team_number),
+                    "image": spaces.Box(
+                        low=0,
+                        high=255,
+                        shape=(view_size, view_size, WorldObj.dim),
+                        dtype=int,
+                    ),
+                    "direction": spaces.Discrete(len(Direction)),
+                    "mission": mission_space,
+                }
+            )
 
             # Actions are discrete integer values
             self.action_space = spaces.Discrete(len(Action))
 
         elif self.training_scheme == "DTDE" or "CTDE":
-
-            self.observation_space = spaces.Dict({
-                'image': spaces.Box(
-                    low=0,
-                    high=255,
-                    shape=(view_size, view_size, WorldObj.dim),
-                    dtype=int,
-                ),
-                'direction': spaces.Discrete(len(Direction)),
-                'mission': mission_space,
-            })
+            self.observation_space = spaces.Dict(
+                {
+                    "image": spaces.Box(
+                        low=0,
+                        high=255,
+                        shape=(view_size, view_size, WorldObj.dim),
+                        dtype=int,
+                    ),
+                    "direction": spaces.Discrete(len(Direction)),
+                    "mission": mission_space,
+                }
+            )
 
             # Actions are discrete integer values
             self.action_space = spaces.Discrete(len(Action))
 
-
-
-        # FIXME - should be convertable between training scenario 
+        # FIXME - should be convertable between training scenario
         # self.observation_space = spaces.Box(
         #         low=0,
         #         high=255,
         #         shape=(view_size, view_size, WorldObj.dim),
         #         dtype=int,
         #     )
-            
+
         # TODO - update action space
         # Actions are discrete integer values
         # self.action_space = spaces.Discrete(len(Action))
 
     # AgentState Properties
-    color = PropertyAlias(
-        'state', 'color', doc='Alias for :attr:`AgentState.color`.')
-    dir = PropertyAlias(
-        'state', 'dir', doc='Alias for :attr:`AgentState.dir`.')
-    pos = PropertyAlias(
-        'state', 'pos', doc='Alias for :attr:`AgentState.pos`.')
-    terminated = PropertyAlias(
-        'state', 'terminated', doc='Alias for :attr:`AgentState.terminated`.')
-    carrying = PropertyAlias(
-        'state', 'carrying', doc='Alias for :attr:`AgentState.carrying`.')
+    color = PropertyAlias("state", "color", doc="Alias for :attr:`AgentState.color`.")
+    dir = PropertyAlias("state", "dir", doc="Alias for :attr:`AgentState.dir`.")
+    pos = PropertyAlias("state", "pos", doc="Alias for :attr:`AgentState.pos`.")
+    terminated = PropertyAlias("state", "terminated", doc="Alias for :attr:`AgentState.terminated`.")
+    carrying = PropertyAlias("state", "carrying", doc="Alias for :attr:`AgentState.carrying`.")
 
     # @property
     # def observation_space(self):
@@ -171,7 +164,7 @@ class Agent:
     #             'mission': self.mission_space,
     #         })
     #     elif self.training_scheme == "DTDE":
-    #         # FIXME - should be convertable between training scenario 
+    #         # FIXME - should be convertable between training scenario
     #         return spaces.Dict({
     #             agent.index: agent.observation_space
     #             for agent in self.agents
@@ -179,14 +172,11 @@ class Agent:
     #     elif self.training_scheme == "CTDE":
     #         ...
 
-
-
     # def set_observation_space(self):
     #     ...
 
     # def set_action_space(self):
     #     ...
-
 
     @property
     def front_pos(self) -> tuple[int, int]:
@@ -197,7 +187,7 @@ class Agent:
         agent_pos = self.state._view[AgentState.POS]
         return front_pos(*agent_pos, agent_dir)
 
-    def reset(self, mission: Mission = Mission('maximize reward')):
+    def reset(self, mission: Mission = Mission("maximize reward")):
         """
         Reset the agent to an initial state.
 
@@ -299,6 +289,7 @@ class AgentState(np.ndarray):
     >>> a.dir
     2
     """
+
     # State vector indices
     TYPE = 0
     COLOR = 1
@@ -327,22 +318,22 @@ class AgentState(np.ndarray):
         obj[..., AgentState.POS] = (-1, -1)
 
         # Other attributes
-        obj._carried_obj = np.empty(dims, dtype=object) # object references
-        obj._terminated = np.zeros(dims, dtype=bool) # cache for faster access
-        obj._view = obj.view(np.ndarray) # view of the underlying array (faster indexing)
+        obj._carried_obj = np.empty(dims, dtype=object)  # object references
+        obj._terminated = np.zeros(dims, dtype=bool)  # cache for faster access
+        obj._view = obj.view(np.ndarray)  # view of the underlying array (faster indexing)
 
         return obj
 
     def __repr__(self):
         shape = str(self.shape[:-1]).replace(",)", ")")
-        return f'{self.__class__.__name__}{shape}'
+        return f"{self.__class__.__name__}{shape}"
 
     def __getitem__(self, idx):
         out = super().__getitem__(idx)
         if out.shape and out.shape[-1] == self.dim:
             out._view = self._view[idx, ...]
-            out._carried_obj = self._carried_obj[idx, ...] # set carried object reference
-            out._terminated = self._terminated[idx, ...] # set terminated cache
+            out._carried_obj = self._carried_obj[idx, ...]  # set carried object reference
+            out._terminated = self._terminated[idx, ...]  # set terminated cache
 
         return out
 

@@ -1,11 +1,7 @@
 from gymnasium import spaces
-from ray.rllib.models.tf.complex_input_net import (
-    ComplexInputNetwork as TFComplexInputNetwork
-)
+from ray.rllib.models.tf.complex_input_net import ComplexInputNetwork as TFComplexInputNetwork
 from ray.rllib.models.tf.tf_modelv2 import TFModelV2
-from ray.rllib.models.torch.complex_input_net import (
-    ComplexInputNetwork as TorchComplexInputNetwork
-)
+from ray.rllib.models.torch.complex_input_net import ComplexInputNetwork as TorchComplexInputNetwork
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from ray.rllib.utils.framework import try_import_torch
@@ -13,7 +9,6 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.annotations import override
 
 torch, nn = try_import_torch()
-
 
 
 class TFModel(TFModelV2):
@@ -34,13 +29,13 @@ class TFModel(TFModelV2):
         num_outputs: int,
         model_config: dict,
         name: str,
-        **kwargs):
+        **kwargs,
+    ):
         """
         See ``TFModelV2.__init__()``.
         """
         super().__init__(obs_space, action_space, num_outputs, model_config, name)
-        self.model = TFComplexInputNetwork(
-            obs_space, action_space, num_outputs, model_config, name)
+        self.model = TFComplexInputNetwork(obs_space, action_space, num_outputs, model_config, name)
         self.forward = self.model.forward
         self.value_function = self.model.value_function
 
@@ -63,15 +58,14 @@ class TorchModel(TorchModelV2, nn.Module):
         num_outputs: int,
         model_config: dict,
         name: str,
-        **kwargs):
+        **kwargs,
+    ):
         """
         See ``TorchModelV2.__init__()``.
         """
-        TorchModelV2.__init__(
-            self, obs_space, action_space, num_outputs, model_config, name)
+        TorchModelV2.__init__(self, obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
-        self.model = TorchComplexInputNetwork(
-            obs_space, action_space, num_outputs, model_config, name)
+        self.model = TorchComplexInputNetwork(obs_space, action_space, num_outputs, model_config, name)
         self.forward = self.model.forward
         self.value_function = self.model.value_function
 
@@ -94,7 +88,8 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
         num_outputs: int,
         model_config: dict,
         name: str,
-        **kwargs):
+        **kwargs,
+    ):
         """
         See ``TorchModelV2.__init__()``.
         """
@@ -113,13 +108,13 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
             action_space,
             None,
             model_config,
-            f'{name}_base',
+            f"{name}_base",
         )
 
         # LSTM
         self.lstm = nn.LSTM(
             self.base_model.post_fc_stack.num_outputs,
-            model_config.get('lstm_cell_size', 256),
+            model_config.get("lstm_cell_size", 256),
             batch_first=True,
         )
 
@@ -138,7 +133,7 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
         x = add_time_dimension(
             x,
             seq_lens=seq_lens,
-            framework='torch',
+            framework="torch",
             time_major=False,
         )
         h, c = state[0].unsqueeze(0), state[1].unsqueeze(0)
@@ -157,35 +152,28 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
         return [torch.zeros(self.lstm.hidden_size), torch.zeros(self.lstm.hidden_size)]
 
 
-
-
-
-
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.misc import SlimFC
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 import numpy as np
 
+
 class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     """Multi-agent model that implements a centralized VF."""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):
-        TorchModelV2.__init__(
-            self, obs_space, action_space, num_outputs, model_config, name
-        )
+        TorchModelV2.__init__(self, obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
 
-
-        self.num_team_members = 1 # FIXME with custom policy spec model_config["custom_model_config"]["teams"]
+        self.num_team_members = 1  # FIXME with custom policy spec model_config["custom_model_config"]["teams"]
 
         # Base of the model
-        self.model = TorchComplexInputNetwork(
-            obs_space, action_space, num_outputs, model_config, name)
+        self.model = TorchComplexInputNetwork(obs_space, action_space, num_outputs, model_config, name)
 
         # Central VF maps (obs, team_obs, team_act) -> vf_pred
         # Calculate input size based on observation size, number of team members and action space
         obs_size = np.prod(obs_space.shape)
-        act_size = action_space.n 
+        act_size = action_space.n
         input_size = obs_size * (self.num_team_members + 1) + act_size * self.num_team_members
 
         # input_size = 6 + 6 + 2  # my agent's obs + team member's obs + team member's actions
@@ -205,7 +193,6 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
                 obs,
                 team_obs,
                 torch.nn.functional.one_hot(team_actions.squeeze(1).long(), self.action_space.n).float(),
-
             ],
             1,
         )
@@ -215,4 +202,3 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     @override(ModelV2)
     def value_function(self):
         return self.model.value_function()  # not used
-

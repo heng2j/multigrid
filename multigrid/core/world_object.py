@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from ..base import MultiGridEnv
 
 
-
 class WorldObjMeta(type):
     """
     Metaclass for world objects.
@@ -50,8 +49,8 @@ class WorldObjMeta(type):
     def __new__(meta, name, bases, class_dict):
         cls = super().__new__(meta, name, bases, class_dict)
 
-        if name != 'WorldObj':
-            type_name = class_dict.get('type_name', name.lower())
+        if name != "WorldObj":
+            type_name = class_dict.get("type_name", name.lower())
 
             # Add the object class name to the `Type` enumeration if not already present
             if type_name not in set(Type):
@@ -82,6 +81,7 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
     cur_pos : tuple[int, int] or None
         The current position of the object
     """
+
     # WorldObj vector indices
     TYPE = 0
     COLOR = 1
@@ -100,7 +100,7 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
             Object color
         """
         # If not provided, infer the object type from the class
-        type_name = type or getattr(cls, 'type_name', cls.__name__.lower())
+        type_name = type or getattr(cls, "type_name", cls.__name__.lower())
         type_idx = Type(type_name).to_index()
 
         # Use the WorldObj subclass corresponding to the object type
@@ -110,9 +110,9 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
         obj = np.zeros(cls.dim, dtype=int).view(cls)
         obj[WorldObj.TYPE] = type_idx
         obj[WorldObj.COLOR] = Color(color).to_index()
-        obj.contains: WorldObj | None = None # object contained by this object
-        obj.init_pos: tuple[int, int] | None = None # initial position of the object
-        obj.cur_pos: tuple[int, int] | None = None # current position of the object
+        obj.contains: WorldObj | None = None  # object contained by this object
+        obj.init_pos: tuple[int, int] | None = None  # initial position of the object
+        obj.cur_pos: tuple[int, int] | None = None  # current position of the object
 
         return obj
 
@@ -130,14 +130,14 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
 
     @staticmethod
     @functools.cache
-    def empty() -> 'WorldObj':
+    def empty() -> "WorldObj":
         """
         Return an empty WorldObj instance.
         """
         return WorldObj(type=Type.empty)
 
     @staticmethod
-    def from_array(arr: ArrayLike[int]) -> 'WorldObj' | None:
+    def from_array(arr: ArrayLike[int]) -> "WorldObj" | None:
         """
         Convert an array to a WorldObj instance.
 
@@ -157,7 +157,7 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
             obj[...] = arr
             return obj
 
-        raise ValueError(f'Unknown object type: {arr[WorldObj.TYPE]}')
+        raise ValueError(f"Unknown object type: {arr[WorldObj.TYPE]}")
 
     @functools.cached_property
     def type(self) -> Type:
@@ -248,7 +248,7 @@ class WorldObj(np.ndarray, metaclass=WorldObjMeta):
         return tuple(self)
 
     @staticmethod
-    def decode(type_idx: int, color_idx: int, state_idx: int) -> 'WorldObj' | None:
+    def decode(type_idx: int, color_idx: int, state_idx: int) -> "WorldObj" | None:
         """
         Create an object from a 3-tuple description.
 
@@ -332,8 +332,7 @@ class Lava(WorldObj):
     """
 
     def __new__(cls):
-        """
-        """
+        """ """
         return super().__new__(cls, color=Color.red)
 
     def can_overlap(self) -> bool:
@@ -366,7 +365,7 @@ class Wall(WorldObj):
     Wall object that agents cannot move through.
     """
 
-    @functools.cache # reuse instances, since object is effectively immutable
+    @functools.cache  # reuse instances, since object is effectively immutable
     def __new__(cls, color: str = Color.grey):
         """
         Parameters
@@ -395,8 +394,7 @@ class Door(WorldObj):
         Whether the door is locked
     """
 
-    def __new__(
-        cls, color: str = Color.blue, is_open: bool = False, is_locked: bool = False):
+    def __new__(cls, color: str = Color.blue, is_open: bool = False, is_locked: bool = False):
         """
         Parameters
         ----------
@@ -428,9 +426,9 @@ class Door(WorldObj):
         Set the door to be open or closed.
         """
         if value:
-            self.state = State.open # set state to open
+            self.state = State.open  # set state to open
         elif not self.is_locked:
-            self.state = State.closed # set state to closed (unless already locked)
+            self.state = State.closed  # set state to closed (unless already locked)
 
     @property
     def is_locked(self) -> bool:
@@ -445,9 +443,9 @@ class Door(WorldObj):
         Set the door to be locked or unlocked.
         """
         if value:
-            self.state = State.locked # set state to locked
+            self.state = State.locked  # set state to locked
         elif not self.is_open:
-            self.state = State.closed # set state to closed (unless already open)
+            self.state = State.closed  # set state to closed (unless already open)
 
     def can_overlap(self) -> bool:
         """
@@ -506,7 +504,12 @@ class Key(WorldObj):
     Key object that can be picked up and used to unlock doors.
     """
 
-    def __new__(cls, color: str = Color.blue, is_pickedup: bool = False, is_available: bool = True, ):
+    def __new__(
+        cls,
+        color: str = Color.blue,
+        is_pickedup: bool = False,
+        is_available: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -531,7 +534,7 @@ class Key(WorldObj):
         """
         Set the key to be pickup or not.
         """
-        self.state = State.pickedup # set state to pickedup
+        self.state = State.pickedup  # set state to pickedup
 
     @property
     def is_available(self) -> bool:
@@ -545,8 +548,7 @@ class Key(WorldObj):
         """
         Set the key to be available or not.
         """
-        self.state = State.available # set state to available
-
+        self.state = State.available  # set state to available
 
     def can_pickup(self) -> bool:
         """
@@ -577,7 +579,7 @@ class Ball(WorldObj):
     Ball object that can be picked up by agents.
     """
 
-    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0,0)): # TODO add discount_factor
+    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0, 0)):  # TODO add discount_factor
         """
         Parameters
         ----------
@@ -614,8 +616,6 @@ class Ball(WorldObj):
     #     Set the key to be available or not.
     #     """
     #     self.state = State.available # set state to available
-
-
 
 
 class Box(WorldObj):

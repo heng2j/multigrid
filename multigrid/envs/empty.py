@@ -6,7 +6,6 @@ from multigrid.core.constants import Direction
 from multigrid.core.world_object import Goal
 
 
-
 class EmptyEnv(MultiGridEnv):
     """
     .. image:: https://i.imgur.com/wY0tT7R.gif
@@ -115,8 +114,9 @@ class EmptyEnv(MultiGridEnv):
         agent_start_dir: Direction | None = Direction.right,
         max_steps: int | None = None,
         joint_reward: bool = False,
-        success_termination_mode: str = 'any',
-        **kwargs):
+        success_termination_mode: str = "any",
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -142,7 +142,7 @@ class EmptyEnv(MultiGridEnv):
         super().__init__(
             mission_space="get to the green goal square",
             grid_size=size,
-            see_through_walls=True, # set this to True for maximum speed
+            see_through_walls=True,  # set this to True for maximum speed
             max_steps=max_steps or (4 * size**2),
             joint_reward=joint_reward,
             success_termination_mode=success_termination_mode,

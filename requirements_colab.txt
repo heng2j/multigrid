@@ -2,11 +2,11 @@ tensorboard
 moviepy
 pyvirtualdisplay
 torch
-opencv-python
+opencv - python
 swig
 gymnasium[box2d]
 ray[rllib]
-scikit-image
+scikit - image
 pygame
 numba
 Gymnasium

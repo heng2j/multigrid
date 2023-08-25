@@ -24,16 +24,14 @@ from .utils.obs import gen_obs_grid_encoding
 from .utils.random import RandomMixin
 
 
-
 ### Typing
 
 AgentID = int
 ObsType = dict[str, Any]
 
 
-
-
 ### Environment
+
 
 class MultiGridEnv(gym.Env, RandomMixin, ABC):
     """
@@ -79,9 +77,10 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
     action_space : spaces.Dict[AgentID, spaces.Space]
         Joint action space of all agents
     """
+
     metadata = {
-        'render_modes': ['human', 'rgb_array'],
-        'render_fps': 20,
+        "render_modes": ["human", "rgb_array"],
+        "render_fps": 20,
     }
 
     def __init__(
@@ -96,8 +95,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         agent_view_size: int = 5,
         allow_agent_overlap: bool = True,
         joint_reward: bool = False,
-        success_termination_mode: Literal['any', 'all'] = 'any',
-        failure_termination_mode: Literal['any', 'all'] = 'all',
+        success_termination_mode: Literal["any", "all"] = "any",
+        failure_termination_mode: Literal["any", "all"] = "all",
         render_mode: str | None = None,
         screen_size: int | None = 640,
         highlight: bool = True,
@@ -105,9 +104,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         agent_pov: bool = True,
         our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
-        training_scheme: str = "CTCE", # Can be either "CTCE", "DTDE" or "CTDE"
-
-        ):
+        training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
+    ):
         """
         Parameters
         ----------
@@ -170,20 +168,18 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             if agents == 1:
                 self.num_agents = agents
             else:
-                self.num_agents = sum( [ team_num for team_name, team_num in teams.items()])
+                self.num_agents = sum([team_num for team_name, team_num in teams.items()])
 
-            self.agent_states = AgentState(self.num_agents) # joint agent state (vectorized)
+            self.agent_states = AgentState(self.num_agents)  # joint agent state (vectorized)
             self.agents: list[Agent] = []
-
 
             # Arrange Teams
             # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
-            self.agents_teams: dict[str,list[Agent]] = defaultdict(list)
+            self.agents_teams: dict[str, list[Agent]] = defaultdict(list)
 
             tmp_agent_idx = 0
             for team_name, team_num in teams.items():
                 for team_idx in range(team_num):
-                
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
@@ -199,14 +195,13 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     self.agents.append(agent)
                     self.agents_teams[team_name].append(agent)
                     self.team_index_dict[team_name][team_idx] = tmp_agent_idx
-                    tmp_agent_idx +=1
+                    tmp_agent_idx += 1
 
             self.agent_index_dict = defaultdict(dict)
 
             for team_name, team_idx_dict in self.team_index_dict.items():
                 for team_idx, agent_idx in team_idx_dict.items():
                     self.agent_index_dict[agent_idx] = {team_name: team_idx}
-                        
 
         elif isinstance(agents, Iterable):
             assert {agent.index for agent in agents} == set(range(len(agents)))
@@ -214,16 +209,15 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             self.agent_states = AgentState(self.num_agents)
             self.agents: list[Agent] = sorted(agents, key=lambda agent: agent.index)
             for agent in self.agents:
-                self.agent_states[agent.index] = agent.state # copy to joint agent state
-                agent.state = self.agent_states[agent.index] # reference joint agent state
+                self.agent_states[agent.index] = agent.state  # copy to joint agent state
+                agent.state = self.agent_states[agent.index]  # reference joint agent state
         else:
             raise ValueError(f"Invalid argument for agents: {agents}")
-
 
         # # TODO - Arrange Teams
         # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
         # self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
-        
+
         # tmp_agent_idx = 0
         # for team_name, team_num in teams.items():
         #     for _ in range(team_num):
@@ -231,16 +225,13 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         #         tmp_agent_idx += 1
         #         self.agents_teams[team_name].append(self.agents[tmp_agent_idx])
 
-
         # Action enumeration for this environment
         self.actions = Action
 
         # Range of possible rewards
         self.reward_range = (0, 1)
 
-        assert isinstance(
-            max_steps, int
-        ), f"The argument max_steps must be an integer, got: {type(max_steps)}"
+        assert isinstance(max_steps, int), f"The argument max_steps must be an integer, got: {type(max_steps)}"
         self.max_steps = max_steps
 
         # Rendering attributes
@@ -265,19 +256,19 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         Return the joint observation space of all agents.
         """
         if self.training_scheme == "CTCE":
-
-            return spaces.Dict({
-                team_name: spaces.Tuple((agent.observation_space
-                for agent in agents )) for team_name, agents in self.agents_teams.items()
-            })
+            return spaces.Dict(
+                {
+                    team_name: spaces.Tuple((agent.observation_space for agent in agents))
+                    for team_name, agents in self.agents_teams.items()
+                }
+            )
             # return spaces.Tuple((agent.observation_space
             #     for agent in self.agents ))
         elif self.training_scheme == "DTDE" or "CTDE":
-            # FIXME - should be convertable between training scenario 
-            return spaces.Dict({
-                f"{agent.color.value}_{agent.team_index}" : agent.observation_space
-                for agent in self.agents
-            })
+            # FIXME - should be convertable between training scenario
+            return spaces.Dict(
+                {f"{agent.color.value}_{agent.team_index}": agent.observation_space for agent in self.agents}
+            )
         # elif self.training_scheme == "CTDE":
         #     ...
 
@@ -290,28 +281,22 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         Return the joint action space of all agents.
         """
 
-        
         if self.training_scheme == "CTCE":
-
             # return spaces.Dict({
             #     agent.index: agent.action_space
             #     for agent in self.agents
             # })
 
-            return spaces.Dict({
-                team_name: spaces.Tuple((agent.action_space
-                for agent in agents )) for team_name, agents in self.agents_teams.items()
-            })
+            return spaces.Dict(
+                {
+                    team_name: spaces.Tuple((agent.action_space for agent in agents))
+                    for team_name, agents in self.agents_teams.items()
+                }
+            )
 
         elif self.training_scheme == "DTDE" or "CTDE":
-
-            # FIXME - should be convertable between training scenario 
-            return spaces.Dict({
-            f"{agent.color.value}_{agent.team_index}" : agent.action_space
-            for agent in self.agents
-        })
-
-
+            # FIXME - should be convertable between training scenario
+            return spaces.Dict({f"{agent.color.value}_{agent.team_index}": agent.action_space for agent in self.agents})
 
     @abstractmethod
     def _gen_grid(self, width: int, height: int):
@@ -334,10 +319,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         pass
 
-    def reset(
-        self, seed: int | None = None, **kwargs) -> tuple[
-            dict[AgentID, ObsType]:
-            dict[AgentID, dict[str, Any]]]:
+    def reset(self, seed: int | None = None, **kwargs) -> tuple[dict[AgentID, ObsType] : dict[AgentID, dict[str, Any]]]:
         """
         Reset the environment.
 
@@ -386,19 +368,20 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         observations = self.gen_obs()
 
         # Render environment
-        if self.render_mode == 'human':
+        if self.render_mode == "human":
             self.render()
 
         return observations, defaultdict(dict)
 
     def step(
-        self,
-        actions: dict[AgentID, Action]) -> tuple[
-            dict[AgentID, ObsType],
-            dict[AgentID, SupportsFloat],
-            dict[AgentID, bool],
-            dict[AgentID, bool],
-            dict[AgentID, dict[str, Any]]]:
+        self, actions: dict[AgentID, Action]
+    ) -> tuple[
+        dict[AgentID, ObsType],
+        dict[AgentID, SupportsFloat],
+        dict[AgentID, bool],
+        dict[AgentID, bool],
+        dict[AgentID, dict[str, Any]],
+    ]:
         """
         Run one timestep of the environment’s dynamics
         using the provided agent actions.
@@ -431,7 +414,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         truncations = dict(enumerate(repeat(truncated, self.num_agents)))
 
         # Rendering
-        if self.render_mode == 'human':
+        if self.render_mode == "human":
             self.render()
 
         return observations, rewards, terminations, truncations, defaultdict(dict)
@@ -459,15 +442,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         observations = {}
         for i in range(self.num_agents):
             observations[i] = {
-                'image': image[i],
-                'direction': direction[i],
-                'mission': self.agents[i].mission,
+                "image": image[i],
+                "direction": direction[i],
+                "mission": self.agents[i].mission,
             }
 
         return observations
 
-    def handle_actions(
-        self, actions: dict[AgentID, Action]) -> dict[AgentID, SupportsFloat]:
+    def handle_actions(self, actions: dict[AgentID, Action]) -> dict[AgentID, SupportsFloat]:
         """
         Handle actions taken by agents.
 
@@ -486,7 +468,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Randomize agent action order
         if self.num_agents == 1:
             order = (0,)
-            
+
         else:
             order = self.np_random.random(size=self.num_agents).argsort()
 
@@ -512,8 +494,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
                 if fwd_obj is None or fwd_obj.can_overlap():
                     if not self.allow_agent_overlap:
-                        agent_present = np.bitwise_and.reduce(
-                            self.agent_states.pos == fwd_pos, axis=1).any()
+                        agent_present = np.bitwise_and.reduce(self.agent_states.pos == fwd_pos, axis=1).any()
                         if agent_present:
                             continue
 
@@ -540,8 +521,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 fwd_obj = self.grid.get(*fwd_pos)
 
                 if agent.state.carrying and fwd_obj is None:
-                    agent_present = np.bitwise_and.reduce(
-                        self.agent_states.pos == fwd_pos, axis=1).any()
+                    agent_present = np.bitwise_and.reduce(self.agent_states.pos == fwd_pos, axis=1).any()
                     if not agent_present:
                         self.grid.set(*fwd_pos, agent.state.carrying)
                         agent.state.carrying.cur_pos = fwd_pos
@@ -564,11 +544,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
         return rewards
 
-    def on_success(
-        self,
-        agent: Agent,
-        rewards: dict[AgentID, SupportsFloat],
-        terminations: dict[AgentID, bool]= None) :
+    def on_success(self, agent: Agent, rewards: dict[AgentID, SupportsFloat], terminations: dict[AgentID, bool] = None):
         """
         Callback for when an agent completes its mission.
 
@@ -581,27 +557,23 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         terminations : dict[AgentID, bool]
             Termination dictionary to be updated
         """
-        if self.success_termination_mode == 'any':
+        if self.success_termination_mode == "any":
             if terminations:
-                self.agent_states.terminated = True # terminate all agents
+                self.agent_states.terminated = True  # terminate all agents
                 for i in range(self.num_agents):
                     terminations[i] = True
         else:
-            agent.state.terminated = True # terminate this agent only
+            agent.state.terminated = True  # terminate this agent only
             if terminations:
                 terminations[agent.index] = True
 
         if self.joint_reward:
             for i in range(self.num_agents):
-                rewards[i] = self._reward() # reward all agents
+                rewards[i] = self._reward()  # reward all agents
         else:
-            rewards[agent.index] = self._reward() # reward this agent only
+            rewards[agent.index] = self._reward()  # reward this agent only
 
-    def on_failure(
-        self,
-        agent: Agent,
-        rewards: dict[AgentID, SupportsFloat],
-        terminations: dict[AgentID, bool]= None):
+    def on_failure(self, agent: Agent, rewards: dict[AgentID, SupportsFloat], terminations: dict[AgentID, bool] = None):
         """
         Callback for when an agent fails its mission prematurely.
 
@@ -614,16 +586,15 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         terminations : dict[AgentID, bool]
             Termination dictionary to be updated
         """
-        if self.failure_termination_mode == 'any':
+        if self.failure_termination_mode == "any":
             if terminations:
-                self.agent_states.terminated = True # terminate all agents
+                self.agent_states.terminated = True  # terminate all agents
                 for i in range(self.num_agents):
                     terminations[i] = True
         else:
-            agent.state.terminated = True # terminate this agent only
+            agent.state.terminated = True  # terminate this agent only
             if terminations:
                 terminations[agent.index] = True
-
 
     def is_done(self) -> bool:
         """
@@ -644,18 +615,18 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         # Map of object types to short string
         OBJECT_TO_STR = {
-            'wall': 'W',
-            'floor': 'F',
-            'door': 'D',
-            'key': 'K',
-            'ball': 'A',
-            'box': 'B',
-            'goal': 'G',
-            'lava': 'V',
+            "wall": "W",
+            "floor": "F",
+            "door": "D",
+            "key": "K",
+            "ball": "A",
+            "box": "B",
+            "goal": "G",
+            "lava": "V",
         }
 
         # Map agent's direction to short string
-        AGENT_DIR_TO_STR = {0: '>', 1: 'V', 2: '<', 3: '^'}
+        AGENT_DIR_TO_STR = {0: ">", 1: "V", 2: "<", 3: "^"}
 
         # Get agent locations
         location_to_agent = {tuple(agent.pos): agent for agent in self.agents}
@@ -670,26 +641,26 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 tile = self.grid.get(i, j)
 
                 if tile is None:
-                    output += '  '
+                    output += "  "
                     continue
 
-                if tile.type == 'agent':
+                if tile.type == "agent":
                     output += 2 * AGENT_DIR_TO_STR[tile.dir]
                     continue
 
-                if tile.type == 'door':
+                if tile.type == "door":
                     if tile.is_open:
-                        output += '__'
+                        output += "__"
                     elif tile.is_locked:
-                        output += 'L' + tile.color[0].upper()
+                        output += "L" + tile.color[0].upper()
                     else:
-                        output += 'D' + tile.color[0].upper()
+                        output += "D" + tile.color[0].upper()
                     continue
 
                 output += OBJECT_TO_STR[tile.type] + tile.color[0].upper()
 
             if j < self.grid.height - 1:
-                output += '\n'
+                output += "\n"
 
         return output
 
@@ -705,7 +676,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         top: tuple[int, int] = None,
         size: tuple[int, int] = None,
         reject_fn: Callable[[MultiGridEnv, tuple[int, int]], bool] | None = None,
-        max_tries=math.inf) -> tuple[int, int]:
+        max_tries=math.inf,
+    ) -> tuple[int, int]:
         """
         Place an object at an empty position in the grid.
 
@@ -775,13 +747,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         obj.init_pos = (i, j)
         obj.cur_pos = (i, j)
 
-    def place_agent(
-        self,
-        agent: Agent,
-        top=None,
-        size=None,
-        rand_dir=True,
-        max_tries=math.inf) -> tuple[int, int]:
+    def place_agent(self, agent: Agent, top=None, size=None, rand_dir=True, max_tries=math.inf) -> tuple[int, int]:
         """
         Set agent starting point at an empty position in the grid.
         """
@@ -798,27 +764,27 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         Render an agent's POV observation for visualization.
         """
-        raise NotImplementedError(
-            "POV rendering not supported for multiagent environments."
-        )
+        raise NotImplementedError("POV rendering not supported for multiagent environments.")
 
     def get_full_render(self, highlight: bool, tile_size: int):
         """
         Render a non-partial observation for visualization.
         """
         # Compute agent visibility masks
-        obs_shape = self.agents[0].observation_space['image'].shape[:-1]
+        obs_shape = self.agents[0].observation_space["image"].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 
         if self.training_scheme == "CTCE":
             for team_name, agent_obs_list in self.gen_obs().items():
                 for agent_obs in agent_obs_list:
-                    vis_masks[self.team_index_dict[team_name][agent_obs["agent_id"]]] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
+                    vis_masks[self.team_index_dict[team_name][agent_obs["agent_id"]]] = (
+                        agent_obs["image"][..., 0] != Type.unseen.to_index()
+                    )
         elif self.training_scheme == "DTDE":
             for agent_id_str, agent_obs in self.gen_obs().items():
                 team_name, agent_team_idx = tuple(agent_id_str.split("_"))
                 agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
-                vis_masks[agent_index] = (agent_obs['image'][..., 0] != Type.unseen.to_index())
+                vis_masks[agent_index] = agent_obs["image"][..., 0] != Type.unseen.to_index()
 
         # Mask of which cells to highlight
         highlight_mask = np.zeros((self.width, self.height), dtype=bool)
@@ -828,11 +794,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             # of the agent's view area
             f_vec = agent.state.dir.to_vec()
             r_vec = np.array((-f_vec[1], f_vec[0]))
-            top_left = (
-                agent.state.pos
-                + f_vec * (agent.view_size - 1)
-                - r_vec * (agent.view_size // 2)
-            )
+            top_left = agent.state.pos + f_vec * (agent.view_size - 1) - r_vec * (agent.view_size // 2)
 
             # For each cell in the visibility mask
             for vis_j in range(0, agent.view_size):
@@ -862,10 +824,8 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         return img
 
     def get_frame(
-        self,
-        highlight: bool = True,
-        tile_size: int = TILE_PIXELS,
-        agent_pov: bool = False) -> ndarray[np.uint8]:
+        self, highlight: bool = True, tile_size: int = TILE_PIXELS, agent_pov: bool = False
+    ) -> ndarray[np.uint8]:
         """
         Returns an RGB image corresponding to the whole environment.
 
@@ -894,7 +854,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         img = self.get_frame(self.highlight, self.tile_size)
 
-        if self.render_mode == 'human':
+        if self.render_mode == "human":
             img = np.transpose(img, axes=(1, 0, 2))
             screen_size = (
                 self.screen_size * min(img.shape[0] / img.shape[1], 1.0),
@@ -905,7 +865,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             if self.window is None:
                 pygame.init()
                 pygame.display.init()
-                pygame.display.set_caption(f'multigrid - {self.__class__.__name__}')
+                pygame.display.set_caption(f"multigrid - {self.__class__.__name__}")
                 self.window = pygame.display.set_mode(screen_size)
             if self.clock is None:
                 self.clock = pygame.time.Clock()
@@ -914,9 +874,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             # Create background with mission description
             offset = surf.get_size()[0] * 0.1
             # offset = 32 if self.agent_pov else 64
-            bg = pygame.Surface(
-                (int(surf.get_size()[0] + offset), int(surf.get_size()[1] + offset))
-            )
+            bg = pygame.Surface((int(surf.get_size()[0] + offset), int(surf.get_size()[1] + offset)))
             bg.convert()
             bg.fill((255, 255, 255))
             bg.blit(surf, (offset / 2, 0))
@@ -933,10 +891,10 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
 
             self.window.blit(bg, (0, 0))
             pygame.event.pump()
-            self.clock.tick(self.metadata['render_fps'])
+            self.clock.tick(self.metadata["render_fps"])
             pygame.display.flip()
 
-        elif self.render_mode == 'rgb_array':
+        elif self.render_mode == "rgb_array":
             return img
 
     def close(self):

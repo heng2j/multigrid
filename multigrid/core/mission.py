@@ -5,7 +5,6 @@ from gymnasium import spaces
 from typing import Any, Callable, Iterable, Sequence
 
 
-
 class Mission(np.ndarray):
     """
     Class representing an agent mission.
@@ -26,8 +25,9 @@ class Mission(np.ndarray):
         return mission.view(cls)
 
     def __array_finalize__(self, mission):
-        if mission is None: return
-        self.string = getattr(mission, 'string', None)
+        if mission is None:
+            return
+        self.string = getattr(mission, "string", None)
 
     def __str__(self) -> str:
         return self.string
@@ -64,7 +64,8 @@ class MissionSpace(spaces.MultiDiscrete):
         self,
         mission_func: Callable[..., str],
         ordered_placeholders: Sequence[Sequence[str]] = [],
-        seed : int | np.random.Generator | None = None):
+        seed: int | np.random.Generator | None = None,
+    ):
         """
         Parameters
         ----------
@@ -85,7 +86,7 @@ class MissionSpace(spaces.MultiDiscrete):
         Get a string representation of this space.
         """
         if self.arg_groups:
-            return f'MissionSpace({self.mission_func.__name__}, {self.arg_groups})'
+            return f"MissionSpace({self.mission_func.__name__}, {self.arg_groups})"
         return f"MissionSpace('{self.mission_func()}')"
 
     def get(self, idx: Iterable[int]) -> Mission:

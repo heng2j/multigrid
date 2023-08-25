@@ -30,7 +30,11 @@ Configurations
 """
 
 from .blockedunlockpickup import BlockedUnlockPickupEnv
-from .competative_red_blue_door import CompetativeRedBlueDoorEnv, CompetativeRedBlueDoorEnvV2, CompetativeRedBlueDoorEnvV3
+from .competative_red_blue_door import (
+    CompetativeRedBlueDoorEnv,
+    CompetativeRedBlueDoorEnvV2,
+    CompetativeRedBlueDoorEnvV3,
+)
 from .empty import EmptyEnv
 from .locked_hallway import LockedHallwayEnv
 from .playground import PlaygroundEnv
@@ -38,44 +42,209 @@ from .redbluedoors import RedBlueDoorsEnv
 
 
 CONFIGURATIONS = {
-    'MultiGrid-BlockedUnlockPickup-v0': (BlockedUnlockPickupEnv, {}),
-    'MultiGrid-CompetativeRedBlueDoor-v0': (CompetativeRedBlueDoorEnv, {'size': 8}),
-    'MultiGrid-CompetativeRedBlueDoor-v1': (CompetativeRedBlueDoorEnv, {'size': 8}),
-    'MultiGrid-CompetativeRedBlueDoor-v1-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "teams":{"red": 1}, "agents": 1, "training_scheme" : "DTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v2': (CompetativeRedBlueDoorEnvV2, {'size': 8, "allow_agent_overlap": False}),
-    'MultiGrid-CompetativeRedBlueDoor-v3': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "teams":{"red": 2, "blue": 2}, "agents": 4 }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "CTCE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "DTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "CTDE" }), 
-    
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red-Eval': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "CTCE", "randomization": True, "max_steps": 300 }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Eval': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "DTDE", "randomization": True, "max_steps": 300 }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red-Eval': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True,  "teams":{"red": 2}, "agents": 2, "training_scheme" : "CTDE", "randomization": True, "max_steps": 300 }), 
-
-
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : False, "death_match" : True, "teams":{"red": 1, "blue": 1}, "agents": 2, "training_scheme" : "DTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : False, "death_match" : True, "teams":{"red": 1, "blue": 1}, "agents": 2, "training_scheme" : "CTCE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "death_match" : True, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTCE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "death_match" : True, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "DTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : True, "death_match" : False, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2-Death-Match': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : False, "death_match" : True, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTDE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2-Death-Match': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : False, "death_match" : True, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "CTCE" }), 
-    'MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2-Death-Match': (CompetativeRedBlueDoorEnvV3, {'size': 8, "allow_agent_overlap": False, "has_obsticle" : False, "death_match" : True, "teams":{"red": 2, "blue": 2}, "agents": 4, "training_scheme" : "DTDE" }), 
-    'MultiGrid-Empty-5x5-v0': (EmptyEnv, {'size': 5}),
-    'MultiGrid-Empty-Random-5x5-v0': (EmptyEnv, {'size': 5, 'agent_start_pos': None}),
-    'MultiGrid-Empty-6x6-v0': (EmptyEnv, {'size': 6}),
-    'MultiGrid-Empty-Random-6x6-v0': (EmptyEnv, {'size': 6, 'agent_start_pos': None}),
-    'MultiGrid-Empty-8x8-v0': (EmptyEnv, {}),
-    'MultiGrid-Empty-16x16-v0': (EmptyEnv, {'size': 16}),
-    'MultiGrid-LockedHallway-2Rooms-v0': (LockedHallwayEnv, {'num_rooms': 2}),
-    'MultiGrid-LockedHallway-4Rooms-v0': (LockedHallwayEnv, {'num_rooms': 4}),
-    'MultiGrid-LockedHallway-6Rooms-v0': (LockedHallwayEnv, {'num_rooms': 6}),
-    'MultiGrid-Playground-v0': (PlaygroundEnv, {}),
-    'MultiGrid-RedBlueDoors-6x6-v0': (RedBlueDoorsEnv, {'size': 6}),
-    'MultiGrid-RedBlueDoors-8x8-v0': (RedBlueDoorsEnv, {'size': 8}),
+    "MultiGrid-BlockedUnlockPickup-v0": (BlockedUnlockPickupEnv, {}),
+    "MultiGrid-CompetativeRedBlueDoor-v0": (CompetativeRedBlueDoorEnv, {"size": 8}),
+    "MultiGrid-CompetativeRedBlueDoor-v1": (CompetativeRedBlueDoorEnv, {"size": 8}),
+    "MultiGrid-CompetativeRedBlueDoor-v1-DTDE-Red": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 1},
+            "agents": 1,
+            "training_scheme": "DTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v2": (CompetativeRedBlueDoorEnvV2, {"size": 8, "allow_agent_overlap": False}),
+    "MultiGrid-CompetativeRedBlueDoor-v3": (
+        CompetativeRedBlueDoorEnvV3,
+        {"size": 8, "allow_agent_overlap": False, "has_obsticle": True, "teams": {"red": 2, "blue": 2}, "agents": 4},
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "CTCE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "DTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "CTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red-Eval": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "CTCE",
+            "randomization": True,
+            "max_steps": 300,
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Eval": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "DTDE",
+            "randomization": True,
+            "max_steps": 300,
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red-Eval": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "CTDE",
+            "randomization": True,
+            "max_steps": 300,
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "death_match": True,
+            "teams": {"red": 1, "blue": 1},
+            "agents": 2,
+            "training_scheme": "DTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "death_match": True,
+            "teams": {"red": 1, "blue": 1},
+            "agents": 2,
+            "training_scheme": "CTCE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "death_match": True,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "CTCE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "death_match": True,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "DTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "death_match": False,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "CTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2-Death-Match": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "death_match": True,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "CTDE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2-Death-Match": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "death_match": True,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "CTCE",
+        },
+    ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2-Death-Match": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "death_match": True,
+            "teams": {"red": 2, "blue": 2},
+            "agents": 4,
+            "training_scheme": "DTDE",
+        },
+    ),
+    "MultiGrid-Empty-5x5-v0": (EmptyEnv, {"size": 5}),
+    "MultiGrid-Empty-Random-5x5-v0": (EmptyEnv, {"size": 5, "agent_start_pos": None}),
+    "MultiGrid-Empty-6x6-v0": (EmptyEnv, {"size": 6}),
+    "MultiGrid-Empty-Random-6x6-v0": (EmptyEnv, {"size": 6, "agent_start_pos": None}),
+    "MultiGrid-Empty-8x8-v0": (EmptyEnv, {}),
+    "MultiGrid-Empty-16x16-v0": (EmptyEnv, {"size": 16}),
+    "MultiGrid-LockedHallway-2Rooms-v0": (LockedHallwayEnv, {"num_rooms": 2}),
+    "MultiGrid-LockedHallway-4Rooms-v0": (LockedHallwayEnv, {"num_rooms": 4}),
+    "MultiGrid-LockedHallway-6Rooms-v0": (LockedHallwayEnv, {"num_rooms": 6}),
+    "MultiGrid-Playground-v0": (PlaygroundEnv, {}),
+    "MultiGrid-RedBlueDoors-6x6-v0": (RedBlueDoorsEnv, {"size": 6}),
+    "MultiGrid-RedBlueDoors-8x8-v0": (RedBlueDoorsEnv, {"size": 8}),
 }
 
 # Register environments with gymnasium
 from gymnasium.envs.registration import register
+
 for name, (env_cls, config) in CONFIGURATIONS.items():
     register(id=name, entry_point=env_cls, kwargs=config)

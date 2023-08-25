@@ -4,7 +4,6 @@ from multigrid.core.mission import MissionSpace
 from multigrid.core.roomgrid import RoomGrid
 
 
-
 class PlaygroundEnv(RoomGrid):
     """
     .. image:: https://i.imgur.com/QBz99Vh.gif
@@ -89,13 +88,7 @@ class PlaygroundEnv(RoomGrid):
     * ``MultiGrid-Playground-v0``
     """
 
-    def __init__(
-        self,
-        room_size: int = 7,
-        num_rows: int = 3,
-        num_cols: int = 3,
-        max_steps: int = 100,
-        **kwargs):
+    def __init__(self, room_size: int = 7, num_rows: int = 3, num_cols: int = 3, max_steps: int = 100, **kwargs):
         """
         Parameters
         ----------

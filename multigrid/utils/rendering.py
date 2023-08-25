@@ -6,15 +6,14 @@ from numpy.typing import NDArray as ndarray
 from typing import Callable
 
 
-
 # Constants
 
 FilterFunction = Callable[[float, float], bool]
 White = np.array([255, 255, 255])
 
 
-
 # Functions
+
 
 def downsample(img: ndarray[np.uint8], factor: int) -> ndarray[np.uint8]:
     """
@@ -35,18 +34,14 @@ def downsample(img: ndarray[np.uint8], factor: int) -> ndarray[np.uint8]:
     assert img.shape[0] % factor == 0
     assert img.shape[1] % factor == 0
 
-    img = img.reshape(
-        [img.shape[0] // factor, factor, img.shape[1] // factor, factor, 3]
-    )
+    img = img.reshape([img.shape[0] // factor, factor, img.shape[1] // factor, factor, 3])
     img = img.mean(axis=3)
     img = img.mean(axis=1)
 
     return img
 
-def fill_coords(
-    img: ndarray[np.uint8],
-    fn: FilterFunction,
-    color: ndarray[np.uint8]) -> ndarray[np.uint8]:
+
+def fill_coords(img: ndarray[np.uint8], fn: FilterFunction, color: ndarray[np.uint8]) -> ndarray[np.uint8]:
     """
     Fill pixels of an image with coordinates matching a filter function.
 
@@ -73,6 +68,7 @@ def fill_coords(
 
     return img
 
+
 def rotate_fn(fin: FilterFunction, cx: float, cy: float, theta: float) -> FilterFunction:
     """
     Rotate a coordinate filter function around a center point by some angle.
@@ -93,6 +89,7 @@ def rotate_fn(fin: FilterFunction, cx: float, cy: float, theta: float) -> Filter
     fout : Callable(float, float) -> bool
         The rotated filter function
     """
+
     def fout(x, y):
         x = x - cx
         y = y - cy
@@ -104,8 +101,8 @@ def rotate_fn(fin: FilterFunction, cx: float, cy: float, theta: float) -> Filter
 
     return fout
 
-def point_in_line(
-    x0: float, y0: float, x1: float, y1: float, r: float) -> FilterFunction:
+
+def point_in_line(x0: float, y0: float, x1: float, y1: float, r: float) -> FilterFunction:
     """
     Return a filter function that returns True for points within distance r
     from the line between (x0, y0) and (x1, y1).
@@ -157,6 +154,7 @@ def point_in_line(
 
     return fn
 
+
 def point_in_circle(cx: float, cy: float, r: float) -> FilterFunction:
     """
     Return a filter function that returns True for points within radius r
@@ -176,10 +174,12 @@ def point_in_circle(cx: float, cy: float, r: float) -> FilterFunction:
     fn : Callable(float, float) -> bool
         Filter function
     """
+
     def fn(x, y):
         return (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r
 
     return fn
+
 
 def point_in_rect(xmin: float, xmax: float, ymin: float, ymax: float) -> FilterFunction:
     """
@@ -201,15 +201,14 @@ def point_in_rect(xmin: float, xmax: float, ymin: float, ymax: float) -> FilterF
     fn : Callable(float, float) -> bool
         Filter function
     """
+
     def fn(x, y):
         return x >= xmin and x <= xmax and y >= ymin and y <= ymax
 
     return fn
 
-def point_in_triangle(
-    a: tuple[float, float],
-    b: tuple[float, float],
-    c: tuple[float, float]) -> FilterFunction:
+
+def point_in_triangle(a: tuple[float, float], b: tuple[float, float], c: tuple[float, float]) -> FilterFunction:
     """
     Return a filter function that returns True for points within a triangle.
 
@@ -253,10 +252,8 @@ def point_in_triangle(
 
     return fn
 
-def highlight_img(
-    img: ndarray[np.uint8],
-    color: ndarray[np.uint8] = White,
-    alpha=0.30) -> ndarray[np.uint8]:
+
+def highlight_img(img: ndarray[np.uint8], color: ndarray[np.uint8] = White, alpha=0.30) -> ndarray[np.uint8]:
     """
     Add highlighting to an image.
 
