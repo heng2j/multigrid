@@ -1,5 +1,14 @@
 """ Expected for restricted changes """
 
+"""Script for performing evaluation of a trained RL policies, aka RLlib checkpoint, by visualizing their behaviors and saving
+metrics. It includes functionalities for visualizing trajectories of trained agents, saving frames as a GIF, and saving evaluation metrics
+to a CSV file.
+
+Note: This script is expected to have restricted changes.
+
+"""
+
+
 import argparse
 import json
 import numpy as np
@@ -14,8 +23,9 @@ def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str)
     """Saves frames as a GIF.
 
     Args:
-        frames (List[np.ndarray]): List of frames.
-        filename (str): Output file name.
+        frames (List[np.ndarray]): List of frames to be saved as GIF.
+        save_path (Path): Directory where the GIF will be saved.
+        filename (str): Name of the output GIF file.
     """
     import imageio
 
@@ -28,9 +38,9 @@ def save_evaluation_metrics(episodes_data: List[Dict], save_path: Path, scenario
     """Saves evaluation metrics to CSV.
 
     Args:
-        episodes_data (List[Dict]): List of episode data dictionaries.
-        save_dir (str): Directory to save metrics.
-        scenario_name (str): Scenario name for the file.
+        episodes_data (List[Dict]): List of dictionaries containing episode data.
+        save_path (Path): Directory where the CSV files will be saved.
+        scenario_name (str): Name of the scenario, used as part of the file name.
     """
 
     # Save episodes statistics
@@ -53,7 +63,15 @@ def evaluation(
     num_episodes: int = 100,
 ) -> list[np.ndarray]:
     """
-    Visualize trajectories from trained agents.
+    Visualizes trajectories from trained agents and collects evaluation data.
+
+    Args:
+        algorithm (Algorithm): The trained algorithm to be evaluated.
+        num_episodes (int, optional): Number of episodes to visualize. Default is 100.
+
+    Returns:
+        frames (list[np.ndarray]): List of frames of the agent's trajectory.
+        episodes_data (List[Dict]): List of dictionaries containing episode data.
     """
     frames = []
     episodes_data = []
@@ -95,6 +113,13 @@ def evaluation(
 
 
 def main_evaluation(args):
+    """
+    Main function for evaluation. It sets up the environment, restores the trained algorithm,
+    runs the evaluation, and saves the results.
+
+    Args:
+        args (argparse.Namespace): Parsed command line arguments.
+    """
     args.env_config.update(render_mode=args.render_mode)
     config = algorithm_config(
         **vars(args),
