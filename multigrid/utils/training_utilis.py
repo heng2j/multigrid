@@ -9,6 +9,14 @@ from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel, TorchCen
 from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
 from gymnasium.envs import registry as gym_envs_registry
+import ray.rllib.algorithms.callbacks as callbacks
+from ray.rllib.algorithms.callbacks import DefaultCallbacks
+from ray.tune.callback import Callback
+from ray.rllib import BaseEnv, Policy, RolloutWorker
+from typing import Dict, Optional, Union
+from ray.rllib.evaluation.episode import Episode
+from ray.rllib.evaluation.episode_v2 import EpisodeV2
+from ray.rllib.utils.typing import AgentID, EnvType, PolicyID
 
 
 def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
@@ -123,3 +131,61 @@ def algorithm_config(
             lr=(lr or NotProvided),
         )
     )
+
+
+
+# TODO - Set Evaluation
+class EvaluationCallbacks(DefaultCallbacks, Callback):
+    def on_episode_step(
+        self,
+        *,
+        worker: "RolloutWorker",
+        base_env: BaseEnv,
+        policies: Optional[Dict[PolicyID, Policy]] = None,
+        episode: Union[Episode, EpisodeV2],
+        env_index: Optional[int] = None,
+        **kwargs,
+    ):
+        info = episode._last_infos
+        for a_key in info.keys():
+            if a_key != "__common__":
+                for b_key in info[a_key]:
+                    try:
+                        episode.user_data[f"{a_key}/{b_key}"].append(info[a_key][b_key])
+                    except KeyError:
+                        episode.user_data[f"{a_key}/{b_key}"] = [info[a_key][b_key]]
+
+    def on_episode_end(
+        self,
+        *,
+        worker: "RolloutWorker",
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: Union[Episode, EpisodeV2, Exception],
+        env_index: Optional[int] = None,
+        **kwargs,
+    ):
+        info = episode._last_infos
+        for a_key in info.keys():
+            if a_key != "__common__":
+                for b_key in info[a_key]:
+                    metric = np.array(episode.user_data[f"{a_key}/{b_key}"])
+                    episode.custom_metrics[f"{a_key}/{b_key}"] = np.sum(metric).item()
+
+
+class RestoreWeightsCallback(DefaultCallbacks, Callback):
+    def __init__(
+        self,
+        load_dir: str,
+        policy_name: str,
+    ):
+        self.load_dir = load_dir
+        self.policy_name = policy_name
+
+    def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+        algorithm.set_weights({self.policy_name: self.restored_policy_0_weights})
+
+    def setup(self, *args, **kwargs):
+        policy_0_checkpoint_path = get_checkpoint_dir(self.load_dir)
+        restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
+        self.restored_policy_0_weights = restored_policy_0[self.policy_name].get_weights()

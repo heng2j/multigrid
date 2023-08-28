@@ -145,7 +145,7 @@ class Grid:
             Function that returns a WorldObj instance to use for the wall
         """
         length = self.width - x if length is None else length
-        self.state[x: x + length, y] = obj_type()
+        self.state[x : x + length, y] = obj_type()
 
     def vert_wall(self, x: int, y: int, length: int | None = None, obj_type: Callable[[], WorldObj] = Wall):
         """
@@ -163,7 +163,7 @@ class Grid:
             Function that returns a WorldObj instance to use for the wall
         """
         length = self.height - y if length is None else length
-        self.state[x, y: y + length] = obj_type()
+        self.state[x, y : y + length] = obj_type()
 
     def wall_rect(self, x: int, y: int, w: int, h: int):
         """

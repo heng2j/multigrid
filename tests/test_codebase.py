@@ -67,13 +67,11 @@ def get_functions_in_classes_from_ast(tree):
 #     assert not modified_locked_files, f"Locked files were modified: {', '.join(modified_locked_files)}"
 
 
-
-
-
-
 def test_restrict_file_changes():
     # Get the AST for the old version of the file
-    old_code = subprocess.run(["git", "show", "HEAD~1:multigrid/envs/competative_red_blue_door.py"], capture_output=True, text=True).stdout
+    old_code = subprocess.run(
+        ["git", "show", "HEAD~1:multigrid/envs/competative_red_blue_door.py"], capture_output=True, text=True
+    ).stdout
     old_tree = ast.parse(old_code)
     old_functions_in_classes = get_functions_in_classes_from_ast(old_tree)
 
@@ -88,4 +86,6 @@ def test_restrict_file_changes():
         allowed_functions = ALLOWED_FUNCTIONS_IN_CLASS.get(class_name, [])
         for old_function, new_function in zip(old_functions, new_functions):
             if old_function.name not in allowed_functions:
-                assert ast.dump(old_function) == ast.dump(new_function), f"Unauthorized modification in {class_name}.{old_function.name}"
+                assert ast.dump(old_function) == ast.dump(
+                    new_function
+                ), f"Unauthorized modification in {class_name}.{old_function.name}"

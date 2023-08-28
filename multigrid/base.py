@@ -316,7 +316,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         pass
 
-    def reset(self, seed: int | None = None, **kwargs) -> tuple[dict[AgentID, ObsType]: dict[AgentID, dict[str, Any]]]:
+    def reset(self, seed: int | None = None, **kwargs) -> tuple[dict[AgentID, ObsType] : dict[AgentID, dict[str, Any]]]:
         """
         Reset the environment.
 

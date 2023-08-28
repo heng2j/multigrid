@@ -105,10 +105,9 @@ def main_evaluation(args):
     algorithm = config.build()
     checkpoint = get_checkpoint_dir(args.load_dir)
 
-
     # Create a Path object for the directory
     save_path = Path(args.save_dir)
-    
+
     # Make sure the directory exists; if not, create it
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -136,10 +135,7 @@ def main_evaluation(args):
 
     if args.gif:
         filename = args.gif if args.gif.endswith(".gif") else f"{args.gif}.gif"
-        save_frames_to_gif(frames=frames,save_path=save_path,filename=filename )
-
-
-
+        save_frames_to_gif(frames=frames, save_path=save_path, filename=filename)
 
 
 if __name__ == "__main__":

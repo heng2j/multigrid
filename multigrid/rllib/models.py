@@ -181,9 +181,10 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         # Calculate input size based on observation size, number of team members and action space
         obs_size = np.prod(obs_space.shape)
         act_size = action_space.n
+
+        # input_size = my agent's obs + team member's obs + team member's actions
         input_size = obs_size * (self.num_team_members + 1) + act_size * self.num_team_members
 
-        # input_size = 6 + 6 + 2  # my agent's obs + team member's obs + team member's actions
         self.central_vf = nn.Sequential(
             SlimFC(input_size, 16, activation_fn=nn.Tanh),
             SlimFC(16, 1),
