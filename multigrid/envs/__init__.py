@@ -70,6 +70,19 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "CTCE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                    "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        }
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red": (
@@ -81,6 +94,20 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "DTDE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                    "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        }
+            
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red": (
@@ -92,6 +119,19 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "CTDE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                            "key_pickup_sparse_reward": 0.5,
+                                            "ball_pickup_dense_reward": 0.5,
+                                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                            "invalid_pickup_dense_penalty": 0.001
+                                            },
+                                "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                            "key_pickup_sparse_reward": 0.5,
+                                            "ball_pickup_dense_reward": 0.5,
+                                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                            "invalid_pickup_dense_penalty": 0.001
+                                            },
+                                    }
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red-Eval": (
@@ -103,6 +143,19 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "CTCE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                    "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        },
             "randomization": True,
             "max_steps": 300,
         },
@@ -116,6 +169,19 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "DTDE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                    "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        },
             "randomization": True,
             "max_steps": 300,
         },
@@ -129,6 +195,19 @@ CONFIGURATIONS = {
             "teams": {"red": 2},
             "agents": 2,
             "training_scheme": "CTDE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                    "red_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        },
             "randomization": True,
             "max_steps": 300,
         },
