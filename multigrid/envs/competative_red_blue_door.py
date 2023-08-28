@@ -124,6 +124,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         has_obsticle: bool = False,
         death_match: bool = False,
         randomization: bool = False,
+        reward_scheme: dict[str, int] = {"red": 1},
         **kwargs,
     ):
         """
@@ -146,6 +147,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         """
         self.teams = teams
         self.training_scheme = training_scheme
+        self.reward_scheme = reward_scheme
         self.has_obsticle = has_obsticle
         self.death_match = death_match
         self.size = size
@@ -408,8 +410,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 fwd_obj.pos = (
                     (2, 2) if fwd_obj.color == "blue" else (13, 2)
                 )  # This is not scalabe and only works in 2v2 at most
-                reward[agent_index] += 0.5
-                reward[fwd_obj.index] -= 1
+                reward[agent_index] += self.reward_scheme[agent.name]["eliminated_opponent_sparse_reward"] #   0.5
+                reward[fwd_obj.index] -= 1 # NOTE - This opponent penalty is a fixed value for the game
 
                 # Terminate the game if the rest of the other agents in the same team also got terminated
                 all_opponents_terminated = all(
@@ -438,7 +440,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 # FIXME - make me elegant
                 agent.carrying.is_available = False
                 agent.carrying.is_pickedup = True
-                reward[agent_index] += 0.5
+                reward[agent_index] += self.reward_scheme[agent.name]["key_pickup_sparse_reward"] #   0.5
 
                 if self.training_scheme == "DTDE" or "CTDE":
                     # TODO - Mimic communiations
@@ -453,9 +455,12 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-                reward[agent_index] += 0.5 * agent.carrying.discount_factor
-                agent.carrying.discount_factor *= agent.carrying.discount_factor
 
+                carrying_discount_factor = self.reward_scheme.get(agent.name, {}).get("dense_reward_discount_factor", {}).get("carrying_discount_factor", agent.carrying.discount_factor)
+                reward[agent_index] +=  self.reward_scheme[agent.name]["ball_pickup_dense_reward"] * carrying_discount_factor # 0.5 * agent.carrying.discount_factor 
+                carrying_discount_factor *= carrying_discount_factor
+                self.reward_scheme[agent.name]["dense_reward_discount_factor"].setdefault("carrying_discount_factor", carrying_discount_factor)
+        
                 if self.training_scheme == "DTDE" or "CTDE":
                     # TODO - Mimic communiations
                     agent.mission = Mission("Go move away the ball")
@@ -473,7 +478,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             else:
                 # If we are grabbing bad stuff
                 # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                reward[agent_index] -= 0.001  # OG  0.2
+                reward[agent_index] -= self.reward_scheme[agent.name]["invalid_pickup_dense_penalty"] # 0.001  # OG  0.2
 
     def step(self, actions):
         """
@@ -635,7 +640,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
     #         # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
 
-    def reward_scheme(self):
+    def process_reward_scheme(self):
         ...
 
 
