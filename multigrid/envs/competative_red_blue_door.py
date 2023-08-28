@@ -641,7 +641,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
     #         # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
 
-    def process_reward_scheme(self):
+    def process_reward_schemes(self):
+        # TODO - For scaling reward_schemes
         ...
 
 
