@@ -325,7 +325,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         return obs, team_rewards, team_terminated, team_truncated, info
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
-        # NOTE -need future fix - Temp work around for RLLlib's "Batches sent to postprocessing must only contain steps from a single trajectory." that caused by early dones
+        # NOTE -need future fix - Temp work around for RLLlib's "Batches sent to postprocessing
+        # must only contain steps from a single trajectory." that caused by early dones
         if any([term_state for agent, term_state in terminated.items()]) and not all(
             [term_state for agent, term_state in terminated.items()]
         ):
@@ -402,8 +403,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 self.grid.set(*fwd_obj.pos, None)
                 fwd_obj.pos = (
                     (2, 2) if fwd_obj.color == "blue" else (13, 2)
-                )  # This is not scalabe and only works in 2v2 at most
-                reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]  #   0.5
+                )  # NOTE This is not scalabe and only works in 2v2 at most
+                reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]
                 reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game
 
                 # Terminate the game if the rest of the other agents in the same team also got terminated
@@ -411,10 +412,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                     [other_agent.terminated for other_agent in self.agents if other_agent.color != agent.color]
                 )
                 if all_opponents_terminated:
-                    # self.on_success(agent, reward, terminated)
-
-                    # info[agent.color if self.training_scheme == "CTCE" else agent.name ]["eliminated_opponents_done"] = True
-
                     for this_agent in self.agents:
                         if this_agent.color == agent.color and not this_agent.terminated:
                             self.on_success(this_agent, reward, terminated)
@@ -427,12 +424,12 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             if (
                 agent.carrying
                 and (agent.carrying.type == "key")
-                and (agent.carrying.is_available == True)
+                and (agent.carrying.is_available)
                 and (agent.color == agent.carrying.color)
             ):
                 agent.carrying.is_available = False
                 agent.carrying.is_pickedup = True
-                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]  #   0.5
+                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
 
                 if self.training_scheme == "DTDE" or "CTDE":
                     # TODO - Mimic communiations
@@ -889,7 +886,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 if (
                     agent.carrying
                     and (agent.carrying.type == "key")
-                    and (agent.carrying.is_available == True)
+                    and (agent.carrying.is_available)
                     and (agent.color == agent.carrying.color)
                 ):
                     # FIXME - make me elegant
@@ -1225,7 +1222,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
         :meta private:
         """
         LEFT, HALLWAY, RIGHT = range(3)  # columns
-        color_sequence = ["blue", "red"]  # ["blue"] #  ["red"] #  ["red", "blue"]
+        # color_sequence = ["blue", "red"]  # ["blue"] #  ["red"] #  ["red", "blue"]
 
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -1319,7 +1316,7 @@ class CompetativeRedBlueDoorEnv(MultiGridEnv):
                 if (
                     agent.carrying
                     and (agent.carrying.type == "key")
-                    and (agent.carrying.is_available == True)
+                    and (agent.carrying.is_available)
                     and (agent.color == agent.carrying.color)
                 ):
                     # FIXME - make me elegant

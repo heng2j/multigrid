@@ -177,7 +177,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             self.agents: list[Agent] = []
 
             # Arrange Teams
-            # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
             self.agents_teams: dict[str, list[Agent]] = defaultdict(list)
 
             tmp_agent_idx = 0
@@ -218,7 +217,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             raise ValueError(f"Invalid argument for agents: {agents}")
 
         # # TODO - Arrange Teams
-        # assert sum([ team_num for _, team_num in teams.items()]) == self.num_agents , f"Team arrangement numer does not match the totoal number avialbe agents: {self.num_agents}"
         # self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
 
         # tmp_agent_idx = 0
@@ -318,7 +316,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         """
         pass
 
-    def reset(self, seed: int | None = None, **kwargs) -> tuple[dict[AgentID, ObsType] : dict[AgentID, dict[str, Any]]]:
+    def reset(self, seed: int | None = None, **kwargs) -> tuple[dict[AgentID, ObsType]: dict[AgentID, dict[str, Any]]]:
         """
         Reset the environment.
 
@@ -349,10 +347,10 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         assert np.all(self.agent_states.pos >= 0)
         assert np.all(self.agent_states.dir >= 0)
 
-        # Check that agents don't overlap with other objects
-        for agent in self.agents:
-            start_cell = self.grid.get(*agent.state.pos)
-            # assert start_cell is None or start_cell.can_overlap()
+        # # Check that agents don't overlap with other objects
+        # for agent in self.agents:
+        #     start_cell = self.grid.get(*agent.state.pos)
+        #     assert start_cell is None or start_cell.can_overlap()
 
         # Episodic reward since episode start
         self.episodic_reward = 0

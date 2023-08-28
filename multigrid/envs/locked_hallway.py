@@ -175,7 +175,7 @@ class LockedHallwayEnv(RoomGrid):
         while key_index < len(color_sequence):
             room = self.rooms[color_sequence[key_index - 1]]
             num_room_keys = self._rand_int(1, self.max_keys_per_room + 1)
-            for key_color in color_sequence[key_index : key_index + num_room_keys]:
+            for key_color in color_sequence[key_index: key_index + num_room_keys]:
                 self.place_obj(Key(color=key_color), top=room.top, size=room.size)
                 key_index += 1
 

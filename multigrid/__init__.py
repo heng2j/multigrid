@@ -1,4 +1,3 @@
-from .base import MultiGridEnv
-from .core import *
+from .core import *  # noqa: F403 F401
 
 __version__ = "0.1.0rc0"
