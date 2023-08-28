@@ -1,5 +1,6 @@
 import subprocess
 import os
+    import ast
 import glob
 
 def test_only_exception_files_modified():
@@ -53,3 +54,9 @@ def test_only_exception_files_modified():
     assert not modified_locked_files, f"Locked files were modified: {', '.join(modified_locked_files)}"
 
 
+
+import subprocess
+
+ALLOWED_FUNCTIONS_IN_CLASS = {
+    "MyClass": ["allowed_function_1", "allowed_function_2"],
+}
