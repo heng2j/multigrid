@@ -154,6 +154,14 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
         return [torch.zeros(self.lstm.hidden_size), torch.zeros(self.lstm.hidden_size)]
 
 
+
+
+# TODO - Set CTDE Model
+# https://github.com/ray-project/ray/blob/master/rllib/examples/centralized_critic.py
+# https://github.com/ray-project/ray/blob/master/rllib/examples/models/centralized_critic_models.py
+
+
+
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.misc import SlimFC
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
@@ -167,7 +175,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
 
-        self.num_team_members = 1  # FIXME with custom policy spec model_config["custom_model_config"]["teams"]
+        self.num_team_members = 1  # NOTE - future fix for scalbility with values from custom policy spec model_config["custom_model_config"] and name to indidate the team name
 
         # Base of the model
         self.model = TorchComplexInputNetwork(obs_space, action_space, num_outputs, model_config, name)

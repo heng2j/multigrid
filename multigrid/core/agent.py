@@ -109,9 +109,6 @@ class Agent:
                 }
             )
 
-            # Actions are discrete integer values
-            self.action_space = spaces.Discrete(len(Action))
-
         elif self.training_scheme == "DTDE" or "CTDE":
             self.observation_space = spaces.Dict(
                 {
@@ -126,20 +123,8 @@ class Agent:
                 }
             )
 
-            # Actions are discrete integer values
-            self.action_space = spaces.Discrete(len(Action))
-
-        # FIXME - should be convertable between training scenario
-        # self.observation_space = spaces.Box(
-        #         low=0,
-        #         high=255,
-        #         shape=(view_size, view_size, WorldObj.dim),
-        #         dtype=int,
-        #     )
-
-        # TODO - update action space
         # Actions are discrete integer values
-        # self.action_space = spaces.Discrete(len(Action))
+        self.action_space = spaces.Discrete(len(Action))
 
     # AgentState Properties
     color = PropertyAlias("state", "color", doc="Alias for :attr:`AgentState.color`.")
@@ -148,35 +133,6 @@ class Agent:
     terminated = PropertyAlias("state", "terminated", doc="Alias for :attr:`AgentState.terminated`.")
     carrying = PropertyAlias("state", "carrying", doc="Alias for :attr:`AgentState.carrying`.")
 
-    # @property
-    # def observation_space(self):
-
-    #     if self.training_scheme == "CTCE":
-    #         return spaces.Dict({
-    #             'agent_id': spaces.Discrete(self.team_index),
-    #             'image': spaces.Box(
-    #                 low=0,
-    #                 high=255,
-    #                 shape=(self.view_size, self.view_size, WorldObj.dim),
-    #                 dtype=int,
-    #             ),
-    #             'direction': spaces.Discrete(len(Direction)),
-    #             'mission': self.mission_space,
-    #         })
-    #     elif self.training_scheme == "DTDE":
-    #         # FIXME - should be convertable between training scenario
-    #         return spaces.Dict({
-    #             agent.index: agent.observation_space
-    #             for agent in self.agents
-    #         })
-    #     elif self.training_scheme == "CTDE":
-    #         ...
-
-    # def set_observation_space(self):
-    #     ...
-
-    # def set_action_space(self):
-    #     ...
 
     @property
     def front_pos(self) -> tuple[int, int]:

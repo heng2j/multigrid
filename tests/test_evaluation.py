@@ -52,7 +52,7 @@ def test_evaluation():
             "lstm": False,
             "env": env,
             "env_config": {},
-            "num_agents": sum([team_num for team_name, team_num in teams.items()]),
+            "num_agents": sum(teams.values()),
             "num_episodes": 10,
             "load_dir": checkpoint_path,
             "gif": gif,

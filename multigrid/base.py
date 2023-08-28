@@ -169,7 +169,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             if agents == 1:
                 self.num_agents = agents
             else:
-                self.num_agents = sum([team_num for team_name, team_num in teams.items()])
+                self.num_agents = sum(teams.values())
 
             self.agent_states = AgentState(self.num_agents)  # joint agent state (vectorized)
             self.agents: list[Agent] = []
@@ -266,12 +266,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             # return spaces.Tuple((agent.observation_space
             #     for agent in self.agents ))
         elif self.training_scheme == "DTDE" or "CTDE":
-            # FIXME - should be convertable between training scenario
             return spaces.Dict(
                 {f"{agent.color.value}_{agent.team_index}": agent.observation_space for agent in self.agents}
             )
-        # elif self.training_scheme == "CTDE":
-        #     ...
 
         # FIXME - for HW2
         # return self.agents[0].observation_space
@@ -296,7 +293,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
             )
 
         elif self.training_scheme == "DTDE" or "CTDE":
-            # FIXME - should be convertable between training scenario
             return spaces.Dict({f"{agent.color.value}_{agent.team_index}": agent.action_space for agent in self.agents})
 
     @abstractmethod

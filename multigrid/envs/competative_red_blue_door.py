@@ -326,7 +326,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         return obs, team_rewards, team_terminated, team_truncated, info
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
-        # FIXME - Temp work around for RLLlib's "Batches sent to postprocessing must only contain steps from a single trajectory." that caused by early dones
+        # NOTE -need future fix - Temp work around for RLLlib's "Batches sent to postprocessing must only contain steps from a single trajectory." that caused by early dones
         if any([term_state for agent, term_state in terminated.items()]) and not all(
             [term_state for agent, term_state in terminated.items()]
         ):
@@ -431,7 +431,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.carrying.is_available == True)
                 and (agent.color == agent.carrying.color)
             ):
-                # FIXME - make me elegant
                 agent.carrying.is_available = False
                 agent.carrying.is_pickedup = True
                 reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"] #   0.5
@@ -470,9 +469,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                                 this_agent.mission = Mission("Go pick up the key")
 
             else:
-                # If we are grabbing bad stuff
+                # Invalid pickup action
                 # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"] # 0.001  # OG  0.2
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]  # OG  0.2
 
     def step(self, actions):
         """
@@ -624,7 +623,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
     #         # TODO - FIXME Extra credict, add Dense Rewards to encourage agent to learn faster
 
     def process_reward_schemes(self):
-        # TODO - For scaling reward_schemes
+        # NOTE future todo - For scaling reward_schemes
         ...
 
 

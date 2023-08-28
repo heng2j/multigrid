@@ -1,6 +1,6 @@
 import subprocess
 import os
-    import ast
+import ast
 import glob
 
 def test_only_exception_files_modified():
