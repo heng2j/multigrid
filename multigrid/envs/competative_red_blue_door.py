@@ -330,7 +330,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         if any([term_state for agent, term_state in terminated.items()]) and not all(
             [term_state for agent, term_state in terminated.items()]
         ):
-            # print("here")
             terminated = {agent_index: False for agent_index, _ in terminated.items()}
 
         info = {
@@ -364,12 +363,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         for agent_idx, value in truncated.items():
             for team_name, team_index in self.agent_index_dict[agent_idx].items():
                 reformated_truncated[f"{team_name}_{team_index}"] = value
-
-        # if all([term_state for agent, term_state in reformated_terminated.items()]):
-        #     print("here")
-
-        # if all([truncated_state for agent, truncated_state in reformated_truncated.items()]):
-        #     print("here")
 
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
@@ -577,17 +570,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         rewards : dict[AgentID, SupportsFloat]
             Reward for each agent
         """
-
-        # # Randomize agent action order
-        # if (self.num_agents == 1) and (self.training_scheme == "DTDE"):
-        #     order = (0,)
-        # elif (self.num_agents == 1) and (self.training_scheme == "CTCE"):
-        #     order = ("red",)
-        # elif (self.num_agents > 1) and (self.training_scheme == "CTCE"):
-        #     order = ("red", "blue")
-        # else:
-        #     order = self.np_random.random(size=self.num_agents).argsort()
-
         rewards = {agent_index: 0 for agent_index in range(self.num_agents)}
 
         if self.training_scheme == "CTCE":
