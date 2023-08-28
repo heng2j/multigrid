@@ -1,17 +1,26 @@
 """ Expected for restricted changes """
 
+
+"""Script for Training Deep Reinforcement Learning agents in MultiGrid environment.
+
+This script provides a streamlined way to configure and train RL agents
+using Ray's RLlib library. The script allows for a variety of command-line options,
+including algorithm selection, environment setup, and more.
+
+Note: This script is expected to have restricted changes.
+
+"""
+
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import pathlib
-import ray
-
-from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, EvaluationCallbacks
-from multigrid.rllib.ctde_torch_policy import CentralizedCritic
-
 from pprint import pprint
+import git
+from pathlib import Path
+import os
+import ray
 from ray import tune
 from ray.rllib.algorithms import AlgorithmConfig
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
@@ -20,16 +29,46 @@ from ray.tune.registry import get_trainable_cls
 from ray.tune import CLIReporter
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 
+from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, EvaluationCallbacks
+from multigrid.rllib.ctde_torch_policy import CentralizedCritic
 
-SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute())
 
-import git
+# Constants
+SUBMISSION_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/submission_config.json"), key=os.path.getmtime
+)[-1]
 
-# Limit the number of rows.
+with open(SUBMISSION_CONFIG_FILE, "r") as file:
+    submission_config_data = file.read()
+
+submission_config = json.loads(submission_config_data)
+
+SUBMITTER_NAME = submission_config["name"]
+
+SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute().parent.absolute())
+TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(SCRIPT_PATH).head.commit}
+
+
+# Initialize the CLI reporter for Ray
 reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
 
+def configure_algorithm(args):
+    """Create an algorithm configuration object based on command-line arguments.
 
-tags = {"user_name": "John", "git_commit_hash": git.Repo(SCRIPT_PATH).head.commit}
+    Parameters:
+        args: argparse.Namespace
+            Parsed command-line arguments.
+
+    Returns:
+        AlgorithmConfig
+            The constructed algorithm configuration object.
+    """
+    config = algorithm_config(**vars(args))
+    config.seed = args.seed
+    config.callbacks(EvaluationCallbacks)
+    config.environment(disable_env_checking=False)
+    return config
+
 
 def train(
     algo: str,
@@ -39,10 +78,25 @@ def train(
     load_dir: str | None = None,
     local_mode: bool = False,
     experiment_name: str = "testing_experiment",
-    training_scheme: str = "CTDE",  # Can be either "CTCE", "DTDE" or "CTDE"
+    training_scheme: str = "CTCE",
 ):
-    """
-    Train an RLlib algorithm.
+    """Main training loop for RLlib algorithms.
+
+    This function initializes Ray, runs the training loop, and handles
+    checkpoints and logging.
+
+    Parameters:
+        algo (str): The RL algorithm to use.
+        config (AlgorithmConfig): Configuration object for the algorithm.
+        stop_conditions (dict): Conditions to stop the training.
+        save_dir (str): Directory to save checkpoints and logs.
+        load_dir (str, optional): Directory to load pre-trained model checkpoints from.
+        local_mode (bool, optional): Whether to run Ray in local mode (for debugging).
+        experiment_name (str, optional): Name of the experiment for logging.
+        training_scheme (str, optional): Training scheme, can be either 'CTCE', 'DTDE', or 'CTDE'.
+
+    Returns:
+        None
     """
 
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
@@ -58,7 +112,7 @@ def train(
         progress_reporter=reporter,
         callbacks=[
             MLflowLoggerCallback(
-                tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=tags, save_artifact=True
+                tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=TAGS, save_artifact=True
             ),
         ],  #   RestoreWeightsCallback(load_dir=load_dir,policy_name="policy_0"),
     )
@@ -106,19 +160,15 @@ if __name__ == "__main__":
         "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument("--our-agent-ids", nargs="+", type=int, default=[0, 1], help="List of agent ids to train")
-    parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red"], help="List of agent ids to train"  # "blue",
-    )
+    # parser.add_argument(
+    #     "--policies-to-train", nargs="+", type=str, default=["red"], help="List of agent ids to train"  
+    # )
     parser.add_argument("--training-scheme", type=str, default="CTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
     args = parser.parse_args()
     # args.multiagent = {}
     # args.multiagent["policies_to_train"] = args.policies_to_train
-    config = algorithm_config(**vars(args))
-    # config.multiagent["policies_to_train"] =args.policies_to_train
-    config.seed = args.seed
-    config.callbacks(EvaluationCallbacks)
-    config.environment(disable_env_checking=False)
+    config = configure_algorithm(args)
     stop_conditions = {"timesteps_total": args.num_timesteps}
 
     print()
