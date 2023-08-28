@@ -61,6 +61,24 @@ CONFIGURATIONS = {
         CompetativeRedBlueDoorEnvV3,
         {"size": 8, "allow_agent_overlap": False, "has_obsticle": True, "teams": {"red": 2, "blue": 2}, "agents": 4},
     ),
+    "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red-Single": (
+        CompetativeRedBlueDoorEnvV3,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": True,
+            "teams": {"red": 2},
+            "agents": 2,
+            "training_scheme": "CTCE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                                "key_pickup_sparse_reward": 0.5,
+                                "ball_pickup_dense_reward": 0.5,
+                                "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                                "invalid_pickup_dense_penalty": 0.001
+                                },
+                        }
+        },
+    ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red": (
         CompetativeRedBlueDoorEnvV3,
         {
@@ -131,7 +149,7 @@ CONFIGURATIONS = {
                                             "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
                                             "invalid_pickup_dense_penalty": 0.001
                                             },
-                                    }
+                                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-Red-Eval": (
@@ -222,6 +240,19 @@ CONFIGURATIONS = {
             "teams": {"red": 1, "blue": 1},
             "agents": 2,
             "training_scheme": "DTDE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1": (
@@ -234,6 +265,19 @@ CONFIGURATIONS = {
             "teams": {"red": 1, "blue": 1},
             "agents": 2,
             "training_scheme": "CTCE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2": (
@@ -246,6 +290,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "CTCE",
+            "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2": (
@@ -258,6 +327,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "DTDE",
+                        "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2": (
@@ -270,6 +364,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "CTDE",
+                        "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-2v2-Death-Match": (
@@ -282,6 +401,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "CTDE",
+                        "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2-Death-Match": (
@@ -294,6 +438,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "CTCE",
+                        "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-2v2-Death-Match": (
@@ -306,6 +475,31 @@ CONFIGURATIONS = {
             "teams": {"red": 2, "blue": 2},
             "agents": 4,
             "training_scheme": "DTDE",
+                        "reward_schemes" : {"red_0": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                        "red_1": {"eliminated_opponent_sparse_reward" : 0.5,
+                        "key_pickup_sparse_reward": 0.5,
+                        "ball_pickup_dense_reward": 0.5,
+                        "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                        "invalid_pickup_dense_penalty": 0.001
+                        },
+                "blue_0" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                                            "blue_1" : {"eliminated_opponent_sparse_reward" : 0.5,
+                            "key_pickup_sparse_reward": 0.5,
+                            "ball_pickup_dense_reward": 0.5,
+                            "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                            "invalid_pickup_dense_penalty": 0.001
+                            },
+                    },
         },
     ),
     "MultiGrid-Empty-5x5-v0": (EmptyEnv, {"size": 5}),
