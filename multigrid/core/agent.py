@@ -133,7 +133,6 @@ class Agent:
     terminated = PropertyAlias("state", "terminated", doc="Alias for :attr:`AgentState.terminated`.")
     carrying = PropertyAlias("state", "carrying", doc="Alias for :attr:`AgentState.carrying`.")
 
-
     @property
     def front_pos(self) -> tuple[int, int]:
         """

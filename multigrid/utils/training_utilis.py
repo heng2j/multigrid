@@ -10,6 +10,7 @@ from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
 from gymnasium.envs import registry as gym_envs_registry
 
+
 def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
     """
     Recursively search for checkpoints within the given directory.
@@ -97,11 +98,11 @@ def algorithm_config(
     """
     Return the RL algorithm configuration dictionary.
     """
-    
-    env_config = gym_envs_registry[env].kwargs 
+
+    env_config = gym_envs_registry[env].kwargs
 
     return (
-        get_trainable_cls(algo) 
+        get_trainable_cls(algo)
         .get_default_config()
         .environment(env=env, env_config=env_config)
         .framework(framework)
@@ -115,7 +116,9 @@ def algorithm_config(
         )
         .training(
             model=model_config(
-                framework=framework, lstm=lstm, custom_model_config={"teams": env_config["teams"], "training_scheme": env_config["training_scheme"]}
+                framework=framework,
+                lstm=lstm,
+                custom_model_config={"teams": env_config["teams"], "training_scheme": env_config["training_scheme"]},
             ),
             lr=(lr or NotProvided),
         )

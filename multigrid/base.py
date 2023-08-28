@@ -105,7 +105,9 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
-        reward_schemes: dict[str, int] = {"red": 1}, # NOTE - Currently reward_schemes is not being used in the base env level
+        reward_schemes: dict[str, int] = {
+            "red": 1
+        },  # NOTE - Currently reward_schemes is not being used in the base env level
     ):
         """
         Parameters

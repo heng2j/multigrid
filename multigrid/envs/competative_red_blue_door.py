@@ -175,7 +175,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             failure_termination_mode=failure_termination_mode,
             teams=self.teams,
             training_scheme=self.training_scheme,
-
             **kwargs,
         )
 
@@ -404,8 +403,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 fwd_obj.pos = (
                     (2, 2) if fwd_obj.color == "blue" else (13, 2)
                 )  # This is not scalabe and only works in 2v2 at most
-                reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"] #   0.5
-                reward[fwd_obj.index] -= 1 # NOTE - This opponent penalty is a fixed value for the game
+                reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]  #   0.5
+                reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game
 
                 # Terminate the game if the rest of the other agents in the same team also got terminated
                 all_opponents_terminated = all(
@@ -433,7 +432,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             ):
                 agent.carrying.is_available = False
                 agent.carrying.is_pickedup = True
-                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"] #   0.5
+                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]  #   0.5
 
                 if self.training_scheme == "DTDE" or "CTDE":
                     # TODO - Mimic communiations
@@ -448,12 +447,19 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-
-                ball_carrying_discount_factor = self.reward_schemes.get(agent.name, {}).get("dense_reward_discount_factor", {}).get("ball_carrying_discount_factor", agent.carrying.discount_factor)
-                reward[agent_index] +=  self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * ball_carrying_discount_factor # 0.5 * agent.carrying.discount_factor 
+                ball_carrying_discount_factor = (
+                    self.reward_schemes.get(agent.name, {})
+                    .get("dense_reward_discount_factor", {})
+                    .get("ball_carrying_discount_factor", agent.carrying.discount_factor)
+                )
+                reward[agent_index] += (
+                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * ball_carrying_discount_factor
+                )  # 0.5 * agent.carrying.discount_factor
                 ball_carrying_discount_factor *= ball_carrying_discount_factor
-                self.reward_schemes[agent.name]["dense_reward_discount_factor"].setdefault("ball_carrying_discount_factor", ball_carrying_discount_factor)
-        
+                self.reward_schemes[agent.name]["dense_reward_discount_factor"].setdefault(
+                    "ball_carrying_discount_factor", ball_carrying_discount_factor
+                )
+
                 if self.training_scheme == "DTDE" or "CTDE":
                     # TODO - Mimic communiations
                     agent.mission = Mission("Go move away the ball")
