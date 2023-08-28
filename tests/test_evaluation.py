@@ -9,6 +9,8 @@ from multigrid.envs import CONFIGURATIONS
 import json
 
 
+# import cProfile
+
 SUBMISSION_CONFIG_FILE = sorted(
     Path("submission").expanduser().glob("**/submission_config.json"), key=os.path.getmtime
 )[-1]
@@ -40,8 +42,8 @@ def test_evaluation():
     for checkpoint_path in checkpoint_paths:
         # Define parameters for the test
         env = str(checkpoint_path).split("/")[-2].split("_")[1] + "-Eval"
-        training_scheme = CONFIGURATIONS[env][1]["training_scheme"]
-        teams = CONFIGURATIONS[env][1]["teams"]
+        # training_scheme = CONFIGURATIONS[env][1]["training_scheme"]
+        # teams = CONFIGURATIONS[env][1]["teams"]
         scenario_name = env.split("-v3-")[1]
         gif = f"{SAVE_DIR}/{scenario_name}_{SUBMITTER_NAME}"
 
@@ -52,13 +54,12 @@ def test_evaluation():
             "lstm": False,
             "env": env,
             "env_config": {},
-            "num_agents": sum(teams.values()),
             "num_episodes": 10,
             "load_dir": checkpoint_path,
             "gif": gif,
             "our_agent_ids": [0, 1],
-            "teams": teams,
-            "training_scheme": training_scheme,
+            # "teams": teams,
+            # "training_scheme": training_scheme,
             "render_mode": "rgb_array",
             "save_dir": SAVE_DIR,
         }
@@ -71,3 +72,7 @@ def test_evaluation():
         # Check the generated evaluation reports
         eval_report_path = os.path.join(args.save_dir, "eval_summary.csv")
         assert os.path.exists(eval_report_path), f"Expected evaluation report {eval_report_path} doesn't exist!"
+
+
+
+# cProfile.run('test_evaluation()', 'test_evaluation_output.prof')
