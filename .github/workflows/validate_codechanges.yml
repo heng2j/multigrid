@@ -1,0 +1,31 @@
+name: Run Codebase Tests
+
+on:
+  push:
+    branches:
+      - hw3  
+  pull_request:
+    branches:
+      - hw3  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 2  # fetch enough commits to get diff for last change
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install pytest
+        # Add any other dependencies here
+
+    - name: Run tests
+      run: pytest test_codebase.py
