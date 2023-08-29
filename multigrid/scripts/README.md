@@ -82,18 +82,19 @@ Fill in sections marked with `TODO` or `FIXME` . In particular, see
 
 Look for sections maked with `HW1` to see how the edits you make will be used.
 Some other files that you may find relevant
- - [scripts/manual_control.py](scripts/manual_control.py)
- - [scripts/visualize.py](scripts/visualize.py)
- - [scripts/train.py](scripts/train.py)
+ - [scripts/manual_control.py](multigrid/scripts/manual_control.py)
+ - [scripts/visualize.py](multigrid/scripts/visualize.py)
+ - [scripts/train.py](multigrid/scripts/train.py)
  
- - [scripts/train.py](scripts/train.py) and [scripts/visualize.py](scripts/visualize.py)  (if running locally) or [notebooks/homework1.ipynb](notebooks/homework1.ipynb) (if running on Colab)
+ For this assignemnt please use: 
+ - [scripts/train.py](multigrid/scripts/train.py) and [multigridscripts/visualize.py](multigrid/scripts/visualize.py) if running locally
+ - or [notebooks/homework1.ipynb](notebooks/homework1.ipynb)if running on Colab
 
 
 
 ## Run the code
 
-Tip: While debugging, you probably want to use VSCode's debugger. And here is a sample Launch command once you have install the Python extention.
-
+Tip: While debugging, you probably want to use VSCode's debugger. And here is a [sample Launch commands](sample_launch.json) once you have install the Python extention.
 
 
 If running on Colab, adjust the `#@params` in the `Args` class according to the commmand line arguments above.
