@@ -1,8 +1,19 @@
 """ Expected for restricted changes """
 
+""" 
+Utilities for Training
+
+This module contains a set of utility functions to assist with training including 
+model configuration, algorithm configuration, and custom callback classes for 
+evaluation and weight restoration.
+
+Note: This script is expected to have restricted changes.
+
+"""
+
 import os
 from pathlib import Path
-import itertools
+import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.algorithms import AlgorithmConfig
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel, TorchCentralizedCriticModel
@@ -21,14 +32,17 @@ from ray.rllib.utils.typing import AgentID, EnvType, PolicyID
 
 def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
     """
-    Recursively search for checkpoints within the given directory.
-
-    If more than one is found, returns the most recently modified checkpoint directory.
+    Returns the most recently modified checkpoint directory.
 
     Parameters
     ----------
-    search_dir : Path or str
-        The directory to search for checkpoints within
+    search_dir : Union[Path, str, None]
+        The directory to search for checkpoints within.
+
+    Returns
+    -------
+    Union[Path, None]
+        The most recently modified checkpoint directory or None if not found.
     """
     if search_dir:
         checkpoints = Path(search_dir).expanduser().glob("**/*.is_checkpoint")
@@ -40,7 +54,12 @@ def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
 
 def can_use_gpu() -> bool:
     """
-    Return whether or not GPU training is available.
+    Check if a GPU is available for training.
+
+    Returns
+    -------
+    bool
+        True if a GPU is available, False otherwise.
     """
     try:
         _, tf, _ = try_import_tf()
@@ -57,9 +76,23 @@ def can_use_gpu() -> bool:
     return False
 
 
-def model_config(framework: str = "torch", lstm: bool = False, custom_model_config: dict = {}):
+def model_config(framework: str = "torch", lstm: bool = False, custom_model_config: dict = None):
     """
-    Return a model configuration dictionary for RLlib.
+    Returns a model configuration dictionary for RLlib.
+
+    Parameters
+    ----------
+    framework : str, optional
+        The deep learning framework to use, default is "torch".
+    lstm : bool, optional
+        Whether to use LSTM model, default is False.
+    custom_model_config : dict, optional
+        Custom model configuration.
+
+    Returns
+    -------
+    dict
+        Model configuration dictionary for RLlib.
     """
     if framework == "torch":
         if lstm:
@@ -104,7 +137,40 @@ def algorithm_config(
     **kwargs,
 ) -> AlgorithmConfig:
     """
-    Return the RL algorithm configuration dictionary.
+    Returns the RL algorithm configuration dictionary.
+
+    Parameters
+    ----------
+    algo : str, optional
+        The name of the RLlib-registered algorithm to use. Default is "PPO".
+    env : str, optional
+        Environment to use. Default is "MultiGrid-Empty-8x8-v0".
+    env_config : dict, optional
+        Environment configuration dictionary. Default is empty dict.
+    num_agents : int, optional
+        Number of agents. Default is 2.
+    framework : str, optional
+        Deep learning framework to use. Default is "torch".
+    lstm : bool, optional
+        Whether to use LSTM model. Default is False.
+    num_workers : int, optional
+        Number of rollout workers. Default is 0.
+    num_gpus : int, optional
+        Number of GPUs to use. Default is 0.
+    lr : float or None, optional
+        Learning rate. Default is None.
+    policies_to_train : list[int] or None, optional
+        List of policies to train. Default is None.
+    our_agent_ids : list[str] or None, optional
+        List of agent ids. Default is None.
+    **kwargs
+        Additional keyword arguments.
+
+    Returns
+    -------
+    AlgorithmConfig
+        The RL algorithm configuration.
+
     """
 
     env_config = gym_envs_registry[env].kwargs
@@ -134,8 +200,14 @@ def algorithm_config(
 
 
 
-# TODO - Set Evaluation
 class EvaluationCallbacks(DefaultCallbacks, Callback):
+    """
+    Custom Callback for Evaluation Metrics.
+
+    Custom callback class for collecting and processing evaluation metrics 
+    during the training of the agents.
+    """
+
     def on_episode_step(
         self,
         *,
@@ -146,6 +218,23 @@ class EvaluationCallbacks(DefaultCallbacks, Callback):
         env_index: Optional[int] = None,
         **kwargs,
     ):
+        """
+        Callback for on episode step.
+
+        Parameters
+        ----------
+        worker : RolloutWorker
+            The rollout worker.
+        base_env : BaseEnv
+            The base environment.
+        policies : dict[PolicyID, Policy], optional
+            The policies.
+        episode : Union[Episode, EpisodeV2]
+            The episode.
+        env_index : int, optional
+            The environment index.
+
+        """
         info = episode._last_infos
         for a_key in info.keys():
             if a_key != "__common__":
@@ -165,6 +254,23 @@ class EvaluationCallbacks(DefaultCallbacks, Callback):
         env_index: Optional[int] = None,
         **kwargs,
     ):
+        """
+        Callback for on episode step.
+
+        Parameters
+        ----------
+        worker : RolloutWorker
+            The rollout worker.
+        base_env : BaseEnv
+            The base environment.
+        policies : dict[PolicyID, Policy], optional
+            The policies.
+        episode : Union[Episode, EpisodeV2]
+            The episode.
+        env_index : int, optional
+            The environment index.
+
+        """
         info = episode._last_infos
         for a_key in info.keys():
             if a_key != "__common__":
@@ -174,18 +280,52 @@ class EvaluationCallbacks(DefaultCallbacks, Callback):
 
 
 class RestoreWeightsCallback(DefaultCallbacks, Callback):
+    """
+    Custom Callback for Restoring Weights.
+
+    Custom callback class for restoring policy weights from checkpoints during 
+    the training of the agents.
+    """
     def __init__(
         self,
         load_dir: str,
         policy_name: str,
     ):
+        """
+        Initialize RestoreWeightsCallback.
+
+        Parameters
+        ----------
+        load_dir : str
+            The directory where the checkpoints are stored.
+        policy_name : str
+            The name of the policy to restore.
+        """
         self.load_dir = load_dir
         self.policy_name = policy_name
 
     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
+        """
+        Callback for algorithm initialization.
+
+        Parameters
+        ----------
+        algorithm : Algorithm
+            The algorithm being initialized.
+        """
         algorithm.set_weights({self.policy_name: self.restored_policy_0_weights})
 
     def setup(self, *args, **kwargs):
+        """
+        Setup callback, called once at the beginning of the training.
+
+        Parameters
+        ----------
+        args : tuple
+            Additional positional arguments.
+        kwargs : dict
+            Additional keyword arguments.
+        """
         policy_0_checkpoint_path = get_checkpoint_dir(self.load_dir)
         restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
         self.restored_policy_0_weights = restored_policy_0[self.policy_name].get_weights()

@@ -166,9 +166,48 @@ import numpy as np
 
 
 class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
-    """Multi-agent model that implements a centralized VF."""
+    """
+    Multi-agent model that implements a centralized value function (VF).
+
+    Attributes
+    ----------
+    num_team_members : int
+        The number of team members.
+    model : nn.Module
+        The base neural network model.
+    central_vf : nn.Module
+        Neural network for the centralized value function.
+    
+    Methods
+    -------
+    __init__(obs_space, action_space, num_outputs, model_config, name)
+        Initialize the model.
+    forward(input_dict, state, seq_lens)
+        Forward pass through the model.
+    central_value_function(obs, team_obs, team_actions)
+        Compute the centralized value function.
+    value_function()
+        Get the value function from the base model (not used in this custom model).
+    """
+
 
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        """
+        Initialize the model.
+
+        Parameters
+        ----------
+        obs_space : gym.Space
+            Observation space.
+        action_space : gym.Space
+            Action space.
+        num_outputs : int
+            Number of output units.
+        model_config : dict
+            Configuration dictionary for the model.
+        name : str
+            Name of the model.
+        """
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
 
@@ -192,10 +231,44 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
 
     @override(ModelV2)
     def forward(self, input_dict, state, seq_lens):
+        """
+        Forward pass through the model.
+
+        Parameters
+        ----------
+        input_dict : dict
+            Dictionary of model inputs.
+        state : list
+            List of RNN hidden states.
+        seq_lens : tensor
+            Tensor of sequence lengths.
+
+        Returns
+        -------
+        tuple
+            Tuple of model outputs and new RNN states.
+        """
         model_out, _ = self.model(input_dict, state, seq_lens)
         return model_out, []
 
     def central_value_function(self, obs, team_obs, team_actions):
+        """
+        Compute the centralized value function.
+
+        Parameters
+        ----------
+        obs : tensor
+            Observations for the agent.
+        team_obs : tensor
+            Observations for the team.
+        team_actions : tensor
+            Actions taken by the team.
+
+        Returns
+        -------
+        tensor
+            Centralized value function predictions.
+        """
         input_ = torch.cat(
             [
                 obs,
@@ -209,4 +282,12 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
 
     @override(ModelV2)
     def value_function(self):
+        """
+        Get the value function from the base model (not used in this custom model).
+
+        Returns
+        -------
+        tensor
+            Value function predictions.
+        """
         return self.model.value_function()  # not used

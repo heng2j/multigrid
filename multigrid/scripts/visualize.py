@@ -20,12 +20,17 @@ from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
 
 
 def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str) -> None:
-    """Saves frames as a GIF.
+    """
+    Saves frames as a GIF.
 
-    Args:
-        frames (List[np.ndarray]): List of frames to be saved as GIF.
-        save_path (Path): Directory where the GIF will be saved.
-        filename (str): Name of the output GIF file.
+    Parameters
+    ----------
+    frames : list[np.ndarray]
+        List of frames to be saved as GIF.
+    save_path : Path
+        Directory where the GIF will be saved.
+    filename : str
+        Name of the output GIF file.
     """
     import imageio
 
@@ -35,14 +40,18 @@ def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str)
 
 
 def save_evaluation_metrics(episodes_data: List[Dict], save_path: Path, scenario_name: str) -> None:
-    """Saves evaluation metrics to CSV.
-
-    Args:
-        episodes_data (List[Dict]): List of dictionaries containing episode data.
-        save_path (Path): Directory where the CSV files will be saved.
-        scenario_name (str): Name of the scenario, used as part of the file name.
     """
+    Saves evaluation metrics to CSV.
 
+    Parameters
+    ----------
+    episodes_data : list[dict]
+        List of dictionaries containing episode data.
+    save_path : Path
+        Directory where the CSV files will be saved.
+    scenario_name : str
+        Name of the scenario, used as part of the file name.
+    """
     # Save episodes statistics
     episodes_df = pd.DataFrame(episodes_data)
     episodes_df.to_csv(save_path / f"{scenario_name}_episodes_data.csv", index=False)
@@ -65,14 +74,21 @@ def evaluation(
     """
     Visualizes trajectories from trained agents and collects evaluation data.
 
-    Args:
-        algorithm (Algorithm): The trained algorithm to be evaluated.
-        num_episodes (int, optional): Number of episodes to visualize. Default is 100.
+    Parameters
+    ----------
+    algorithm : Algorithm
+        The trained algorithm to be evaluated.
+    num_episodes : int, optional
+        Number of episodes to visualize. Default is 100.
 
-    Returns:
-        frames (list[np.ndarray]): List of frames of the agent's trajectory.
-        episodes_data (List[Dict]): List of dictionaries containing episode data.
+    Returns
+    -------
+    list[np.ndarray]
+        List of frames of the agent's trajectory.
+    list[dict]
+        List of dictionaries containing episode data.
     """
+
     frames = []
     episodes_data = []
     env = algorithm.env_creator(algorithm.config.env_config)
@@ -114,11 +130,13 @@ def evaluation(
 
 def main_evaluation(args):
     """
-    Main function for evaluation. It sets up the environment, restores the trained algorithm,
+    Main function for evaluation. Sets up the environment, restores the trained algorithm,
     runs the evaluation, and saves the results.
 
-    Args:
-        args (argparse.Namespace): Parsed command line arguments.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed command line arguments.
     """
     args.env_config.update(render_mode=args.render_mode)
     config = algorithm_config(

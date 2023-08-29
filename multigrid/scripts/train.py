@@ -53,15 +53,18 @@ TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(SCRIPT_PATH).he
 reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
 
 def configure_algorithm(args):
-    """Create an algorithm configuration object based on command-line arguments.
+    """
+    Create an algorithm configuration object based on command-line arguments.
 
-    Parameters:
-        args: argparse.Namespace
-            Parsed command-line arguments.
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed command-line arguments.
 
-    Returns:
-        AlgorithmConfig
-            The constructed algorithm configuration object.
+    Returns
+    -------
+    AlgorithmConfig
+        The constructed algorithm configuration object.
     """
     config = algorithm_config(**vars(args))
     config.seed = args.seed
@@ -85,18 +88,28 @@ def train(
     This function initializes Ray, runs the training loop, and handles
     checkpoints and logging.
 
-    Parameters:
-        algo (str): The RL algorithm to use.
-        config (AlgorithmConfig): Configuration object for the algorithm.
-        stop_conditions (dict): Conditions to stop the training.
-        save_dir (str): Directory to save checkpoints and logs.
-        load_dir (str, optional): Directory to load pre-trained model checkpoints from.
-        local_mode (bool, optional): Whether to run Ray in local mode (for debugging).
-        experiment_name (str, optional): Name of the experiment for logging.
-        training_scheme (str, optional): Training scheme, can be either 'CTCE', 'DTDE', or 'CTDE'.
+    Parameters
+    ----------
+    algo : str
+        The RL algorithm to use.
+    config : AlgorithmConfig
+        Configuration object for the algorithm.
+    stop_conditions : dict
+        Conditions to stop the training.
+    save_dir : str
+        Directory to save checkpoints and logs.
+    load_dir : str, optional
+        Directory to load pre-trained model checkpoints from.
+    local_mode : bool, optional
+        Whether to run Ray in local mode (for debugging).
+    experiment_name : str, optional
+        Name of the experiment for logging.
+    training_scheme : str, optional
+        Training scheme, can be either 'CTCE', 'DTDE', or 'CTDE'.
 
-    Returns:
-        None
+    Returns
+    -------
+    None
     """
 
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
