@@ -28,4 +28,4 @@ jobs:
         # Add any other dependencies here
 
     - name: Run tests
-      run: pytest test_codebase.py
+      run: pytest tests/test_codebase.py
