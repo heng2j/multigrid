@@ -126,7 +126,6 @@ def algorithm_config(
     algo: str = "PPO",
     env: str = "MultiGrid-Empty-8x8-v0",
     env_config: dict = {},
-    num_agents: int = 2,
     framework: str = "torch",
     lstm: bool = False,
     num_workers: int = 0,
@@ -147,8 +146,6 @@ def algorithm_config(
         Environment to use. Default is "MultiGrid-Empty-8x8-v0".
     env_config : dict, optional
         Environment configuration dictionary. Default is empty dict.
-    num_agents : int, optional
-        Number of agents. Default is 2.
     framework : str, optional
         Deep learning framework to use. Default is "torch".
     lstm : bool, optional

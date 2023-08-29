@@ -10,7 +10,7 @@ from multigrid.envs import *
 from multigrid.core.actions import Action
 from multigrid.base import MultiGridEnv
 from multigrid.wrappers import SingleAgentWrapper  # ImgObsWrapper, RGBImgPartialObsWrapper
-
+from gymnasium.envs import registry as gym_envs_registry
 
 class ManualControl:
     def __init__(self, env: Env, seed=None, agents=2) -> None:
@@ -135,24 +135,30 @@ if __name__ == "__main__":
         default=True,
         help="",
     )
-    parser.add_argument(
-        "--agents",
-        type=int,
-        default=1,
-        help="",
-    )
+    # parser.add_argument(
+    #     "--agents",
+    #     type=int,
+    #     default=1,
+    #     help="",
+    # )
     parser.add_argument("--our-agent-ids", nargs="+", type=int, default=[1], help="List of agent ids to evaluate")
 
     args = parser.parse_args()
 
+
+    env_config = gym_envs_registry[args.env_id].kwargs
+    num_agents = sum(env_config["teams"].values())
     env: MultiGridEnv = gym.make(
         args.env_id,
         # tile_size=args.tile_size,
         render_mode="human",
-        agents=args.agents,
+        agents=num_agents,
         # agent_pov=args.agent_view,
         # agent_view_size=args.agent_view_size,
+
         screen_size=args.screen_size,
+        # **env_config
+
     )
 
     # # TODO: check if this can be removed
@@ -165,5 +171,5 @@ if __name__ == "__main__":
         print("Convert to single agent")
         env = SingleAgentWrapper(env)
 
-    manual_control = ManualControl(env, seed=args.seed, agents=args.agents)
+    manual_control = ManualControl(env, seed=args.seed, agents=num_agents)
     manual_control.start()
