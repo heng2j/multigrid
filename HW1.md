@@ -60,6 +60,8 @@ Tips:
 You can take a look at `CONFIGURATIONS` in [envs/__init__.py](multigrid/envs/__init__.py) to manually control different environemnts.
 Please noticed that only the single agents versions are playable. Multi-agents versions are only for viewing.
 
+If you have anymore questions regarding the training environment, you can checkout the original [multigrid](https://github.com/ini/multigrid) repo that we forked from. And also it is worth to checkout the actively developing official [Minigrid](https://github.com/Farama-Foundation/Minigrid) that is managing by Farama-Foundation.
+
 *If you have any suggestions for how to manually control Multi-agents environments please feel free to let us know.
 
 ***Notes:***
@@ -75,7 +77,7 @@ There are many ways to debug the rewrads. You can either manualy control the age
 ---
 ## Task 2 - Debug Observations and Observations Space for Training
 
-If you run the following training command to train an agent with Decentalized Training Decentalized Execution (DTDE) training scheme, you are expected to see ValueError on mismatching observation and observation space. Make sure to handle this exception and implement the correct observation to avoid it.
+If you run the following training command to train an agent with Decentalized Training Decentalized Execution (DTDE) training scheme, you are expected to see ValueErrors from blanks that needed to be filled to fix the mismatching observation and observation space issue. Make sure to handle this exception and implement the correct observation to avoid it.
 
 
 Command for Task 2:
@@ -85,6 +87,7 @@ python multigrid/scripts/train.py --local-mode False --env MultiGrid-Competative
 
 Tips:
 You can set `--local-mode` to True and use VSCode debugger to walk though the code for debugging
+You can take a look at the definition of `self.observation_space` in [agent.py](multigrid/core/agent.py) to see how the observation for the agents were defined. Then you will know how to match them with the observations that you are generating. manually control different environemnts.
 
 ***Note:*** 
 

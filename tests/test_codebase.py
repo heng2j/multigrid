@@ -31,6 +31,8 @@ def get_functions_in_classes_from_ast(tree):
 #         "multigrid/scripts/visualize.py",
 #         "multigrid/scripts/train_ppo_cleanrl.py",
 #         "multigrid/utils/training_utilis.py",
+#         "multigrid/wrappers.py",
+#         "multigrid/rllib/__init__.py"
 #     ]
 
 #     EXCEPTION_FOLDERS = ["submission/**", "notebooks/**"]
