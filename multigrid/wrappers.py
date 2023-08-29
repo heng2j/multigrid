@@ -227,10 +227,7 @@ class CompetativeRedBlueDoorWrapper_v3(ObservationWrapper):
         """
         :meta private:
         """
-        # for agent_id in obs:
-        #     obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
-        # TODO - maybe  I can change the obs here?
-
+  
         return obs
 
     # # NOTE Questions

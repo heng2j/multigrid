@@ -216,15 +216,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         else:
             raise ValueError(f"Invalid argument for agents: {agents}")
 
-        # # TODO - Arrange Teams
-        # self.agents_teams: dict[str,list[Agent]] = defaultdict(dict)
-
-        # tmp_agent_idx = 0
-        # for team_name, team_num in teams.items():
-        #     for _ in range(team_num):
-        #         self.agents[tmp_agent_idx].color = team_name
-        #         tmp_agent_idx += 1
-        #         self.agents_teams[team_name].append(self.agents[tmp_agent_idx])
 
         # Action enumeration for this environment
         self.actions = Action

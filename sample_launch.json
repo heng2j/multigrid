@@ -34,7 +34,7 @@
             "request": "launch",
             "program": "multigrid/scripts/visualize.py",
             "args": ["--env", "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red", "--num-episodes", "10",
-                    "--load-dir", "submission/ray_results/CentralizedCritic_MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red_99f20_00000_0_2023-08-23_09-26-00/checkpoint_000250", // Please change the file path to your trained checkpoint
+                    "--load-dir", "submission/ray_results/CentralizedCritic_MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red_99f20_00000_0_2023-08-23_09-26-00/checkpoint_000250",
                     "--render-mode", "rgb_array",
                     "--gif", "CTDE-Red-testing"
             ],

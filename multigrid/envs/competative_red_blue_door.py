@@ -207,7 +207,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
         # Place agents in the top-left corner
-        # TODO - update to encapsulate muti-agent positioning
+        # NOTE - future todo - update to encapsulate muti-agent positioning
         for idx, agent in enumerate(self.agents):
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=(4, 4))
@@ -367,7 +367,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
     def _handle_steps(self, agent, agent_index, action, reward, terminated, info):
-        fwd_obj = self.grid.get(*agent.front_pos)  # TODO - get opponent agent
+        fwd_obj = self.grid.get(*agent.front_pos) 
 
         if action == Action.toggle:
             for other_agent in self.agents:
@@ -377,9 +377,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             # If fwd_obj is a door
             if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                 if (self.red_door.is_open or self.blue_door.is_open) and (fwd_obj.color == agent.color):
-                    # TODO - Mimic communiations
-                    # agent.mission = Mission("We won!")
-                    # info[agent.color if self.training_scheme == "CTCE" else agent.name ]["door_open_done"] = True
 
                     # Set Done Conditions for winning team
                     for this_agent in self.agents:
@@ -419,7 +416,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                                 "eliminated_opponents_done"
                             ] = True
 
-        # TODO - Add Sparse rewards
         elif action == Action.pickup:
             if (
                 agent.carrying
@@ -432,7 +428,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # TODO - Mimic communiations
+                    # FIXME - Mimic communiations
                     agent.mission = Mission("Go open the door with the key")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -458,7 +454,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 )
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # TODO - Mimic communiations
+                    # FIXME - Mimic communiations
                     agent.mission = Mission("Go move away the ball")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -791,7 +787,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         self.grid.set(blue_door_x, blue_door_y, self.blue_door)
 
         # Place agents in the top-left corner
-        # TODO - update to encapsulate muti-agent positioning
         for agent in self.agents:
             if agent.color == "red":
                 self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=room_size)

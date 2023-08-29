@@ -154,7 +154,7 @@ class TorchLSTMModel(TorchModelV2, nn.Module):
         return [torch.zeros(self.lstm.hidden_size), torch.zeros(self.lstm.hidden_size)]
 
 
-# TODO - Set CTDE Model
+# NOTE - Reference for setting CTDE Model
 # https://github.com/ray-project/ray/blob/master/rllib/examples/centralized_critic.py
 # https://github.com/ray-project/ray/blob/master/rllib/examples/models/centralized_critic_models.py
 

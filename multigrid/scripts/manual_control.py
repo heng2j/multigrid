@@ -161,12 +161,6 @@ if __name__ == "__main__":
 
     )
 
-    # # TODO: check if this can be removed
-    # if args.agent_view:
-    #     print("Using agent view")
-    #     env = RGBImgPartialObsWrapper(env, args.tile_size)
-    #     env = ImgObsWrapper(env)
-
     if args.single_agent:
         print("Convert to single agent")
         env = SingleAgentWrapper(env)

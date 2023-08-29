@@ -4,7 +4,7 @@
 
 # Assignment 1: Intro to Deep RL with Single Agent Training Environments
 
-**Due Date:** September 14, 11:30 pm
+**Due Date:** Thursday September 14, 6:00 pm
 
 The goal of this assignment is to gain hands-on experience with the key components of Reinforcement Learning (RL) environments. You will be able to:
 
@@ -22,7 +22,7 @@ The starter code for this assignment can be found [here](https://classroom.githu
 
 You have the option of running the code either on Google Colab or on your local machine.
 
-1. **Local Setup:** If you choose to run locally, you will need to install MuJoCo and some Python packages. Refer to [INSTALLATION.md](INSTALLATION.md) for instructions.
+1. **Local Setup:** If you choose to run locally, you will need to install some Python packages. Refer to [INSTALLATION.md](INSTALLATION.md) for instructions.
 2. **Google Colab:** The initial sections of the notebook will install all required dependencies. You can try out the Colab option by clicking the badge below:
 
     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](#)

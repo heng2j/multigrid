@@ -579,7 +579,7 @@ class Ball(WorldObj):
     Ball object that can be picked up by agents.
     """
 
-    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0, 0)):  # TODO add discount_factor
+    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0, 0)): 
         """
         Parameters
         ----------

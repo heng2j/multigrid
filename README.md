@@ -24,7 +24,7 @@ The primary aim of this course is to equip STR employees with fundamental RL und
 
 - Nurture in-house RL talent as contributors and consultants to support RL programs at STR.
 - Create in-house RL learning materials for company-wide use on the LinkedIn Learning Platform.
-- Leverage top-notch open-sourced materials across academic and industry (UC Berkely, Standford, Anyscale Ray RLlib, OpenAI, and more).
+- Leverage top-notch open-sourced materials across academic and industry (UC Berkeley, Stanford, Anyscale Ray RLlib, OpenAI, and more).
 - Inspire innovations and creative applications of RL to new and ongoing programs across all divisions of the company.
 - Gain hands-on experience with industry-standard Open-Source Collaborative MLOps workflow.
 - Implement and develop RL agents with RLlib, an industry-Grade Reinforcement Learning open-source library.

@@ -23,7 +23,7 @@ A. (Recommended) Install with conda:
 
 	4. Install the requirements into this conda environment
 	```
-	pip install -r requirements.txt
+	pip install -r requirements_colab.txt
 	```
 
 	5. Allow your code to be able to see 'rl_class'
@@ -37,5 +37,5 @@ This conda environment requires activating it every time you open a new terminal
 
 B. Install on system Python:
 	```
-	pip install -r requirements.txt
+	pip install -r requirements_colab.txt
 	```

@@ -162,7 +162,7 @@ def main_evaluation(args):
 
         scenario_name = str(checkpoint).split("/")[-2].split("_")[1].split("-v3-")[1]
 
-        # # TODO update checkpoint loading method
+        # # FIXME update checkpoint loading method
         # # New way
         # policy_name = f"policy_{args.our_agent_ids[1]}"
         # restored_policy_0 = Policy.from_checkpoint(checkpoint)
