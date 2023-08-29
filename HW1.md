@@ -89,11 +89,12 @@ Tips:
 You can set `--local-mode` to True and use VSCode debugger to walk though the code for debugging
 You can take a look at the definition of `self.observation_space` in [agent.py](multigrid/core/agent.py) to see how the observation for the agents were defined. Then you will know how to match them with the observations that you are generating. manually control different environemnts.
 
+For training. Your training batch size should be larger than the horizon so that you're collecting multiple rollouts when evaluating the performance of your trained policy. For example, if the horizon is 1000 and the training batch size is 5000, you'll collect approximately 5 trajectories (or more if any of them terminate early).
+
 ***Note:*** 
 
 You might encounter a `ValueError` for mismatching observation and observation space if you run the above command. Make sure to handle this exception and implement the correct observation to avoid it.
 
-Your training batch size should be larger than the horizon so that you're collecting multiple rollouts when evaluating the performance of your trained policy. For example, if the horizon is 1000 and the training batch size is 5000, you'll collect approximately 5 trajectories (or more if any of them terminate early).
 
 ---
 
@@ -101,9 +102,10 @@ Your training batch size should be larger than the horizon so that you're collec
 
 Monitor and track your runs using Tensorboard with the following command:
 ```shell
-tensorboard --logdir ./ray_result
+tensorboard --logdir submission/ray_results/
 ```
 
+Tips:
 You can filter the plots using the following filters:
 
 ```
@@ -111,12 +113,11 @@ episode_len_mean|ray/tune/episode_reward_mean|episode_reward_min|entropy|vf|loss
 ```
 
 
-You will see scalar summaries as well as videos of your trained policies in the 'Images' tab.
-
 To visualize a specific checkpoint, use the following command:
 ```shell
-python scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v0  --num-episodes 20  --load-dir ./ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v0_37eb5_00000_0_2023-07-10_11-12-43 --gif ./result.gif
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single  --num-episodes 10  --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_37eb5_00000_0_2023-07-10_11-12-43 --render-mode human --gif DTDE-Red-Single
 ```
+
 If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
 
 ---
@@ -127,3 +128,6 @@ If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthe
 You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. Convert your notebook into HTML format and then push to your Github Classroom Github Page folder.
 
 During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
+
+***Note:*** 
+Please beaware that the [pre-commit hooks](.git/hooks/pre-commit) will check the total files size for folers "submission/" "notebooks/", to ensure each of them will not exceed 5MBs. Please ensure to only submit the checkpoints, the notebooks and the MLFlow artifacts that are for grading by the Github Action CI/CD pipeline.
