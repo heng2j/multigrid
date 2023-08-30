@@ -55,7 +55,7 @@ def test_only_exception_files_modified():
 
     # Get list of changed files between HEAD and its previous commit.
     changed_files_result = subprocess.run(
-        ["git", "diff", "--name-only", "HEAD~1", "HEAD"], capture_output=True, text=True
+        ["git", "diff", "--name-only", "v1.0", "HEAD"], capture_output=True, text=True
     )
 
     # If the git command fails, the test should fail.
@@ -92,6 +92,3 @@ def test_restrict_file_changes():
                 ), f"Unauthorized modification in {class_name}.{old_function.name}"
 
 
-
-
-test_only_exception_files_modified()
