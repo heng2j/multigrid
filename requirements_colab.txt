@@ -1,5 +1,4 @@
 tensorboard
-moviepy
 pyvirtualdisplay
 torch
 opencv - python
@@ -13,6 +12,8 @@ Gymnasium
 black
 PyYAML
 black
+flake8
 GitPython
 tensorflow_probability
+imageio
 mlflow
