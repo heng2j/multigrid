@@ -127,9 +127,14 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 ## Task 4 - Submit your homework on Github Classroom
 
-You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. Convert your notebook into HTML format and then push to your Github Classroom Github Page folder.
+You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. 
+
+Please put your submission under the `submission/` folder. And you can keep your `homework1.ipynb` and related files under `notebooks/` if you are taking the notebook route.
+
 
 During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
+
+For students not using the PRO version of Google CodeLab, 
 
 
 ***Note:*** 
