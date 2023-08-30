@@ -20,18 +20,19 @@ from pprint import pprint
 import git
 from pathlib import Path
 import os
+import subprocess
 import ray
 from ray import tune
 from ray.rllib.algorithms import AlgorithmConfig
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ray.rllib.utils.from_config import NotProvided
-from ray.tune.registry import get_trainable_cls
 from ray.tune import CLIReporter
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 
 from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, EvaluationCallbacks
 from multigrid.rllib.ctde_torch_policy import CentralizedCritic
 
+# Set the working diretory to the repo root
+REPO_ROOT = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode('utf-8')
+os.chdir(REPO_ROOT)
 
 # Constants
 SUBMISSION_CONFIG_FILE = sorted(
@@ -45,8 +46,7 @@ submission_config = json.loads(submission_config_data)
 
 SUBMITTER_NAME = submission_config["name"]
 
-SCRIPT_PATH = str(pathlib.Path(__file__).parent.absolute().parent.absolute().parent.absolute())
-TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(SCRIPT_PATH).head.commit}
+TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head.commit}
 
 
 # Initialize the CLI reporter for Ray

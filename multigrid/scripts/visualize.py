@@ -38,6 +38,7 @@ def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str)
     print(f"Saving GIF to {save_path / filename}")
     imageio.mimsave(save_path / filename, frames)
 
+    return save_path / filename
 
 def save_evaluation_metrics(episodes_data: List[Dict], save_path: Path, scenario_name: str) -> None:
     """
@@ -162,7 +163,7 @@ def main_evaluation(args):
 
         scenario_name = str(checkpoint).split("/")[-2].split("_")[1].split("-v3-")[1]
 
-        # # FIXME update checkpoint loading method
+        # NOTE - future fixme update checkpoint loading method
         # # New way
         # policy_name = f"policy_{args.our_agent_ids[1]}"
         # restored_policy_0 = Policy.from_checkpoint(checkpoint)
@@ -178,7 +179,7 @@ def main_evaluation(args):
 
     if args.gif:
         filename = args.gif if args.gif.endswith(".gif") else f"{args.gif}.gif"
-        save_frames_to_gif(frames=frames, save_path=save_path, filename=filename)
+        return save_frames_to_gif(frames=frames, save_path=save_path, filename=filename)
 
 
 if __name__ == "__main__":
