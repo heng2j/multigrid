@@ -24,7 +24,7 @@ The starter code for this assignment can be found [here](https://classroom.githu
 Choose to run the code on either Google Colab or your local machine:
 - **Local Setup**: For local execution, install the necessary Python packages by following the [INSTALLATION.md](INSTALLATION.md) guidelines.
 - **Google Colab**: To run on Colab, the notebook will handle dependency installations. Try it by clicking below:  
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](#)
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/heng2j/multigrid/blob/hw1_new/notebooks/homework1.ipynb)
 
 ## Recommended Steps to Get Familiar with the Codebase
 We recommend reading the files in the following order. For some files, you will need to fill in the sections labeled `HW1 TODO` or `HW1 FIXME`.

@@ -1,6 +1,7 @@
 import pytest
 
 import argparse
+import subprocess
 import os
 from pathlib import Path
 from multigrid.scripts.visualize import main_evaluation
@@ -24,6 +25,25 @@ SUBMITTER_NAME = submission_config["name"]
 SAVE_DIR = "submission/evaluation_reports/from_github_actions"
 
 
+def commit_and_push():
+    # Setting git config
+    # subprocess.run(['git', 'config', '--global', 'user.email', 'you@example.com'])
+    # subprocess.run(['git', 'config', '--global', 'user.name', 'Your Name'])
+
+    # Add all changed files
+    subprocess.run(['git', 'add', '-u'])
+
+    # Commit changes
+    try:
+        subprocess.run(['git', 'commit', '-m', 'Auto-commit evaluation reports'], check=True)
+    except subprocess.CalledProcessError:
+        print("Nothing to commit. Skipping git commit.")
+        return
+
+    # Push changes
+    subprocess.run(['git', 'push'])  
+
+
 def test_evaluation():
     # Create/check paths
     search_dir = "submission/ray_results"
@@ -45,7 +65,7 @@ def test_evaluation():
         # training_scheme = CONFIGURATIONS[env][1]["training_scheme"]
         # teams = CONFIGURATIONS[env][1]["teams"]
         scenario_name = env.split("-v3-")[1]
-        gif = f"{SAVE_DIR}/{scenario_name}_{SUBMITTER_NAME}"
+        gif = f"{scenario_name}_{SUBMITTER_NAME}"
 
         # Set argument
         params = {
