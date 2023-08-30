@@ -31,7 +31,7 @@ def commit_and_push():
     # subprocess.run(['git', 'config', '--global', 'user.name', 'Your Name'])
 
     # Add all changed files
-    subprocess.run(['git', 'add', '-u'])
+    subprocess.run(['git', 'add', 'submission/evaluation_reports/from_github_actions/*'])
 
     # Commit changes
     try:
@@ -61,9 +61,7 @@ def test_evaluation():
 
     for checkpoint_path in checkpoint_paths:
         # Define parameters for the test
-        env = str(checkpoint_path).split("/")[-2].split("_")[1] + "-Eval"
-        # training_scheme = CONFIGURATIONS[env][1]["training_scheme"]
-        # teams = CONFIGURATIONS[env][1]["teams"]
+        env = str(checkpoint_path).split("/")[-2].split("_")[1] 
         scenario_name = env.split("-v3-")[1]
         gif = f"{scenario_name}_{SUBMITTER_NAME}"
 
@@ -78,8 +76,6 @@ def test_evaluation():
             "load_dir": checkpoint_path,
             "gif": gif,
             "our_agent_ids": [0, 1],
-            # "teams": teams,
-            # "training_scheme": training_scheme,
             "render_mode": "rgb_array",
             "save_dir": SAVE_DIR,
         }
@@ -90,8 +86,11 @@ def test_evaluation():
         main_evaluation(args)
 
         # Check the generated evaluation reports
-        eval_report_path = os.path.join(args.save_dir, "eval_summary.csv")
+        eval_report_path = os.path.join(args.save_dir, f"{scenario_name}_eval_summary.csv")
         assert os.path.exists(eval_report_path), f"Expected evaluation report {eval_report_path} doesn't exist!"
 
+    commit_and_push()
 
 # cProfile.run('test_evaluation()', 'test_evaluation_output.prof')
+
+test_evaluation()
