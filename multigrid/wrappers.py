@@ -213,6 +213,8 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
     # def __init__(self, env: MultiGridEnv):
     #     """ """
     #     super().__init__(env)
+    #     self.script_path = __file__
+
     #     # HW1 TODO 1:
     #     # Instead of directly using the RGB 3 channels  partially observable agent view 
     #     # In this wrapper, we are applying one-hot encoding of a partially observable agent view 
