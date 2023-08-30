@@ -15,4 +15,5 @@ flake8
 GitPython
 tensorflow_probability
 imageio
+pydantic==1.10.9
 mlflow
