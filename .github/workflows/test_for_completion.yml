@@ -30,7 +30,7 @@ jobs:
         pip install pytest
         pip install gymnasium
         pip install numpy
-        pip install ray[tune]==2.5.1
+        pip install ray[rllib]==2.5.1
         # Add any other dependencies here
 
     - name: Run tests
