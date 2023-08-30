@@ -1,4 +1,6 @@
+swig
 pytest
+aenum
 torch
 gymnasium[box2d]
 ray[rllib]==2.5.1

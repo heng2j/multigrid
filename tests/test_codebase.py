@@ -90,3 +90,8 @@ def test_restrict_file_changes():
                 assert ast.dump(old_function) == ast.dump(
                     new_function
                 ), f"Unauthorized modification in {class_name}.{old_function.name}"
+
+
+
+
+test_only_exception_files_modified()

@@ -1,4 +1,5 @@
 swig 
+aenum
 tensorboard
 pyvirtualdisplay
 torch
