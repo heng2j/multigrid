@@ -1,7 +1,6 @@
 
 
 ---
-
 # Assignment 1: Intro to Deep RL with Single Agent Training Environments
 
 ## Due Date
