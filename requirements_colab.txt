@@ -1,15 +1,13 @@
+swig 
 tensorboard
 pyvirtualdisplay
 torch
-opencv - python
-swig
 gymnasium[box2d]
-ray[rllib]
-scikit - image
+ray[rllib]==2.5.1
+scikit-image
 pygame
 numba
 Gymnasium
-black
 PyYAML
 black
 flake8

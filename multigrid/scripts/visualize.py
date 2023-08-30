@@ -145,7 +145,7 @@ def main_evaluation(args):
         num_workers=0,
         num_gpus=0,
     )
-    config.environment(disable_env_checking=False)
+    config.environment(disable_env_checking=True)
     algorithm = config.build()
     checkpoint = get_checkpoint_dir(args.load_dir)
 

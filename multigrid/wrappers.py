@@ -185,7 +185,7 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
     Examples
     --------
     >>> from multigrid.envs import EmptyEnv
-    >>> from multigrid.wrappers import OneHotObsWrapper
+    >>> from multigrid.wrappers import CompetativeRedBlueDoorWrapper
     >>> env = EmptyEnv()
     >>> obs, _ = env.reset()
     >>> obs[0]['image'][0, :, :]
@@ -196,7 +196,7 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
             [2, 5, 0],
             [2, 5, 0],
             [2, 5, 0]])
-    >>> env = OneHotObsWrapper(env)
+    >>> env = CompetativeRedBlueDoorWrapper(env)
     >>> obs, _ = env.reset()
     >>> obs[0]['image'][0, :, :]
     array([[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],

@@ -22,13 +22,19 @@ A. (Recommended) Install with conda:
 	```
 
 	4. Install the requirements into this conda environment
+
+	To avoid issue of building box2d-py we will need to manually install swig first
+	```
+	pip install swig
+	```
+
 	```
 	pip install -r requirements_colab.txt
 	```
 
 	5. Allow your code to be able to see 'rl_class'
 	```
-	cd <path_to_hw1>
+	cd <path_to_repo>
 	$ pip install -e .
 	```
 
