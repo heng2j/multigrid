@@ -53,11 +53,26 @@ def test_only_exception_files_modified():
     # Remove exception files from all_files to create the locked_files set.
     locked_files = all_files - EXCEPTION_FILES
 
-    # Get list of changed files between HEAD and its previous commit.
-    changed_files_result = subprocess.run(
-        ["git", "diff", "--name-only", "v1.0", "HEAD"], capture_output=True, text=True
-    )
 
+    # Check if the tag 'v1.0' exists
+    list_tags_result = subprocess.run(["git", "tag"], capture_output=True, text=True)
+    tags = list_tags_result.stdout.splitlines()
+    
+    if "v1.0" in tags:
+        base_commit = "v1.0"
+    else:
+        # If the tag doesn't exist, means it is in Github Classroom find the oldest (initial) commit hash
+        oldest_commit_result = subprocess.run(
+            ["git", "rev-list", "--max-parents=0", "HEAD"], 
+            capture_output=True, text=True
+        )
+        base_commit = oldest_commit_result.stdout.strip()
+
+    # Get list of changed files between HEAD and base_commit.
+    changed_files_result = subprocess.run(
+        ["git", "diff", "--name-only", base_commit, "HEAD"], 
+        capture_output=True, text=True
+    )
     # If the git command fails, the test should fail.
     changed_files_result.check_returncode()
 
