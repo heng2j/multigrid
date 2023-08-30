@@ -3,10 +3,10 @@ name: Run Codebase Tests
 on:
   push:
     branches:
-      - hw3  
+      - hw1_new  
   pull_request:
     branches:
-      - hw3  
+      - hw1_new  
 
 jobs:
   test:
