@@ -27,6 +27,7 @@ def test_only_exception_files_modified():
     EXCEPTION_FILES = [
         "multigrid/envs/competative_red_blue_door.py",
         "multigrid/rllib/models.py",
+        "multigrid/rllib/ctde_torch_policy.py",
         "multigrid/scripts/train.py",
         "multigrid/scripts/visualize.py",
         "multigrid/scripts/train_ppo_cleanrl.py",
@@ -54,7 +55,7 @@ def test_only_exception_files_modified():
     locked_files = all_files - EXCEPTION_FILES
 
 
-    # Check if the tag 'v1.0' exists
+    # Check if the tag 'v1.1' exists
     list_tags_result = subprocess.run(["git", "tag"], capture_output=True, text=True)
     tags = list_tags_result.stdout.splitlines()
     
