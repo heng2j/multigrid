@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import numba as nb
 import numpy as np
+from numpy.typing import NDArray as ndarray
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.core import ObservationWrapper
-from numpy.typing import NDArray as ndarray
 
 from .base import MultiGridEnv, AgentID, ObsType
 from .core.constants import Color, Direction, State, Type
