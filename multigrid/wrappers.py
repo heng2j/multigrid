@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import gymnasium as gym
+
 import numba as nb
 import numpy as np
-
+import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.core import ObservationWrapper
 from numpy.typing import NDArray as ndarray
