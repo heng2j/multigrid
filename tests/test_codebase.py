@@ -26,11 +26,13 @@ def test_only_exception_files_modified():
 
     EXCEPTION_FILES = [
         "multigrid/envs/competative_red_blue_door.py",
+        "multigrid/envs/__init__.py",
         "multigrid/rllib/models.py",
         "multigrid/rllib/ctde_torch_policy.py",
         "multigrid/scripts/train.py",
         "multigrid/scripts/visualize.py",
         "multigrid/scripts/train_ppo_cleanrl.py",
+        "multigrid/scripts/train_sac_cleanrl.py",
         "multigrid/utils/training_utilis.py",
         "multigrid/wrappers.py",
         "multigrid/rllib/__init__.py"
