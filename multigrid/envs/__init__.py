@@ -31,7 +31,6 @@ Configurations
 
 from .blockedunlockpickup import BlockedUnlockPickupEnv
 from .competative_red_blue_door import (
-    CompetativeRedBlueDoorEnv,
     CompetativeRedBlueDoorEnvV2,
     CompetativeRedBlueDoorEnvV3,
 )
@@ -43,19 +42,6 @@ from .redbluedoors import RedBlueDoorsEnv
 
 CONFIGURATIONS = {
     "MultiGrid-BlockedUnlockPickup-v0": (BlockedUnlockPickupEnv, {}),
-    "MultiGrid-CompetativeRedBlueDoor-v0": (CompetativeRedBlueDoorEnv, {"size": 8}),
-    "MultiGrid-CompetativeRedBlueDoor-v1": (CompetativeRedBlueDoorEnv, {"size": 8}),
-    "MultiGrid-CompetativeRedBlueDoor-v1-DTDE-Red": (
-        CompetativeRedBlueDoorEnvV3,
-        {
-            "size": 8,
-            "allow_agent_overlap": False,
-            "has_obsticle": True,
-            "teams": {"red": 1},
-            "agents": 1,
-            "training_scheme": "DTDE",
-        },
-    ),
     "MultiGrid-CompetativeRedBlueDoor-v2": (CompetativeRedBlueDoorEnvV2, {"size": 8, "allow_agent_overlap": False}),
     "MultiGrid-CompetativeRedBlueDoor-v3": (
         CompetativeRedBlueDoorEnvV3,

@@ -5,7 +5,6 @@ from multigrid.rllib import to_rllib_env
 from multigrid.wrappers import (
     CompetativeRedBlueDoorWrapper,
 )
-from gymnasium.envs import registry as gym_envs_registry
 from multigrid.base import MultiGridEnv
 from multigrid.core.constants import Color, Direction, State, Type
 import numpy as np

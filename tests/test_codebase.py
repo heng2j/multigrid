@@ -58,8 +58,8 @@ def test_only_exception_files_modified():
     list_tags_result = subprocess.run(["git", "tag"], capture_output=True, text=True)
     tags = list_tags_result.stdout.splitlines()
     
-    if "v1.0" in tags:
-        base_commit = "v1.0"
+    if "v1.1" in tags:
+        base_commit = "v1.1"
     else:
         # If the tag doesn't exist, means it is in Github Classroom find the oldest (initial) commit hash
         oldest_commit_result = subprocess.run(
