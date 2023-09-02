@@ -62,7 +62,7 @@ CONFIGURATIONS = {
                     "key_pickup_sparse_reward": 0.5,
                     "ball_pickup_dense_reward": 0.5,
                     "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
-                    "invalid_pickup_dense_penalty": 0.2, # HW1 FIXME 1 - This value maybe too high for dense penalty 
+                    "invalid_pickup_dense_penalty": 0.001, # HW1 FIXME 1 - This value maybe too high for dense penalty 
                 },
             },
         },
