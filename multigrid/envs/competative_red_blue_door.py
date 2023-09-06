@@ -1185,7 +1185,8 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         Render a non-partial observation for visualization.
         """
         # Compute agent visibility masks
-        obs_shape = self.agents[0].observation_space["image"].shape[:-1]
+        dict_obs_space = self.agents[0].original_observation_space if hasattr(self.agents[0], "original_observation_space" )  else self.agents[0].observation_space
+        obs_shape = dict_obs_space["image"].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 
         if self.training_scheme == "CTCE":

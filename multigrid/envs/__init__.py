@@ -43,7 +43,30 @@ from .redbluedoors import RedBlueDoorsEnv
 CONFIGURATIONS = {
     "MultiGrid-BlockedUnlockPickup-v0": (BlockedUnlockPickupEnv, {}),
     "MultiGrid-CompetativeRedBlueDoor-v2": (CompetativeRedBlueDoorEnvV2, {"size": 8, "allow_agent_overlap": False}),
-     "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle": (
+    "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single": (
+        CompetativeRedBlueDoorEnvV2,
+        {
+            "size": 8,
+            "allow_agent_overlap": False,
+            "has_obsticle": False,
+            "teams": {"red": 1},
+            "agents": 1,
+            "training_scheme": "DTDE",
+            "reward_schemes": {
+                "red_0": {
+                    "eliminated_opponent_sparse_reward": 0.5,
+                    "key_pickup_sparse_reward": 0.5,
+                    "ball_pickup_dense_reward": 0.5,
+                    "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
+                    "invalid_pickup_dense_penalty": 0.001,
+                },
+            },
+            "max_steps": 500,
+        },
+    ),
+    
+    
+    "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle": (
         CompetativeRedBlueDoorEnvV2,
         {
             "size": 8,
@@ -61,6 +84,7 @@ CONFIGURATIONS = {
                     "invalid_pickup_dense_penalty": 0.001,
                 },
             },
+            "max_steps": 500,
         },
     ),
     
