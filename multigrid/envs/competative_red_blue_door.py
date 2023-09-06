@@ -750,6 +750,10 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             **kwargs,
         )
 
+        self.observation_space = self.agents[0].observation_space["image"]
+
+
+
     def _gen_grid(self, width, height):
         """
         :meta private:
@@ -793,11 +797,18 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 agent.state.dir = 0
 
         # Block doors with a ball
+        ball_carrying_discount_factor = (
+                self.reward_schemes.get(self.agents[0].name, {})
+                .get("dense_reward_discount_factor", {})
+                .get("ball_carrying_discount_factor", 0.9)
+            )
+
         if self.has_obsticle:
             if "red" in set(self.teams.keys()):
-                self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y)))
+                self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y), ball_carrying_discount_factor=ball_carrying_discount_factor))
             if "blue" in set(self.teams.keys()):
-                self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y)))
+                self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y), ball_carrying_discount_factor=ball_carrying_discount_factor))
+                
 
         # Place keys in hallway
         # Fixed Key Positions
@@ -957,18 +968,12 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-                ball_carrying_discount_factor = (
-                    self.reward_schemes.get(agent.name, {})
-                    .get("dense_reward_discount_factor", {})
-                    .get("ball_carrying_discount_factor", agent.carrying.discount_factor)
-                )
+
+
                 reward[agent_index] += (
-                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * ball_carrying_discount_factor
+                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
                 )  # 0.5 * agent.carrying.discount_factor
-                ball_carrying_discount_factor *= ball_carrying_discount_factor
-                self.reward_schemes[agent.name]["dense_reward_discount_factor"].setdefault(
-                    "ball_carrying_discount_factor", ball_carrying_discount_factor
-                )
+                agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                 if self.training_scheme == "DTDE" or "CTDE":
                     # FIXME - Mimic communiations

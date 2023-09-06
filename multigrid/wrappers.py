@@ -158,7 +158,6 @@ class SingleAgentWrapper(gym.Wrapper):
         self.observation_space = env.agents[0].observation_space
         self.action_space = env.agents[0].action_space
 
-        # self.observation_space
 
     def reset(self, *args, **kwargs):
         """

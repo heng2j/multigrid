@@ -579,7 +579,7 @@ class Ball(WorldObj):
     Ball object that can be picked up by agents.
     """
 
-    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0, 0)): 
+    def __new__(cls, color: str = Color.blue, init_pos: tuple[int, int] = (0, 0), ball_carrying_discount_factor: float = 0.9): 
         """
         Parameters
         ----------
@@ -588,7 +588,7 @@ class Ball(WorldObj):
         """
         ball = super().__new__(cls, color=color)
         ball.init_pos = init_pos
-        ball.discount_factor = 0.9
+        ball.discount_factor = ball_carrying_discount_factor
         return ball
 
     def can_pickup(self) -> bool:

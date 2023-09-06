@@ -48,7 +48,7 @@ CONFIGURATIONS = {
         {
             "size": 8,
             "allow_agent_overlap": False,
-            "has_obsticle": False,
+            "has_obsticle": True,
             "teams": {"red": 1},
             "agents": 1,
             "training_scheme": "DTDE",
@@ -62,7 +62,7 @@ CONFIGURATIONS = {
                     "invalid_pickup_dense_penalty": 0.001,
                 },
             },
-            "max_steps": 500,
+            "max_steps": 100,
         },
     ),
     
