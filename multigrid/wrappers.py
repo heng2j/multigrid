@@ -290,6 +290,33 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         return out
 
 
+class SingleAgentWrapperV2(gym.Wrapper):
+    """
+    Wrapper to convert a multi-agent environment into a
+    single-agent environment.
+    """
+
+    def __init__(self, env: MultiGridEnv):
+        """ """
+        super().__init__(env)
+        self.observation_space = env.agents[0].observation_space["image"]
+        self.action_space = env.agents[0].action_space
+
+        # self.observation_space
+
+    def reset(self, *args, **kwargs):
+        """
+        :meta private:
+        """
+        result = super().reset(*args, **kwargs)
+        return tuple(item for item in result)
+
+    def step(self, action):
+        """
+        :meta private:
+        """
+        result = super().step({self.agents[0].name: action})
+        return tuple(item for item in result)
 
 class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
     """
@@ -345,14 +372,15 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
                 low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
             )
 
-            agent_space_dict = agent.observation_space.spaces.copy()
-            agent_space_dict.pop('mission')
-            agent.observation_space = spaces.Dict(agent_space_dict)
-            agent.original_observation_space = agent.observation_space.spaces.copy()
-            agent.observation_space = self.convert_dict_space_to_single_space(agent.observation_space)
+            # agent_space_dict = agent.observation_space.spaces.copy()
+            # agent_space_dict.pop('mission')
+            # agent.observation_space = spaces.Dict(agent_space_dict)
+            # agent.original_observation_space = agent.observation_space.spaces.copy()
+            # agent.observation_space = self.convert_dict_space_to_single_space(agent.observation_space)
 
 
-        self.observation_space = self.env.agents[0].observation_space
+        # self.observation_space = self.env.agents[0].observation_space
+        self.observation_space = self.env.agents[0].observation_space["image"] 
 
 
 
@@ -368,6 +396,7 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         #             or that one of the sub-observations wasout of bounds.
         # Make sure to handle this exception and implement the correct observation to avoid it.
 
+        agent_id = list(obs.keys())[0]
         for agent_id in obs:
             agent_observations = obs[agent_id]
             if isinstance(agent_observations, list):
@@ -379,8 +408,8 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
                 # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
                 agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
         
-        return self.convert_dict_obs_to_single_obs(obs_dict=obs,obs_space=self.observation_space, action_space=self.action_space) 
-
+        # return self.convert_dict_obs_to_single_obs(obs_dict=obs,obs_space=self.observation_space, action_space=self.action_space) 
+        return obs[agent_id]["image"]
 
     @staticmethod
     def convert_dict_space_to_single_space(dict_space: spaces.Dict) -> spaces.Box:

@@ -52,6 +52,7 @@ CONFIGURATIONS = {
             "teams": {"red": 1},
             "agents": 1,
             "training_scheme": "DTDE",
+            "agent_view_size": 9,
             "reward_schemes": {
                 "red_0": {
                     "eliminated_opponent_sparse_reward": 0.5,
