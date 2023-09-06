@@ -11,11 +11,13 @@ from .mission import Mission, MissionSpace
 from .world_object import WorldObj
 
 from ..utils.misc import front_pos, PropertyAlias
+# from ..utils.training_utilis import convert_dict_space_to_single_space
 from ..utils.rendering import (
     fill_coords,
     point_in_triangle,
     rotate_fn,
 )
+
 
 
 class Agent:
@@ -122,6 +124,20 @@ class Agent:
                     "mission": mission_space,
                 }
             )
+
+            # # FIXME - self.disable_mission_obs
+            # self.disable_mission_obs = True
+
+            # if self.disable_mission_obs:
+
+            #         agent_space_dict = self.observation_space.spaces.copy()
+            #         agent_space_dict.pop('mission')
+            #         self.observation_space = spaces.Dict(agent_space_dict)
+            #         self.using_single_space = True
+            #         if self.using_single_space:
+            #             self.original_observation_space = self.observation_space.spaces.copy()
+            #             self.observation_space = convert_dict_space_to_single_space(self.observation_space)
+
 
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(Action))

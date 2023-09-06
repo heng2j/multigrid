@@ -242,11 +242,14 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.success_termination_mode = success_termination_mode
         self.failure_termination_mode = failure_termination_mode
 
+
+
     @cached_property
     def observation_space(self) -> spaces.Dict[AgentID, spaces.Space]:
         """
         Return the joint observation space of all agents.
         """
+
         if self.training_scheme == "CTCE":
             return spaces.Dict(
                 {
@@ -759,7 +762,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         Render a non-partial observation for visualization.
         """
         # Compute agent visibility masks
-        obs_shape = self.agents[0].observation_space["image"].shape[:-1]
+        obs_shape = self.agents[0].original_observation_space["image"].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 
         if self.training_scheme == "CTCE":

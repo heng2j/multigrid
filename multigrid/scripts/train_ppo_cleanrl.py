@@ -16,7 +16,7 @@ from torch.distributions.categorical import Categorical
 from torch.utils.tensorboard import SummaryWriter
 
 from multigrid.envs import *
-from multigrid.wrappers import SingleAgentWrapper, CompetativeRedBlueDoorWrapper
+from multigrid.wrappers import SingleAgentWrapper, CompetativeRedBlueDoorWrapperV2
 
 CHECKPOINT_FREQUENCY = 50
 
@@ -44,7 +44,7 @@ def parse_args():
         help="whether to capture videos of the agent performances (check out `videos` folder)")
 
     # Algorithm specific arguments
-    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2",  #"CartPole-v1",
+    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle",  #"CartPole-v1",
         help="the id of the environment")
     parser.add_argument("--total-timesteps", type=int, default=5000000,
         help="total timesteps of the experiments")
@@ -87,8 +87,8 @@ def parse_args():
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
-        env = gym.make(env_id, agents=1, render_mode="rgb_array", screen_size=640)  #  render_mode="rgb_array",
-        env = CompetativeRedBlueDoorWrapper(env)
+        env = gym.make(env_id, agents=1, render_mode="rgb_array", screen_size=640, disable_env_checker=True)  #  render_mode="rgb_array",
+        env = CompetativeRedBlueDoorWrapperV2(env)
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
             if idx == 0:
@@ -101,6 +101,22 @@ def make_env(env_id, seed, idx, capture_video, run_name):
         return env
 
     return thunk
+
+
+def convert_dict_space_to_single_space(dict_space: gym.spaces.Dict) -> gym.spaces.Box:
+    total_size = 0
+    
+    # Loop over each item in the dictionary
+    for key, space in dict_space.spaces.items():
+        if isinstance(space, gym.spaces.Discrete):
+            total_size += space.n
+        elif isinstance(space, gym.spaces.Box):
+            total_size += np.prod(space.shape)
+        else:
+            raise ValueError(f"Unsupported space type for key {key}: {type(space)}")
+            
+    # Create a single Box space with the computed size
+    return gym.spaces.Box(low=0, high=1, shape=(total_size,), dtype=np.float32)
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
@@ -181,12 +197,10 @@ if __name__ == "__main__":
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)],
+        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)], #observation_space=gym.spaces.Box(low=0, high=1, shape=(604,), dtype=np.float32)
     )
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
 
-    # FIXME
-    # envs.single_observation_space = envs.single_observation_space["image"]
     agent = Agent(envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
+from xmlrpc.client import Boolean, boolean
 
 import gymnasium as gym
 import pygame
 from gymnasium import Env
+import numbers
+import numpy as np
 
 from multigrid.envs import *
 from multigrid.core.actions import Action
@@ -35,20 +38,20 @@ class ManualControl:
 
     def step(self, action: Action):
         _, reward, terminated, truncated, _ = self.env.step(action)
-        reward = reward if self.agents < 2 else reward[0]
-        terminated = terminated if self.agents < 2 else terminated[0]
-        truncated = truncated if self.agents < 2 else truncated[0]
+        reward = reward if isinstance(reward, numbers.Number)  else reward["red_0"]
+        terminated = terminated if isinstance(terminated,(np.bool_,bool))    else terminated["red_0"]
+        truncated = truncated if isinstance(truncated, bool)  else truncated["red_0"]
 
-        red_reward = reward["red_0"]
+        red_reward = reward
         self.total_episodic_rewards += red_reward
         print(
             f"step={self.env.step_count}, reward={red_reward:.2f}, total episodic reward={self.total_episodic_rewards: .2f} "
         )
-        if terminated["red_0"]:
+        if terminated:
             print(f"terminated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
-        elif truncated["red_0"]:
+        elif truncated:
             print(f"truncated! total episodic reward={self.total_episodic_rewards: .2f} ")
             self.total_episodic_rewards = 0
             self.reset(self.seed)
@@ -157,6 +160,7 @@ if __name__ == "__main__":
         # agent_view_size=args.agent_view_size,
 
         screen_size=args.screen_size,
+        disable_env_checker=True
         # **env_config
 
     )

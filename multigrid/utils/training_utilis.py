@@ -20,6 +20,7 @@ from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel, TorchCen
 from ray.rllib.utils.from_config import NotProvided
 from ray.tune.registry import get_trainable_cls
 from gymnasium.envs import registry as gym_envs_registry
+from gymnasium import spaces
 import ray.rllib.algorithms.callbacks as callbacks
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.tune.callback import Callback
@@ -74,6 +75,23 @@ def can_use_gpu() -> bool:
         pass
 
     return False
+
+
+# def convert_dict_space_to_single_space(dict_space: spaces.Dict) -> spaces.Box:
+#     total_size = 0
+    
+#     # Loop over each item in the dictionary
+#     for key, space in dict_space.spaces.items():
+#         if isinstance(space, spaces.Discrete):
+#             total_size += space.n
+#         elif isinstance(space, spaces.Box):
+#             total_size += np.prod(space.shape)
+#         else:
+#             raise ValueError(f"Unsupported space type for key {key}: {type(space)}")
+            
+#     # Create a single Box space with the computed size
+#     return spaces.Box(low=0, high=1, shape=(total_size,), dtype=np.float32)
+
 
 
 def model_config(framework: str = "torch", lstm: bool = False, custom_model_config: dict = None):
