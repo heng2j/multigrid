@@ -62,7 +62,7 @@ CONFIGURATIONS = {
                     "invalid_pickup_dense_penalty": 0.001,
                 },
             },
-            "max_steps": 100,
+            # "max_steps": 100,
         },
     ),
     
