@@ -362,7 +362,7 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent observation spaces
-        dim = sum(self.dim_sizes)
+        dim = sum(self.dim_sizes) + 1 # +1 for adding the current direction 
         for agent in self.env.agents:
             # Retrieve the shape of the original "image" observation_space 
             view_height, view_width, _ = agent.observation_space["image"].shape
@@ -408,7 +408,13 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
                 agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
         
         # return self.convert_dict_obs_to_single_obs(obs_dict=obs,obs_space=self.observation_space, action_space=self.action_space) 
-        return obs[agent_id]["image"]
+       
+        obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
+        obs[agent_id]["direction"] = np.full((obs[agent_id]["image"].shape[:2] + (1,)), obs[agent_id]["direction"]).astype('uint8')
+        obs = np.concatenate((obs[agent_id]["direction"] , obs[agent_id]["image"]), axis=2, )
+
+    
+        return obs
 
     @staticmethod
     def convert_dict_space_to_single_space(dict_space: spaces.Dict) -> spaces.Box:
