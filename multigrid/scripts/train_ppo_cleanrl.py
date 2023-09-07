@@ -7,8 +7,9 @@ import os
 import random
 import time
 from distutils.util import strtobool
-import pprint 
-pp = pprint.PrettyPrinter(indent=4)  
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 import gymnasium as gym
 import numpy as np
@@ -17,13 +18,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
 from torch.utils.tensorboard import SummaryWriter
-
 from multigrid.envs import *
 from multigrid.wrappers import SingleAgentWrapperV2, CompetativeRedBlueDoorWrapperV2
 
-
 # Set the working diretory to the repo root
-REPO_ROOT = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode('utf-8')
+REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
 os.chdir(REPO_ROOT)
 
 SUBMISSION_FOLDER = "submission/cleanRL"
@@ -100,7 +99,9 @@ def parse_args():
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
-        env = gym.make(env_id, agents=1, render_mode="rgb_array", screen_size=640, disable_env_checker=True)  #  render_mode="rgb_array",
+        env = gym.make(
+            env_id, agents=1, render_mode="rgb_array", screen_size=640, disable_env_checker=True
+        )  #  render_mode="rgb_array",
         env = CompetativeRedBlueDoorWrapperV2(env)
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
@@ -114,7 +115,6 @@ def make_env(env_id, seed, idx, capture_video, run_name):
         return env
 
     return thunk
-
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
@@ -163,7 +163,6 @@ if __name__ == "__main__":
     pp.pprint(vars(args))
     print("==========================================\n")
 
-
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
 
     if args.save_checkpoint:
@@ -201,7 +200,9 @@ if __name__ == "__main__":
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)], #observation_space=gym.spaces.Box(low=0, high=1, shape=(604,), dtype=np.float32)
+        [
+            make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)
+        ],  # observation_space=gym.spaces.Box(low=0, high=1, shape=(604,), dtype=np.float32)
     )
 
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
@@ -240,9 +241,8 @@ if __name__ == "__main__":
     print("\n")
 
     if args.debug_mode:
-
         print("Running the environment...")
-        # Running the envinorment 
+        # Running the envinorment
         next_obs = envs.reset()
         for _ in range(1000):
             action = envs.action_space.sample()
@@ -253,10 +253,11 @@ if __name__ == "__main__":
                     episodic_lengths = []
                     for sub_item in info["final_info"]:
                         if (sub_item is not None) and ("episode" in sub_item.keys()):
-                            print(f"Episode details: Return = {sub_item['episode']['r']}, Length = {sub_item['episode']['l']}")
+                            print(
+                                f"Episode details: Return = {sub_item['episode']['r']}, Length = {sub_item['episode']['l']}"
+                            )
 
     else:
-
         for update in range(1, num_updates + 1):
             # Annealing the rate if instructed to do so.
             if args.anneal_lr:
@@ -332,7 +333,9 @@ if __name__ == "__main__":
                     end = start + args.minibatch_size
                     mb_inds = b_inds[start:end]
 
-                    _, newlogprob, entropy, newvalue = agent.get_action_and_value(b_obs[mb_inds], b_actions.long()[mb_inds])
+                    _, newlogprob, entropy, newvalue = agent.get_action_and_value(
+                        b_obs[mb_inds], b_actions.long()[mb_inds]
+                    )
                     logratio = newlogprob - b_logprobs[mb_inds]
                     ratio = logratio.exp()
 
