@@ -301,8 +301,6 @@ class SingleAgentWrapperV2(gym.Wrapper):
         self.observation_space = env.agents[0].observation_space["image"]
         self.action_space = env.agents[0].action_space
 
-        # self.observation_space
-
     def reset(self, *args, **kwargs):
         """
         :meta private:
@@ -452,28 +450,6 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
             index_counter += 4
 
         return single_space_obs
-    # def convert_dict_obs_to_single_obs(dict_obs: dict, dict_space: spaces.Dict) -> np.ndarray:
-    #     single_obs_list = []
-        
-    #     for key, space in dict_space.spaces.items():
-    #         # If the observation space is discrete, we'll use one-hot encoding.
-    #         if isinstance(space, spaces.Discrete):
-    #             one_hot = np.zeros(space.n, dtype=np.float32)
-    #             one_hot[dict_obs[key]] = 1.0
-    #             single_obs_list.append(one_hot)
-            
-    #         # If the observation space is a box, we'll flatten the observation.
-    #         elif isinstance(space, spaces.Box):
-    #             flattened_obs = dict_obs[key].astype(np.float32).reshape(-1)
-    #             # If needed, you can normalize the observation to [0,1] range here.
-    #             single_obs_list.append(flattened_obs)
-            
-    #         else:
-    #             raise ValueError(f"Unsupported space type for key {key}: {type(space)}")
-        
-    #     # Concatenate all individual observations together to form a single observation vector.
-    #     single_obs = np.concatenate(single_obs_list)
-    #     return single_obs
 
 
 

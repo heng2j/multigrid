@@ -2,6 +2,7 @@
 
 # docs and experiment results can be found at https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
 import argparse
+import subprocess
 import os
 import random
 import time
@@ -17,6 +18,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 from multigrid.envs import *
 from multigrid.wrappers import SingleAgentWrapperV2, CompetativeRedBlueDoorWrapperV2
+
+
+# Set the working diretory to the repo root
+REPO_ROOT = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode('utf-8')
+os.chdir(REPO_ROOT)
+
+SUBMISSION_FOLDER = "submission/cleanRL"
 
 CHECKPOINT_FREQUENCY = 50
 
@@ -44,39 +52,39 @@ def parse_args():
         help="whether to capture videos of the agent performances (check out `videos` folder)")
 
     # Algorithm specific arguments
-    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single",  #"CartPole-v1",
+    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle",  #"MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single"
         help="the id of the environment")
     parser.add_argument("--total-timesteps", type=int, default=5000000,
         help="total timesteps of the experiments")
-    parser.add_argument("--learning-rate", type=float, default=2.5e-4,
+    parser.add_argument("--learning-rate", type=float, default=3e-4,
         help="the learning rate of the optimizer")
-    parser.add_argument("--num-envs", type=int, default=4,
+    parser.add_argument("--num-envs", type=int, default=8,
         help="the number of parallel game environments")
-    parser.add_argument("--num-steps", type=int, default=500,
+    parser.add_argument("--num-steps", type=int, default=128,
         help="the number of steps to run in each environment per policy rollout")
     parser.add_argument("--anneal-lr", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggle learning rate annealing for policy and value networks")
-    parser.add_argument("--gamma", type=float, default=0.99,
+    parser.add_argument("--gamma", type=float, default=0.9,
         help="the discount factor gamma")
-    parser.add_argument("--gae-lambda", type=float, default=0.95,
+    parser.add_argument("--gae-lambda", type=float, default=1.0,
         help="the lambda for the general advantage estimation")
     parser.add_argument("--num-minibatches", type=int, default=4,
         help="the number of mini-batches")
-    parser.add_argument("--update-epochs", type=int, default=4,
+    parser.add_argument("--update-epochs", type=int, default=10,
         help="the K epochs to update the policy")
     parser.add_argument("--norm-adv", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggles advantages normalization")
-    parser.add_argument("--clip-coef", type=float, default=0.2,
+    parser.add_argument("--clip-coef", type=float, default=0.1,
         help="the surrogate clipping coefficient")
     parser.add_argument("--clip-vloss", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggles whether or not to use a clipped loss for the value function, as per the paper.")
-    parser.add_argument("--ent-coef", type=float, default=0.01,
+    parser.add_argument("--ent-coef", type=float, default=0.01, #0.01
         help="coefficient of the entropy")
     parser.add_argument("--vf-coef", type=float, default=0.5,
         help="coefficient of the value function")
     parser.add_argument("--max-grad-norm", type=float, default=0.5,
         help="the maximum norm for the gradient clipping")
-    parser.add_argument("--target-kl", type=float, default=None,
+    parser.add_argument("--target-kl", type=float, default=0.015, # None
         help="the target KL divergence threshold")
     args = parser.parse_args()
     args.batch_size = int(args.num_envs * args.num_steps)
@@ -92,7 +100,7 @@ def make_env(env_id, seed, idx, capture_video, run_name):
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
             if idx == 0:
-                env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
+                env = gym.wrappers.RecordVideo(env, f"{SUBMISSION_FOLDER}/videos/{run_name}")
         # env.seed(seed)
         env = SingleAgentWrapperV2(env)
         # env.reset(seed=seed)
@@ -102,21 +110,6 @@ def make_env(env_id, seed, idx, capture_video, run_name):
 
     return thunk
 
-
-def convert_dict_space_to_single_space(dict_space: gym.spaces.Dict) -> gym.spaces.Box:
-    total_size = 0
-    
-    # Loop over each item in the dictionary
-    for key, space in dict_space.spaces.items():
-        if isinstance(space, gym.spaces.Discrete):
-            total_size += space.n
-        elif isinstance(space, gym.spaces.Box):
-            total_size += np.prod(space.shape)
-        else:
-            raise ValueError(f"Unsupported space type for key {key}: {type(space)}")
-            
-    # Create a single Box space with the computed size
-    return gym.spaces.Box(low=0, high=1, shape=(total_size,), dtype=np.float32)
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
@@ -144,12 +137,12 @@ class Agent(nn.Module):
         )
 
     def get_value(self, x):
-        # FIXME Reshape the tensor to (batch_size, -1)
+        # Reshape the tensor to (batch_size, -1)
         x = x.view(x.size(0), -1)
         return self.critic(x)
 
     def get_action_and_value(self, x, action=None):
-        # FIXME Reshape the tensor to (batch_size, -1)
+        # Reshape the tensor to (batch_size, -1)
         x = x.view(x.size(0), -1)
         logits = self.actor(x)
         probs = Categorical(logits=logits)
@@ -163,7 +156,7 @@ if __name__ == "__main__":
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
 
     if args.save_checkpoint:
-        checkpoint_folder = f"checkpoints/{run_name}"
+        checkpoint_folder = f"{SUBMISSION_FOLDER}/checkpoints/{run_name}"
 
         checkpoint_folder = os.path.abspath(checkpoint_folder)
         # Create output folder if needed
@@ -181,7 +174,7 @@ if __name__ == "__main__":
             monitor_gym=True,
             save_code=True,
         )
-    writer = SummaryWriter(f"runs/{run_name}")
+    writer = SummaryWriter(f"{SUBMISSION_FOLDER}/runs/{run_name}")
     writer.add_text(
         "hyperparameters",
         "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
@@ -199,9 +192,6 @@ if __name__ == "__main__":
     envs = gym.vector.SyncVectorEnv(
         [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)], #observation_space=gym.spaces.Box(low=0, high=1, shape=(604,), dtype=np.float32)
     )
-
-    # envs.single_observation_space = envs.single_observation_space["image"]
-    # envs.single_action_space = envs.single_action_space #["red_0"]
 
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
     agent = Agent(envs).to(device)
