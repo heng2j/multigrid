@@ -353,13 +353,15 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         super().__init__(env)
         self.script_path = __file__
 
-        # HW1 TODO 1:
-        # Instead of directly using the RGB 3 channels  partially observable agent view 
-        # In this wrapper, we are applying one-hot encoding of a partially observable agent view 
-        # using Type, Color, State and Direction
+        # HW2 NOTE 1:
+        # This basic implementation of PPO in CleanRL is not using spaces.Dict as the observation space
+        # Instead, one of the alternative is use the one-hot encoding of a partially observable agent view
+        # And add one more dimention to the shape of the observations to include the direction in the Box observation space
+        # In this wrapper, we need to increase the dimention of the box observation space by 1
+        # Can you update the dimension of the observation? 
         self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
-        # Update agent observation spaces
+        # Update agent's observation spaces
         dim = sum(self.dim_sizes) + 1 # +1 for adding the current direction 
         for agent in self.env.agents:
             # Retrieve the shape of the original "image" observation_space 
@@ -369,14 +371,9 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
                 low=0, high=1, shape=(view_height, view_width, dim), dtype=np.uint8
             )
 
-            # agent_space_dict = agent.observation_space.spaces.copy()
-            # agent_space_dict.pop('mission')
-            # agent.observation_space = spaces.Dict(agent_space_dict)
-            # agent.original_observation_space = agent.observation_space.spaces.copy()
-            # agent.observation_space = self.convert_dict_space_to_single_space(agent.observation_space)
-
-
-        # self.observation_space = self.env.agents[0].observation_space
+        # HW2 NOTE 2:
+        # This basic implementation of PPO in CleanRL only works with single agent
+        # Please update the observation_space to use the one and only agent's updated image observation space?
         self.observation_space = self.env.agents[0].observation_space["image"] 
 
 
@@ -385,14 +382,6 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         """
         :meta private:
         """
-        # HW1 TODO 2:
-        # For each agent_id in obs, update obs[agent_id]['image'] using the self.one_hot() method and 'image' from obs[agent_id].
-        # If there's a type mismatch or one of the sub-observations is out of bounds, you might encounter an error like this:
-        # ValueError: The observation collected from env.reset was not contained within your env's observation space.
-        #             Its possible that there was a typemismatch (for example observations of np.float32 and a space ofnp.float64 observations),
-        #             or that one of the sub-observations wasout of bounds.
-        # Make sure to handle this exception and implement the correct observation to avoid it.
-
         agent_id = list(obs.keys())[0]
         for agent_id in obs:
             agent_observations = obs[agent_id]
@@ -405,52 +394,16 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
                 # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
                 agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
         
-        # return self.convert_dict_obs_to_single_obs(obs_dict=obs,obs_space=self.observation_space, action_space=self.action_space) 
-       
+        # HW2 NOTE 3:
+        # The obs we are receiveing from the unwrapped environment will not match the observation space that we defined for this wrapper
+        # Can you modify the obs[agent_id]["direction"] and concatenate obs[agent_id]["direction"] and obs[agent_id]["image"] and use it as the obs output?
+        # The output shape should match the shape of the observation space
         obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
         obs[agent_id]["direction"] = np.full((obs[agent_id]["image"].shape[:2] + (1,)), obs[agent_id]["direction"]).astype('uint8')
         obs = np.concatenate((obs[agent_id]["direction"] , obs[agent_id]["image"]), axis=2, )
 
     
-        return obs
-
-    @staticmethod
-    def convert_dict_space_to_single_space(dict_space: spaces.Dict) -> spaces.Box:
-        total_size = 0
-        
-        # Loop over each item in the dictionary
-        for key, space in dict_space.spaces.items():
-            if isinstance(space, spaces.Discrete):
-                total_size += space.n
-            elif isinstance(space, spaces.Box):
-                total_size += np.prod(space.shape)
-            else:
-                raise ValueError(f"Unsupported space type for key {key}: {type(space)}")
-                
-        # Create a single Box space with the computed size
-        return spaces.Box(low=0, high=1, shape=(total_size,), dtype=np.float32)
-
-    @staticmethod
-    def convert_dict_obs_to_single_obs(obs_dict, obs_space: spaces.Box, action_space: spaces.Box):
-        # No need for dict_space argument
-
-        single_space_obs = np.zeros(obs_space.shape[0], dtype=np.float32)
-        index_counter = 0
-
-        for agent_id, agent_obs in obs_dict.items():
-
-            # Image:
-            flat_values = agent_obs["image"].flatten()
-            single_space_obs[index_counter:index_counter+len(flat_values)] = flat_values
-            index_counter += len(flat_values)
-            
-            # Direction:
-            one_hot_values = np.eye(4)[agent_obs["direction"]]  # 4 for Discrete(4)
-            single_space_obs[index_counter:index_counter+4] = one_hot_values
-            index_counter += 4
-
-        return single_space_obs
-
+        return obs 
 
 
     @staticmethod

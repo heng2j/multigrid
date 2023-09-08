@@ -10,14 +10,14 @@
 This assignment aims to provide hands-on experience to implementing the key components of Policy Gradient (PG)  and Actor-Critic (AC) Methods. Upon completion, you'll be able to:
 
 - Having the architectual understanding of general PG and AC algorithms and the learning proccess in a Deep RL training via hand-on implemenation in [CleanRL](https://docs.cleanrl.dev/):
-  - Understanding of the 🤖 **Deep RL Agent Mechanics**:
-    - The role of 💹 **Value Functions Network** aka the Actor
-    - The role of  🎯 **Policy Network** aka the Critic 
   - Understand the Deep RL training Loop and Data Flow
     - Initial Agent -> Policy Rollouts -> Rollouts Data -> Policy Training -> Update Agent -> Policy Rolluts again
     - Understand the Deep Learning Factors of Deep RL Agent like batch sizes and learning rate 
-- How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
-  - Having a good understanding of what those parameters are how to tune them to modify agent behavniors without directly modifying the envinorment mechanics (rewards, observations, dones etc...)
+  - Understanding of the 🤖 **Deep RL Agent Mechanics**:
+    - The role of 💹 **Value Functions Network** aka the Actor
+    - The role of  🎯 **Policy Network** aka the Critic - 
+  - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
+    - Having a good understanding of what those parameters are how to tune them to modify agent behavniors without directly modifying the envinorment mechanics (rewards, observations, dones etc...)
 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
   - Compare and contrast how different algorithms and algorithm configs perform against a pretrained agent 
 
@@ -56,7 +56,8 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 # Assignment Task Breakdown
 
 ## Task 0 - Own Your Assignment By Configuring Submission Settings
-Please change the `name` in [submission_config.json](submission/submission_config.json) to your name in CamelCase
+- Please change the `name` in [submission_config.json](submission/submission_config.json) to your name in CamelCase
+- Please tag your codebase with new release v1.1 
 
 ---
 ## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation
@@ -85,12 +86,62 @@ python multigrid/scripts/train_ppo_cleanrl.py --debug-mode True
 
 
 
-**Task 1 Description:** Your agent can perform a wrong action by randomly using the pickup action at each time step. There is a penalty when the agent picks up the incorrect object. You should adjust this value in proportion to the game horizon (1280 time steps). Please fix the reward scale in the reward scheme that defined for `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single` in [envs/__init__.py](multigrid/envs/__init__.py)  [envs/competative_red_blue_door.py](multigrid/envs/competative_red_blue_door.py).
+**Task 1 Description:** Run the above command and take a look at the outputs on the commandline. You should find the essental informations you need for training your RL agent. 
 
-There are many ways to debug the rewards. You can manually control the agent, collect performance and behavior analysis data by evaluating the trained agent, or observe the Training Status Reports or Tensorboard during training. Based on your observations in this exercise, in your own words, please briefly describe the impact of having the right scale of dense rewards in respect to the total horizon of the game. Please include your answer in the Notebooks or as a sepearte `HW1_answers.md` in the `submission/` folder.
+Can you report the following numbers from commandline outputs? And would you please describe the role of them in 1-2 sentences of how these values affect learning?
+
+num_envs
+batch_size
+num_minibatches
+minibatch_size
+num_steps
+update_epochs
+total_timesteps
+num_updates
+
+fixed-length trajectory segments
+
+
 
 ---
-## Task 2 - Debug Observations and Observations Space for Training
+## Task 2 - Understand the Deep RL training Loop and Data Flow
+PPO uses a simpler clipped surrogate objective, omitting the expensive second-order optimization presented in TRPO
+
+
+Please identify the Rollout Phase and the Learning Phase in the code base with given line numbers of code from your tag `v1.1`
+
+What is the role of num_updates?
+
+
+With multiple vectorized training env running in parallel, what happend if one of the i-th sub-environment is done (terminated or truncated) ?
+
+How did PPO handle long-horion games? What is fixed-length trajectory segments?
+
+It is important to understand next_obs and next_done’s role to help transition between phases: At the end of the j
+-th rollout phase, next_obs can be used to estimate the value of the final state during learning phase, and in the begining of the (j+1)
+-th rollout phase, next_obs becomes the initial observation in data. Likewise, next_done tells if next_obs is actually the first observation of a new episode. This intricate design allows PPO to continue step the sub-environments, and because agent always learns from fixed-length trajectory segments after M
+ steps, PPO can train the agent even if the sub-environments never terminate or truncate. This is in principal why PPO can learn in long-horizon games that last 100,000 steps (default truncation limit for Atari games in gym) in a single episode.
+
+
+Rollout phase : The agent samples actions for the N
+ environments and continue to step them for a fixed number of M
+ steps
+
+
+Learning phase: The agent in principal learns from the collected data in the rollout phase: data of length NM
+, next_obs and done
+
+
+
+
+Value Function Loss Clipping may not be importan as per 
+
+Engstrom, Ilyas, et al., (2020) find no evidence that the value function loss clipping helps with the performance. Andrychowicz, et al. (2021) suggest value function loss clipping even hurts performance (decision C13, figure 43).
+We implemented this detail because this work is more about high-fidelity reproduction of prior results.
+
+
+
+
 If you run the following training command to train an agent with Decentalized Training Decentalized Execution (DTDE) training scheme, you are expected to see ValueErrors from blanks that needed to be filled to fix the mismatching observation and observation space issue. Make sure to handle this exception and implement the correct observation to avoid it.
 
 
@@ -112,7 +163,16 @@ You might encounter a `ValueError` for mismatching observation and observation s
 
 ---
 
-## Task 3 - Monitor and Track Agent Training with Tensorboard and Save Out Visualization from Evaluation
+## Task 3 - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
+
+
+ (via --target-kl 0.01), 
+
+
+ Report differences of training metrics
+
+
+
 Monitor and track your runs using Tensorboard with the following command:
 ```shell
 tensorboard --logdir submission/ray_results/
@@ -135,9 +195,19 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 - If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
 
+
+## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
+
 ---
 
-## Task 4 - Submit your homework on Github Classroom
+
+
+## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
+
+---
+
+
+## Task 5 - Submit your homework on Github Classroom
 
 You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. 
 

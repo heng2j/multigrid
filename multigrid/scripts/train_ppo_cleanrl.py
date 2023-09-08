@@ -107,9 +107,8 @@ def make_env(env_id, seed, idx, capture_video, run_name):
         if capture_video:
             if idx == 0:
                 env = gym.wrappers.RecordVideo(env, f"{SUBMISSION_FOLDER}/videos/{run_name}")
-        # env.seed(seed)
         env = SingleAgentWrapperV2(env)
-        # env.reset(seed=seed)
+        env.reset(seed=seed)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)
         return env
@@ -202,7 +201,7 @@ if __name__ == "__main__":
     envs = gym.vector.SyncVectorEnv(
         [
             make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)
-        ],  # observation_space=gym.spaces.Box(low=0, high=1, shape=(604,), dtype=np.float32)
+        ],  
     )
 
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
