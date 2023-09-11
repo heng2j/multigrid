@@ -413,32 +413,79 @@ if __name__ == "__main__":
     else:
         # Main Training Loop for updating the PPO policy
         """
-        NOTE:
-        This loop represents the number of updates to be made to the policy during training. 
-        Each update consists of collecting some rollout trajectory data and then performing a series of optimizations on the collected data.
+        Main training loop for Proximal Policy Optimization (PPO) algorithm.
 
-        Recalls:
-        num_updates - The total number of times the policy (or agent) is updated throughout the entire training process
-        num_steps - The number of consecutive interactions (steps) an agent takes in the environment before the data is used for an update
-        update_epochs - 
-        batch_size - 
-        minibatch_size -
+        This loop represents the number of updates to be made to the policy during training. 
+        Each update consists of collecting some rollout trajectory data and then performing 
+        a series of optimizations on the collected data to improve the policy.
+
+        Parameters:
+            num_updates (int): The total number of times the policy (or agent) is updated 
+                            throughout the entire training process.
+
+            num_steps (int): The number of consecutive interactions (steps) an agent takes 
+                            in the environment before the data is used for an update. Represents 
+                            the horizon for each rollout.
+
+            update_epochs (int): The number of times to re-use the collected data to update 
+                                the policy. For each update, the collected data is optimized over 
+                                'update_epochs' epochs.
+
+            batch_size (int): Total number of timesteps collected in a single rollout. It's the 
+                            product of 'num_steps' and the number of parallel environments, 'num_envs'.
+
+            minibatch_size (int): Size of each batch of data when dividing the collected rollout 
+                                into multiple mini-batches for stochastic gradient descent (SGD).
+
+        Note:
+            The learning rate annealing logic reduces the learning rate linearly as training 
+            progresses. This can help stabilize learning in later stages of training.
+
         """
         for update in range(1, num_updates + 1):
             # Annealing the rate if instructed to do so.
             if args.anneal_lr:
-                # Calculates the fraction of learning rate left
+                # Calculates the fraction of total updates remaining
                 # Update the learning rate with annealing
                 frac = 1.0 - (update - 1.0) / num_updates
                 lrnow = frac * args.learning_rate
                 optimizer.param_groups[0]["lr"] = lrnow
 
+
             # Main Rollout loop for training trajectory data collection
             """
-            NOTE:
-            This loop is for collecting data from the environments using the current policy. 
-            Data like observations, rewards, and actions are stored for later use during optimization
+            This loop collects data from the environments using the current policy. 
+            Observations, rewards, actions, and other agent-environment interaction 
+            data are stored for later use during the optimization phase.
+
+            For each step:
+                1. The agent selects an action based on the current policy and the observed state.
+                2. The action is executed in the environment.
+                3. The environment responds with a reward, a new observation, and a flag indicating if the episode ended.
+                4. These interactions are recorded for later training.
+
+            Parameters:
+            ----------
+            step : int
+                The current timestep in the rollout loop. Iterates from 0 to `args.num_steps-1`.
+
+            global_step : int
+                Cumulative count of the number of steps taken across all environments 
+                and updates.
+
+            obs : torch.Tensor
+                Array storing observations for each timestep.
+
+            dones : torch.Tensor
+                Array indicating whether the episode ended (done=True) at each timestep.
+
+            next_obs : torch.Tensor
+                Observation from the environment after taking an action.
+
+            next_done : torch.Tensor
+                Flag indicating if the episode ended after taking an action.
             """
+
             for step in range(0, args.num_steps):
                 global_step += 1 * args.num_envs
                 obs[step] = next_obs
@@ -470,26 +517,140 @@ if __name__ == "__main__":
                             break
 
             # Estimate the advantage using Generalized Advantage Estimation (GAE)
+            # HW2 TODO - 
             """
             NOTE:
-            This section calculates the advantages and returns which are essential parts of the PPO algorithm. 
-            It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages
-            This block also bootstraps value if not done
+            This section calculates the advantages and returns, which are essential parts of the PPO algorithm. 
+            It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages. 
+            This method combines multiple n-step estimators into a single estimate, reducing variance 
+            and allowing for more stable and efficient training. This block also bootstraps value if not done.
+
+            GAE combines multiple n-step advantage estimators into a single weighted estimator:
+                A_t^GAE(γ,λ) = Σ(γλ)^i δ_(t+i)
+
+            where:
+            δ_t - The temporal difference error formally defined as δ_t = r_t + γV(s_(t+1)) - V(s_t)
+            γ - Discount factor which determines the weight of future rewards
+            λ - A hyperparameter in [0,1] balancing bias and variance in the advantage estimation
+
+            References:
+            High-Dimensional Continuous Control Using Generalized Advantage Estimation - John Schulman et al.
             """
             with torch.no_grad():
+                # Get the value function estimate for the next observation (V(s_(t+1)))
                 next_value = agent.get_value(next_obs).reshape(1, -1)
+
+                # Initializing a tensor to store the computed advantages at each timestep
                 advantages = torch.zeros_like(rewards).to(device)
+
+                # Initialize variable to recursively compute the GAE advantage. Represents Σ(γλ)^i δ_{t+i} for previous timestep
                 lastgaelam = 0
+
+                # Looping through each timestep in reverse to calculate the GAE advantage using the recursive formula
                 for t in reversed(range(args.num_steps)):
                     if t == args.num_steps - 1:
+                        # Indicator for non-terminal states at the next step (1 if not terminal, 0 if terminal)
                         nextnonterminal = 1.0 - next_done
                         nextvalues = next_value
                     else:
+                        # Indicator for non-terminal states at t+1 (1 if not terminal, 0 if terminal)
                         nextnonterminal = 1.0 - dones[t + 1]
                         nextvalues = values[t + 1]
+
+                    # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
+                    # HW2 TODO - 
                     delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
+
+                    # Computing the GAE advantage at the current timestep using the recursive formula.
+                    # The GAE formula is:
+                    #    A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
+                    # Where:
+                    #    δ_t = r_t + γV(s_(t+1)) - V(s_t)
+                    # Here:
+                    #    - δ_t is the TD-error at time t, which is the difference between the expected return and the current value estimate.
+                    #    - A_(t+1)^GAE(γ,λ) is the advantage estimate of the next timestep (which is stored in `lastgaelam`).
+                    #    - γ is the discount factor (args.gamma).
+                    #    - λ is the hyperparameter that determines the trade-off between bias and variance in the advantage estimate (args.gae_lambda).
                     advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+
+                # Compute returns for each state: return = value + advantage
                 returns = advantages + values
+
+            # # HW2 TODO 1 - Estimate the advantage using Generalized Advantage Estimation (GAE)
+            # """
+            # NOTE:
+            # This section calculates the advantages and returns, which are essential parts of the PPO algorithm. 
+            # It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages. 
+            # This method combines multiple n-step estimators into a single estimate, reducing variance 
+            # and allowing for more stable and efficient training. This block also bootstraps value if not done.
+
+            # GAE combines multiple n-step advantage estimators into a single weighted estimator:
+            #     A_t^GAE(γ,λ) = Σ(γλ)^i δ_(t+i)
+
+            # where:
+            # δ_t - The temporal difference error formally defined as δ_t = r_t + γV(s_(t+1)) - V(s_t)
+            # γ - Discount factor which determines the weight of future rewards
+            # λ - A hyperparameter in [0,1] balancing bias and variance in the advantage estimation
+
+            # References:
+            # High-Dimensional Continuous Control Using Generalized Advantage Estimation - John Schulman et al.
+            # """
+            # with torch.no_grad():
+            #     # Get the value function estimate for the next observation (V(s_(t+1)))
+            #     next_value = agent.get_value(next_obs).reshape(1, -1)
+
+            #     # Initializing a tensor to store the computed advantages at each timestep
+            #     advantages = torch.zeros_like(rewards).to(device)
+
+            #     # Initialize variable to recursively compute the GAE advantage. Represents Σ(γλ)^i δ_{t+i} for previous timestep
+            #     lastgaelam = 0
+            # with torch.no_grad():
+            #     # Get the value function estimate for the next observation (V(s_(t+1)))
+            #     next_value = agent.get_value(next_obs).reshape(1, -1)
+
+            #     # Initializing a tensor to store the computed advantages at each timestep
+            #     advantages = torch.zeros_like(rewards).to(device)
+
+            #     # Initialize variable to recursively compute the GAE advantage. Represents Σ(γλ)^i δ_{t+i} for previous timestep
+            #     lastgaelam = 0
+
+            #     # Looping through each timestep in reverse to calculate the GAE advantage using the recursive formula
+            #     for t in reversed(range(args.num_steps)):
+            #         if t == args.num_steps - 1:
+            #             # HW2 TODO - 
+            #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
+            #             nextnonterminal = ________ 
+            #             nextvalues = next_value
+            #         else:
+            #             # HW2 TODO -
+            #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
+            #             nextnonterminal = ________ 
+            #             nextvalues = values[t + 1]
+
+            #         # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
+            #         # HW2 TODO - 
+            #         # Complete the calculation for 'delta' using the formula provided above
+            #         delta = ________
+
+            #         # Computing the GAE advantage at the current timestep using the recursive formula.
+            #         # The GAE formula is:
+            #         #    A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
+            #         # Where:
+            #         #    δ_t = r_t + γV(s_(t+1)) - V(s_t)
+            #         # Here:
+            #         #    - δ_t is the TD-error at time t, which is the difference between the expected return and the current value estimate.
+            #         #    - A_(t+1)^GAE(γ,λ) is the advantage estimate of the next timestep (which is stored in `lastgaelam`).
+            #         #    - γ is the discount factor (args.gamma).
+            #         #    - λ is the hyperparameter that determines the trade-off between bias and variance in the advantage estimate (args.gae_lambda).
+            #         # HW2 TODO - 
+            #         # Fill in the blank to complete the computation for the GAE advantage at the current timestep
+            #         advantages[t] = lastgaelam = ________
+
+            #     # Compute returns for each state: return = value + advantage
+            #     # HW2 TODO -
+            #     # Complete the calculation for 'returns' using the relationship between advantage and value
+            #     returns = ________
+
 
             # Flatten the batch to fit the neural network's input dimensions
             # NOTE: This part is reshaping the tensor structure for ease of processing
@@ -502,32 +663,54 @@ if __name__ == "__main__":
 
             # PPO optimization: Optimize the policy and value function
             # NOTE: This loop represents the number of epochs of optimization to perform on the collected data
+            
+            # Initializing Batching Variables
+
+            # Creates an array of indices from 0 to args.batch_size-1. This will later be used to shuffle and create minibatches for stochastic optimization
             b_inds = np.arange(args.batch_size)
+            # An empty list initialized to store the fraction of ratio terms that are clipped. It's useful for tracking the behavior of the PPO algorithm
             clipfracs = []
+
+            # Optimization Loop:
+            # NOTE: This represents multiple passes over the collected data. Each pass can be seen as one epoch of optimization
             for epoch in range(args.update_epochs):
+                # The shuffle function shuffles the indices. This is done to introduce randomness in the selection of mini-batches during training
                 np.random.shuffle(b_inds)
+                
+                # This inner loop creates mini-batches using shuffled indices. mb_inds contains the indices for the current minibatch
                 for start in range(0, args.batch_size, args.minibatch_size):
                     end = start + args.minibatch_size
                     mb_inds = b_inds[start:end]
 
                     # Obtain updated action and value predictions for the minibatch
+                    # The agent is queried for updated action and value predictions for the current mini-batch
                     _, newlogprob, entropy, newvalue = agent.get_action_and_value(
                         b_obs[mb_inds], b_actions.long()[mb_inds]
                     )
+
+                    # This calculates the difference between the new log probability, newlogprob and the old log probability b_logprobs[mb_inds] of the action. 
+                    # This ratio, logratio indicates how the policy has changed after optimization
                     logratio = newlogprob - b_logprobs[mb_inds]
                     ratio = logratio.exp()
 
+                    # KL Divergence Calculation
+                    # KL divergence measures how one probability distribution diverges from a second expected probability distribution
                     with torch.no_grad():
                         # calculate approx_kl http://joschu.net/blog/kl-approx.html
                         old_approx_kl = (-logratio).mean()
                         approx_kl = ((ratio - 1) - logratio).mean()
                         clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
+
                     mb_advantages = b_advantages[mb_inds]
+                    
+                    # Advantage Normalization
+                    # NOTE: The advantages are normalized to have zero mean and unit variance. This can stabilize training
                     if args.norm_adv:
                         mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
                     # Policy loss
+                    # PPO introduces a clipping to the objective to prevent large policy updates which could harm the policy's performance
                     pg_loss1 = -mb_advantages * ratio
                     pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - args.clip_coef, 1 + args.clip_coef)
                     pg_loss = torch.max(pg_loss1, pg_loss2).mean()
@@ -535,6 +718,7 @@ if __name__ == "__main__":
                     # Value loss
                     newvalue = newvalue.view(-1)
                     if args.clip_vloss:
+                        # The value loss is clipped to prevent large updates
                         v_loss_unclipped = (newvalue - b_returns[mb_inds]) ** 2
                         v_clipped = b_values[mb_inds] + torch.clamp(
                             newvalue - b_values[mb_inds],
@@ -547,8 +731,27 @@ if __name__ == "__main__":
                     else:
                         v_loss = 0.5 * ((newvalue - b_returns[mb_inds]) ** 2).mean()
 
+                    # Entropy Loss
+                    # NOTE: Entropy encourages exploration by penalizing deterministic policies. A higher entropy corresponds to a more explorative policy
                     entropy_loss = entropy.mean()
+
+                    # HW2 TODO - 
+                    # Combined Loss Calculation:
+                    # This line computes the combined loss for optimizing the policy network, which is composed of three main components: 
+                    # 1. Policy Gradient Loss (pg_loss): Encourages the policy to increase the probability of actions that yield higher advantages.
+                    # 2. Entropy Loss (entropy_loss): Adds an entropy bonus to encourage exploration. The `args.ent_coef` parameter scales this component. 
+                    #    - A higher value of `args.ent_coef` promotes more exploration, helping the agent to explore various strategies, 
+                    #      potentially finding more optimal paths.
+                    #    - A lower value nudges the agent towards exploitation, focusing more on the strategies that are known to work well.
+                    # 3. Value Loss (v_loss): Measures the error in value function estimates, with the `args.vf_coef` parameter determining its influence in the overall loss.
+                    #    - A higher `args.vf_coef` emphasizes the accuracy of value estimation, potentially leading to a more stable training process.
+                    #    - A lower `args.vf_coef` gives precedence to policy improvement over value estimation, possibly leading to faster, 
+                    #      but less stable policy updates.
+                    # It's important to note that the balance between exploration and exploitation, and the stability of training 
+                    # is influenced by the careful tuning of `args.ent_coef` and `args.vf_coef`. These coefficients might require 
+                    # adjustment based on the specifics of the environment and task.
                     loss = pg_loss - args.ent_coef * entropy_loss + v_loss * args.vf_coef
+
 
                     # Gradient Descent
                     """ 
@@ -571,20 +774,39 @@ if __name__ == "__main__":
                     if approx_kl > args.target_kl:
                         break
 
+            # Calculating Explained Variance:
+            # This metric indicates how well the value function (critic) is approximating the true returns. 
+            # If this is close to 1, it means our value function is doing a good job in terms of prediction. 
+            # If it's close to 0, it's mostly like guessing.
             y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
             var_y = np.var(y_true)
             explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
 
             # Logging Training Information
             # TRY NOT TO MODIFY: record rewards for plotting purposes
+
+            # Log the current learning rate
             writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
+            # Log the value loss, representing the difference between predicted values and actual returns
             writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
+            # Log the policy loss. Lower values indicate the policy is improving in predicting better actions
             writer.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
+            # Log the entropy, which gives a sense of how random the policy's actions are 
+            # Higher values indicate more exploration, while lower values suggest the policy is becoming deterministic
             writer.add_scalar("losses/entropy", entropy_loss.item(), global_step)
+            # Log the old KL divergence approximation between old and new policy
             writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), global_step)
+            # Log the current KL divergence approximation between old and new policy 
+            # A large sudden increase can be a sign of policy updates being too aggressive
             writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
+            # Track the fraction of actions for which the clipped objective is activated
+            # This helps understand how frequently our updates are being bounded to ensure stable training
             writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
+            # Log the explained variance. A high explained variance suggests our value function 
+            # is effectively capturing the variance in the returns
             writer.add_scalar("losses/explained_variance", explained_var, global_step)
+            # Compute and display the number of environment steps processed per second
+            # This serves as a performance metric for the training loop itself
             print("Steps per Second (SPS):", int(global_step / (time.time() - start_time)))
             writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
 
