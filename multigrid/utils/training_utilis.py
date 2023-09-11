@@ -187,6 +187,7 @@ def algorithm_config(
             if env_config["training_scheme"] == "CTCE"
             else {f"{team_name}_{i}" for team_name, team_num in env_config["teams"].items() for i in range(team_num)},
             policy_mapping_fn=lambda agent_id, *args, **kwargs: agent_id,
+            policies_to_train=policies_to_train,
         )
         .training(
             model=model_config(
@@ -313,7 +314,7 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         algorithm : Algorithm
             The algorithm being initialized.
         """
-        algorithm.set_weights({self.policy_name: self.restored_policy_0_weights})
+        algorithm.set_weights({self.policy_name: self.restored_policy_weights})
 
     def setup(self, *args, **kwargs):
         """
@@ -326,6 +327,6 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         kwargs : dict
             Additional keyword arguments.
         """
-        policy_0_checkpoint_path = get_checkpoint_dir(self.load_dir)
-        restored_policy_0 = Policy.from_checkpoint(policy_0_checkpoint_path)
-        self.restored_policy_0_weights = restored_policy_0[self.policy_name].get_weights()
+        checkpoint_path = get_checkpoint_dir(self.load_dir)
+        restored_policies = Policy.from_checkpoint(checkpoint_path)
+        self.restored_policy_weights = restored_policies[self.policy_name].get_weights()
