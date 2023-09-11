@@ -1,6 +1,17 @@
+from __future__ import annotations
+
 """ Expected for restricted changes """
 
-# docs and experiment results can be found at https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
+
+"""Script for Training Deep Reinforcement Learning agents in MultiGrid environment wiht Proximal Policy Optimization.
+
+Documentation and experiment results related to this implementation can be found at: https://docs.cleanrl.dev/rl-algorithms/ppo/#ppopy
+
+Note: This script is expected to have restricted changes.
+
+"""
+
+# Imports 
 import argparse
 import subprocess
 import os
@@ -21,16 +32,27 @@ from torch.utils.tensorboard import SummaryWriter
 from multigrid.envs import *
 from multigrid.wrappers import SingleAgentWrapperV2, CompetativeRedBlueDoorWrapperV2
 
-# Set the working diretory to the repo root
+# ======== Define Global Variables and Configurations ======== #
+
+# Find the root directory of the git repository and change the current working directory to that path.
 REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
 os.chdir(REPO_ROOT)
 
+# Define the submission folder's path
 SUBMISSION_FOLDER = "submission/cleanRL"
 
+# Define the frequency to save checkpoints of the model during training.
 CHECKPOINT_FREQUENCY = 50
 
 
 def parse_args():
+    """
+    Parses command-line arguments for the PPO training script.
+    
+    Returns:
+        argparse.Namespace: A namespace containing all the parsed arguments.
+    """
+
     # fmt: off
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp-name", type=str, default=os.path.basename(__file__).rstrip(".py"),
@@ -98,10 +120,36 @@ def parse_args():
 
 
 def make_env(env_id, seed, idx, capture_video, run_name):
+    """
+    Factory function to create and configure a gym environment.
+
+    Parameters
+    ----------
+    env_id : str
+        Identifier of the gym environment to be created.
+    seed : int
+        Seed for initializing the environment's random processes.
+    idx : int
+        Index of the environment instance, mainly used to determine if videos should be recorded.
+    capture_video : bool
+        Flag indicating whether to capture videos of the environment's episodes.
+    run_name : str
+        Name of the current run, used in naming video files.
+
+    Returns
+    -------
+    func
+        A function that, when called, initializes and returns the specified gym environment.
+
+    Examples
+    --------
+    >>> env_factory = make_env('CartPole-v1', 0, 0, True, 'test_run')
+    """
+    
     def thunk():
         env = gym.make(
             env_id, agents=1, render_mode="rgb_array", screen_size=640, disable_env_checker=True
-        )  #  render_mode="rgb_array",
+        )  #  render_mode="human",
         env = CompetativeRedBlueDoorWrapperV2(env)
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
@@ -117,14 +165,73 @@ def make_env(env_id, seed, idx, capture_video, run_name):
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
+    """
+    Initializes a given neural network layer's weights and biases using orthogonal initialization.
+
+    Parameters
+    ----------
+    layer : torch.nn.Module
+        The neural network layer to be initialized.
+    std : float, optional
+        The standard deviation for the orthogonal initialization of weights. Default is sqrt(2).
+    bias_const : float, optional
+        The constant value for initializing biases. Default is 0.0.
+
+    Returns
+    -------
+    torch.nn.Module
+        The initialized neural network layer.
+
+    Examples
+    --------
+    >>> linear_layer = torch.nn.Linear(10, 20)
+    >>> initialized_layer = layer_init(linear_layer)
+
+    Notes
+    -----
+    - Reference: Exact solutions to the nonlinear dynamics of learning in deep linear neural 
+      networks - Saxe, A. et al. (2013).
+    - The input tensor for the orthogonal initialization should have at least 2 dimensions. 
+      For tensors with more than 2 dimensions, the trailing dimensions are flattened.
+
+    """
     torch.nn.init.orthogonal_(layer.weight, std)
     torch.nn.init.constant_(layer.bias, bias_const)
     return layer
 
 
 class Agent(nn.Module):
+    """
+    Defines an agent using an Actor-Critic architecture to interact with an environment.
+
+    The agent comprises two main components:
+    - Actor: Outputs the action probabilities for a given state/observation.
+    - Critic: Estimates the value of a given state/observation.
+
+    Parameters
+    ----------
+    envs : gym.Env
+        The environments with which the agent interacts.
+
+    Attributes
+    ----------
+    critic : torch.nn.Sequential
+        The neural network that estimates state/observation values.
+    actor : torch.nn.Sequential
+        The neural network that outputs action probabilities.
+
+    Methods
+    -------
+    get_value(x: torch.Tensor) -> torch.Tensor:
+        Returns the estimated value of the input state/observation.
+    
+    get_action_and_value(x: torch.Tensor, action: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        Returns the chosen action, its log probability, the entropy of the policy, and the state value.
+
+    """
     def __init__(self, envs):
         super().__init__()
+        # Define the critic network to estimate state/observation values
         self.critic = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 64)),
             nn.Tanh(),
@@ -132,6 +239,7 @@ class Agent(nn.Module):
             nn.Tanh(),
             layer_init(nn.Linear(64, 1), std=1.0),
         )
+        # Define the actor network to output action probabilities
         self.actor = nn.Sequential(
             layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 64)),
             nn.Tanh(),
@@ -141,11 +249,45 @@ class Agent(nn.Module):
         )
 
     def get_value(self, x):
+        """
+        Estimates the value of the given state/observation.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The state/observation tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            The estimated value of the state/observation.
+        """
         # Reshape the tensor to (batch_size, -1)
         x = x.view(x.size(0), -1)
         return self.critic(x)
 
     def get_action_and_value(self, x, action=None):
+        """
+        Computes the chosen action, its log probability, the entropy of the policy, and the state/observation value.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            The state/observation tensor.
+        action : torch.Tensor, optional
+            If provided, this action will be used. Otherwise, an action is sampled from the policy. 
+
+        Returns
+        -------
+        torch.Tensor
+            The chosen action.
+        torch.Tensor
+            The log probability of the chosen action.
+        torch.Tensor
+            The entropy of the policy.
+        torch.Tensor
+            The estimated value of the state/observation.
+        """
         # Reshape the tensor to (batch_size, -1)
         x = x.view(x.size(0), -1)
         logits = self.actor(x)
@@ -190,6 +332,7 @@ if __name__ == "__main__":
     )
 
     # TRY NOT TO MODIFY: seeding
+    # Seeding for reproducibility
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -197,18 +340,26 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
-    # env setup
+    # Initialize vectorized environments
+    """
+    NOTE:
+    The code uses a vectorized environment (SyncVectorEnv) from gym, which allows running multiple instances of an environment in parallel.
+    This is particularly useful for algorithm like Proximal Policy Optimization (PPO), which can benefit from parallel environment interactions.
+    The environments are created using the provided make_env function
+    """
     envs = gym.vector.SyncVectorEnv(
         [
             make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)
         ],  
     )
 
+    # Check and print environment details
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
     print(f"Environment Details:")
     print(f" - Action space: {envs.single_action_space} with {envs.single_action_space.n} discrete actions")
     print(f" - Observation space: {envs.single_observation_space} with shape {envs.single_observation_space.shape}\n")
 
+    # Initialize agent and print its architecture
     agent = Agent(envs).to(device)
     print("Agent Model Architecture:")
     print(agent)
@@ -216,6 +367,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
     # ALGO Logic: Storage setup
+    # Setup storage for agent's learning loop
     obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape).to(device)
     logprobs = torch.zeros((args.num_steps, args.num_envs)).to(device)
@@ -224,12 +376,14 @@ if __name__ == "__main__":
     values = torch.zeros((args.num_steps, args.num_envs)).to(device)
 
     # TRY NOT TO MODIFY: start the game
+    # Initialize the game and fetch initial observations
     global_step = 0
     start_time = time.time()
     next_obs = torch.Tensor(envs.reset()[0]).to(device)
     next_done = torch.zeros(args.num_envs).to(device)
     num_updates = args.total_timesteps // args.batch_size
 
+    # Print training initialization details
     print(f"Agent Training Initialization:")
     print(f" - Number of updates in this training cycle: {num_updates}")
     print(f" - Estimated State Value for the initial observation:\n")
@@ -240,8 +394,8 @@ if __name__ == "__main__":
     print("\n")
 
     if args.debug_mode:
+        # Running the envinorment in debug mode
         print("Running the environment...")
-        # Running the envinorment
         next_obs = envs.reset()
         for _ in range(1000):
             action = envs.action_space.sample()
@@ -257,19 +411,42 @@ if __name__ == "__main__":
                             )
 
     else:
+        # Main Training Loop for updating the PPO policy
+        """
+        NOTE:
+        This loop represents the number of updates to be made to the policy during training. 
+        Each update consists of collecting some rollout trajectory data and then performing a series of optimizations on the collected data.
+
+        Recalls:
+        num_updates - The total number of times the policy (or agent) is updated throughout the entire training process
+        num_steps - The number of consecutive interactions (steps) an agent takes in the environment before the data is used for an update
+        update_epochs - 
+        batch_size - 
+        minibatch_size -
+        """
         for update in range(1, num_updates + 1):
             # Annealing the rate if instructed to do so.
             if args.anneal_lr:
+                # Calculates the fraction of learning rate left
+                # Update the learning rate with annealing
                 frac = 1.0 - (update - 1.0) / num_updates
                 lrnow = frac * args.learning_rate
                 optimizer.param_groups[0]["lr"] = lrnow
 
+            # Main Rollout loop for training trajectory data collection
+            """
+            NOTE:
+            This loop is for collecting data from the environments using the current policy. 
+            Data like observations, rewards, and actions are stored for later use during optimization
+            """
             for step in range(0, args.num_steps):
                 global_step += 1 * args.num_envs
                 obs[step] = next_obs
                 dones[step] = next_done
 
                 # ALGO LOGIC: action logic
+                # NOTE: Using the current policcy to get the action, value, and log probabilities of the next observation without calculating gradients
+                #       It's just for data collection purpose
                 with torch.no_grad():
                     action, logprob, _, value = agent.get_action_and_value(next_obs)
                     values[step] = value.flatten()
@@ -277,29 +454,28 @@ if __name__ == "__main__":
                 logprobs[step] = logprob
 
                 # TRY NOT TO MODIFY: execute the game and log data.
+                # NOTE: This block steps the environment with the selected action using the current policy
                 next_obs, reward, done, truncate, info = envs.step(action.cpu().numpy())
                 rewards[step] = torch.tensor(reward).to(device).view(-1)
                 next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
 
-                # if any(done):
-                #     writer.add_scalar("charts/episodic_return", float(rewards.mean()), global_step)
-                #     writer.add_scalar("charts/episodic_length", step, global_step)
+                # Log episodic returns and lengths.
                 if "final_info" in info:
                     episodic_returns = []
                     episodic_lengths = []
                     for item in info["final_info"]:
                         if (item is not None) and ("episode" in item.keys()):
-                            # episodic_returns.append(item['episode']['r'])
-                            # episodic_lengths.append(item['episode']['l'])
-                            # print(f"global_step={global_step}, episodic_return={item['episode']['r']},  episodic_length={item['episode']['l']}")
                             writer.add_scalar("charts/episodic_return", item["episode"]["r"], global_step)
                             writer.add_scalar("charts/episodic_length", item["episode"]["l"], global_step)
                             break
-                    # print(f"global_step={global_step}, episodic_return_mean={np.mean(episodic_returns)},  episodic_length={np.mean(episodic_lengths)}")
-                    # writer.add_scalar("charts/episodic_return_mean", np.mean(episodic_returns), global_step)
-                    # writer.add_scalar("charts/episodic_length_mean", np.mean(episodic_lengths), global_step)
 
-            # bootstrap value if not done
+            # Estimate the advantage using Generalized Advantage Estimation (GAE)
+            """
+            NOTE:
+            This section calculates the advantages and returns which are essential parts of the PPO algorithm. 
+            It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages
+            This block also bootstraps value if not done
+            """
             with torch.no_grad():
                 next_value = agent.get_value(next_obs).reshape(1, -1)
                 advantages = torch.zeros_like(rewards).to(device)
@@ -315,7 +491,8 @@ if __name__ == "__main__":
                     advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
                 returns = advantages + values
 
-            # flatten the batch
+            # Flatten the batch to fit the neural network's input dimensions
+            # NOTE: This part is reshaping the tensor structure for ease of processing
             b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
             b_logprobs = logprobs.reshape(-1)
             b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
@@ -323,7 +500,8 @@ if __name__ == "__main__":
             b_returns = returns.reshape(-1)
             b_values = values.reshape(-1)
 
-            # Optimizing the policy and value network
+            # PPO optimization: Optimize the policy and value function
+            # NOTE: This loop represents the number of epochs of optimization to perform on the collected data
             b_inds = np.arange(args.batch_size)
             clipfracs = []
             for epoch in range(args.update_epochs):
@@ -332,6 +510,7 @@ if __name__ == "__main__":
                     end = start + args.minibatch_size
                     mb_inds = b_inds[start:end]
 
+                    # Obtain updated action and value predictions for the minibatch
                     _, newlogprob, entropy, newvalue = agent.get_action_and_value(
                         b_obs[mb_inds], b_actions.long()[mb_inds]
                     )
@@ -371,11 +550,23 @@ if __name__ == "__main__":
                     entropy_loss = entropy.mean()
                     loss = pg_loss - args.ent_coef * entropy_loss + v_loss * args.vf_coef
 
+                    # Gradient Descent
+                    """ 
+                    NOTE: 
+                    Here the gradients are calculated and a step of optimization is performed. 
+                    Gradients are clipped to prevent too large updates which can destabilize training.
+                    """
                     optimizer.zero_grad()
                     loss.backward()
                     nn.utils.clip_grad_norm_(agent.parameters(), args.max_grad_norm)
                     optimizer.step()
 
+                # Early Stopping
+                """
+                NOTE: 
+                If the average KL divergence between the new and old policy is larger than a threshold, it stops the optimization early. 
+                This is to prevent too large policy updates which can destabilize the training
+                """
                 if args.target_kl is not None:
                     if approx_kl > args.target_kl:
                         break
@@ -384,6 +575,7 @@ if __name__ == "__main__":
             var_y = np.var(y_true)
             explained_var = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
 
+            # Logging Training Information
             # TRY NOT TO MODIFY: record rewards for plotting purposes
             writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
             writer.add_scalar("losses/value_loss", v_loss.item(), global_step)

@@ -102,6 +102,12 @@ num_updates
 fixed-length trajectory segments
 
 
+How are these value relate or indicate an algorithm's sample efficiency? 
+
+Measure sample effiicency
+
+Wall clock time is not the same as sample efficiency 
+
 
 ---
 ## Task 2 - Understand the Deep RL training Loop and Data Flow
@@ -112,6 +118,13 @@ Please identify the Rollout Phase and the Learning Phase in the code base with g
 
 What is the role of num_updates?
 
+
+In a model-free setting, if ther agent doesn't have the model to model the transition probability even P(s1), how does it lean without the model fo the world?
+  - Rollout 
+  - Trail and Error? Which part? Grad maximum likelihood
+  - how to reduce high variance? 
+    - reward to go
+    - subtract baselines
 
 With multiple vectorized training env running in parallel, what happend if one of the i-th sub-environment is done (terminated or truncated) ?
 
