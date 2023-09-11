@@ -110,7 +110,7 @@ def parse_args():
     parser.add_argument("--target-kl", type=float, default=0.015, # None
         help="the target KL divergence threshold")
     parser.add_argument(
-        "--debug-mode", type=bool, default=True, help="Boolean value to set to use debug mode for debugging"
+        "--debug-mode", type=bool, default=False, help="Boolean value to set to use debug mode for debugging"
     )
     args = parser.parse_args()
     args.batch_size = int(args.num_envs * args.num_steps)

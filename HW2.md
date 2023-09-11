@@ -97,7 +97,7 @@ minibatch_size
 num_steps
 update_epochs
 total_timesteps
-num_updates
+num_updates - What is the role of num_updates?
 
 fixed-length trajectory segments
 
@@ -109,31 +109,13 @@ Measure sample effiicency
 Wall clock time is not the same as sample efficiency 
 
 
+
+
+
 ---
 ## Task 2 - Understand the Deep RL training Loop and Data Flow
-PPO uses a simpler clipped surrogate objective, omitting the expensive second-order optimization presented in TRPO
-
 
 Please identify the Rollout Phase and the Learning Phase in the code base with given line numbers of code from your tag `v1.1`
-
-What is the role of num_updates?
-
-
-In a model-free setting, if ther agent doesn't have the model to model the transition probability even P(s1), how does it lean without the model fo the world?
-  - Rollout 
-  - Trail and Error? Which part? Grad maximum likelihood
-  - how to reduce high variance? 
-    - reward to go
-    - subtract baselines
-
-With multiple vectorized training env running in parallel, what happend if one of the i-th sub-environment is done (terminated or truncated) ?
-
-How did PPO handle long-horion games? What is fixed-length trajectory segments?
-
-It is important to understand next_obs and next_done’s role to help transition between phases: At the end of the j
--th rollout phase, next_obs can be used to estimate the value of the final state during learning phase, and in the begining of the (j+1)
--th rollout phase, next_obs becomes the initial observation in data. Likewise, next_done tells if next_obs is actually the first observation of a new episode. This intricate design allows PPO to continue step the sub-environments, and because agent always learns from fixed-length trajectory segments after M
- steps, PPO can train the agent even if the sub-environments never terminate or truncate. This is in principal why PPO can learn in long-horizon games that last 100,000 steps (default truncation limit for Atari games in gym) in a single episode.
 
 
 Rollout phase : The agent samples actions for the N
@@ -144,18 +126,39 @@ Rollout phase : The agent samples actions for the N
 Learning phase: The agent in principal learns from the collected data in the rollout phase: data of length NM
 , next_obs and done
 
+It is important to understand next_obs and next_done’s role to help transition between phases: At the end of the j
+-th rollout phase, next_obs can be used to estimate the value of the final state during learning phase, and in the begining of the (j+1)
+-th rollout phase, next_obs becomes the initial observation in data. Likewise, next_done tells if next_obs is actually the first observation of a new episode. This intricate design allows PPO to continue step the sub-environments, and because agent always learns from fixed-length trajectory segments after M
+ steps, PPO can train the agent even if the sub-environments never terminate or truncate. This is in principal why PPO can learn in long-horizon games that last 100,000 steps (default truncation limit for Atari games in gym) in a single episode.
 
 
 
-Value Function Loss Clipping may not be importan as per 
-
-Engstrom, Ilyas, et al., (2020) find no evidence that the value function loss clipping helps with the performance. Andrychowicz, et al. (2021) suggest value function loss clipping even hurts performance (decision C13, figure 43).
-We implemented this detail because this work is more about high-fidelity reproduction of prior results.
 
 
 
+PPO uses a simpler clipped surrogate objective, omitting the expensive second-order optimization presented in TRPO
 
-If you run the following training command to train an agent with Decentalized Training Decentalized Execution (DTDE) training scheme, you are expected to see ValueErrors from blanks that needed to be filled to fix the mismatching observation and observation space issue. Make sure to handle this exception and implement the correct observation to avoid it.
+Vanaela PG is high variance, how did PPO  
+
+
+
+In a model-free setting, if the agent doesn't have the model to model the transition probability even P(s1), how does it lean without the model for the world?
+  - Rollout 
+  - Trail and Error? Which part? Grad maximum likelihood
+  - how to reduce high variance? 
+    - reward to go
+      - MDP has some randomness 
+      - fewer the sample reward to go, the higher the variance is 
+    - subtract baselines: subtracting a baseline is unbiased in expectation
+    - Differece of Q value and the value functions 
+    - Q - V = Advantage 
+      - The better A estimate, the lower the variance
+
+With multiple vectorized training env running in parallel, what happend if one of the i-th sub-environment is done (terminated or truncated) ?
+
+
+
+
 
 
 Command for Task 2:
@@ -182,7 +185,17 @@ You might encounter a `ValueError` for mismatching observation and observation s
  (via --target-kl 0.01), 
 
 
+
  Report differences of training metrics
+
+
+
+
+As mentioned in 
+Value Function Loss Clipping may not be importan as per Engstrom, Ilyas, et al., (2020) find no evidence that the value function loss clipping helps with the performance. Andrychowicz, et al. (2021) suggest value function loss clipping even hurts performance (decision C13, figure 43).
+We implemented this detail because this work is more about high-fidelity reproduction of prior results.
+
+
 
 
 

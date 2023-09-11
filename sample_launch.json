@@ -29,7 +29,7 @@
             "justMyCode": false
         },
         {
-            "name": "Visualie Trained Agent",
+            "name": "Visualize Trained Agent",
             "type": "python",
             "request": "launch",
             "program": "multigrid/scripts/visualize.py",

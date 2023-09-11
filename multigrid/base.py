@@ -762,7 +762,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         Render a non-partial observation for visualization.
         """
         # Compute agent visibility masks
-        obs_shape = self.agents[0].original_observation_space["image"].shape[:-1]
+        obs_shape = self.agents[0].observation_space["image"].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 
         if self.training_scheme == "CTCE":
