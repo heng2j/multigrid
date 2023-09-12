@@ -60,21 +60,43 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 - Please tag your codebase with new release v1.1 
 
 ---
-## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation
+## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
 Checkout the CleanRL PPO implementation and configuration in [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) by running the following command with `--debug-mode True`.
 
 
-The output of this command will print the default configuration of trianing and export an video of how the training scenario looks like with random actions. 
+The output of this command will print the default values of the trianing configuration and export an video of how the training scenario looks like with random actions. 
 
 Command for Task 1:
 ```shell
 python multigrid/scripts/train_ppo_cleanrl.py --debug-mode True 
 ```
 
+
+**Task 1 Questions:** Run the above command and take a look at the outputs on the commandline. You should find the essental informations you need for training your RL agent. 
+
+
+### Questions for General Deep RL Training Parameters Understanding
+***Q.1*** Can you report the following numbers from commandline outputs? And would you please describe the role for each of the following parameters in 1-2 sentences on the their role in the training loop and how these values affect training?
+
+- num_envs
+- batch_size
+- num_minibatches
+- minibatch_size
+- total_timesteps
+- num_updates - What is the role of num_updates?
+- num_steps
+- update_epochs
+
+***Q.2*** How are these values relate or indicate an algorithm's Sample Efficiency? 
+
+Recall from Week 1, `Sample Efficiency` is The ability an algorithm to converge to an optimal solution with minimal sampling of experience data (trajectory from steps) from the environment
+
+
 **Tips:**
-- Watch the [Part 1 of 3 — Proximal Policy Optimization Implementation: 11 Core Implementation Details](https://www.youtube.com/watch?v=MEt6rrxH8W4)
+- Watch [Part 1 of 3 — Proximal Policy Optimization Implementation: 11 Core Implementation Details](https://www.youtube.com/watch?v=MEt6rrxH8W4) as mentioned in Week 2's Curriclum
+- Extensive comments and doctstrings have been added on top of the original [CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py) for your references 
 - You can try different configuraitons for the V2 environemnt in `CONFIGURATIONS` in [envs/__init__.py]
-- Pleae feel free to play with various arguments in [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) to get familalr with thie new training script, the parameters and the meaning of the commandline outputs.
+- Pleae feel free to play with various arguments in [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) to get familalr with thie new training script, the parameters, and the meaning of the commandline outputs.
 
 ***Notes:***
 
@@ -82,27 +104,30 @@ python multigrid/scripts/train_ppo_cleanrl.py --debug-mode True
 2. It is encouraged to take a look at other implementations of ppo in CleanRL's official repos. For examples:
     - [ppo_atari.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari.py)
     - [ppo_atari_lstm.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari_lstm.py)
-    - [/ppo_continuous_action.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action.py) 
+    - [ppo_continuous_action.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action.py) 
 
 
 
-**Task 1 Description:** Run the above command and take a look at the outputs on the commandline. You should find the essental informations you need for training your RL agent. 
 
-Can you report the following numbers from commandline outputs? And would you please describe the role of them in 1-2 sentences of how these values affect learning?
+---
+## Task 2 - Understand the Dataflow in Deep RL training Loop and Implement the Technique to reduce variance in Learning 
 
-num_envs
-batch_size
-num_minibatches
-minibatch_size
-num_steps
-update_epochs
-total_timesteps
-num_updates - What is the role of num_updates?
+### Questions for Understanding the Deep RL training Loop
+***Q.1*** As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/), PPO leverages an efficient paradigm known as the vectorized architecture which contained 2 phases in the training loop:
 
-fixed-length trajectory segments
+`Rollout phase` : The agent samples actions for the N environments and continue to step them for a fixed number of M steps
+`Learning phase`: The agent in principal learns from the collected data in the rollout phase: data of length NM, next_obs and done
 
 
-How are these value relate or indicate an algorithm's sample efficiency? 
+From your baseline codebase with tag `v1.1`, Please identify the `Rollout Phase` and the `Learning Phase` in the code base with given line numbers of code. 
+
+
+For example these following lines in  [CleanRL ppo.py][https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211] are the Rollout Phase for their PPO implementation. 
+
+
+
+***Q.2*** 
+
 
 Measure sample effiicency
 
@@ -110,21 +135,6 @@ Wall clock time is not the same as sample efficiency
 
 
 
-
-
----
-## Task 2 - Understand the Deep RL training Loop and Data Flow
-
-Please identify the Rollout Phase and the Learning Phase in the code base with given line numbers of code from your tag `v1.1`
-
-
-Rollout phase : The agent samples actions for the N
- environments and continue to step them for a fixed number of M
- steps
-
-
-Learning phase: The agent in principal learns from the collected data in the rollout phase: data of length NM
-, next_obs and done
 
 It is important to understand next_obs and next_done’s role to help transition between phases: At the end of the j
 -th rollout phase, next_obs can be used to estimate the value of the final state during learning phase, and in the begining of the (j+1)

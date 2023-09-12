@@ -77,7 +77,7 @@ def parse_args():
     # Algorithm specific arguments
     parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle",  #"MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single"
         help="the id of the environment")
-    parser.add_argument("--total-timesteps", type=int, default=5000000,
+    parser.add_argument("--total-timesteps", type=int, default=1000000,
         help="total timesteps of the experiments")
     parser.add_argument("--learning-rate", type=float, default=3e-4,
         help="the learning rate of the optimizer")
@@ -785,6 +785,9 @@ if __name__ == "__main__":
             # Logging Training Information
             # TRY NOT TO MODIFY: record rewards for plotting purposes
 
+
+            # Log the number of Policy updates
+            writer.add_scalar("charts/Policy_updates", update, global_step)
             # Log the current learning rate
             writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
             # Log the value loss, representing the difference between predicted values and actual returns
