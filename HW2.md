@@ -228,9 +228,41 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 
 
+
+
+
 ## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
 
 ---
+
+
+Command for Task 4:
+```shell
+python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-workers 10 --num-gpus 0 --name 1v1_death_match --training-scheme DTDE --policies-to-train red_0  --policies-to-load blue_0 --load-dir 
+```
+
+
+
+
+
+**Tips:**
+- You can filter the plots using the following filters:
+
+```
+episode_len_mean|ray/tune/episode_reward_mean|episode_reward_min|entropy|vf|loss|kl|cpu|ram
+```
+
+
+- To visualize a specific checkpoint, use the following command:
+```shell
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single  --num-episodes 10  --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode human --gif DTDE-Red-Single
+```
+##### Replace `XXXX` and `YYY` with the corresponding number of your checkpoint.
+
+
+- If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
+
+
 
 
 ## Task 5 - Submit your homework on Github Classroom
