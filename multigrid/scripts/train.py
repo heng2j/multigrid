@@ -82,7 +82,7 @@ def train(
     local_mode: bool = False,
     experiment_name: str = "testing_experiment",
     training_scheme: str = "CTCE",
-    policy_to_load_name: str = None,
+    policies_to_load: list[str] | None = None,
 ):
     """Main training loop for RLlib algorithms.
 
@@ -113,6 +113,16 @@ def train(
     None
     """
 
+    # Construct the final callbacks
+    callbacks=[
+            MLflowLoggerCallback(
+                tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=TAGS, save_artifact=True
+            ),
+        ]
+
+    if policies_to_load:
+        callbacks.append(RestoreWeightsCallback(load_dir=load_dir, policy_name=policies_to_load))
+
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
     tune.run(
         CentralizedCritic if training_scheme == "CTDE" else algo,
@@ -124,12 +134,7 @@ def train(
         checkpoint_freq=10,
         checkpoint_at_end=True,
         progress_reporter=reporter,
-        callbacks=[
-            MLflowLoggerCallback(
-                tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=TAGS, save_artifact=True
-            ),
-            RestoreWeightsCallback(load_dir=load_dir,policy_name="blue_0"),
-        ],  
+        callbacks=callbacks,  
     )
     ray.shutdown()
 
@@ -142,7 +147,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--lstm", action="store_true", help="Use LSTM model.")
     parser.add_argument(
-        "--env", type=str, default="MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single", help="MultiGrid environment to use."
+        "--env", type=str, default="MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1", help="MultiGrid environment to use."
     )
     parser.add_argument(
         "--env-config",
@@ -153,13 +158,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--seed", type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible"
     )
-    parser.add_argument("--num-workers", type=int, default=1, help="Number of rollout workers.")
-    parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
+    parser.add_argument("--num-workers", type=int, default=60, help="Number of rollout workers.")
+    parser.add_argument("--num-gpus", type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
-        type=str,  default='submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_43c52_00000_0_2023-09-07_22-49-01/checkpoint_000030',
+        type=str,  #default='/proj/autonomy/rl_irad/team/heng/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_43c52_00000_0_2023-09-07_22-49-01/checkpoint_000130',
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(
@@ -172,11 +177,13 @@ if __name__ == "__main__":
         "--name", type=str, default="<my_experinemnt>", help="Distinct name to track your experinemnt in save-dir"
     )
     parser.add_argument(
-        "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
+        "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
-    parser.add_argument("--our-agent-ids", nargs="+", type=int, default=[0, 1], help="List of agent ids to train")
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"  
+        "--policies-to-train", nargs="+", type=str, default=["red_0", "blue_0"], help="List of agent ids to train"  
+    )
+    parser.add_argument(
+        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"  
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
@@ -200,4 +207,5 @@ if __name__ == "__main__":
         local_mode=args.local_mode,
         experiment_name=args.name,
         training_scheme=args.training_scheme,
+        policies_to_load=args.policies_to_load
     )

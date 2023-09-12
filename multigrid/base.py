@@ -102,7 +102,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         highlight: bool = True,
         tile_size: int = TILE_PIXELS,
         agent_pov: bool = True,
-        our_agent_ids: list[int] = [0],
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
         reward_schemes: dict[str, int] = {
@@ -163,7 +162,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.grid: Grid = Grid(width, height)
 
         # Initialize agents
-        self.our_agent_ids = our_agent_ids
         self.training_scheme = training_scheme
         self.team_index_dict = defaultdict(dict)
 

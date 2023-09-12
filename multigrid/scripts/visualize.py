@@ -165,7 +165,6 @@ def main_evaluation(args):
 
         # NOTE - future fixme update checkpoint loading method
         # # New way
-        # policy_name = f"policy_{args.our_agent_ids[1]}"
         # restored_policy_0 = Policy.from_checkpoint(checkpoint)
         # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
         # algorithm.set_weights({policy_name: restored_policy_0_weights})
@@ -201,7 +200,6 @@ if __name__ == "__main__":
     parser.add_argument("--num-episodes", type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument("--load-dir", type=str, help="Checkpoint directory for loading pre-trained policies.")
     parser.add_argument("--gif", type=str, help="Store output as GIF at given path.")
-    parser.add_argument("--our-agent-ids", nargs="+", type=int, default=[0, 1], help="List of agent ids to evaluate.")
     parser.add_argument("--render-mode", type=str, default="rgb_array", help="Can be either 'human' or 'rgb_array.'")
     parser.add_argument(
         "--save-dir",

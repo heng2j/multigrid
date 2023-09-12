@@ -328,6 +328,8 @@ CONFIGURATIONS = {
                     "invalid_pickup_dense_penalty": 0.001,
                 },
             },
+            "randomization": True,
+            "max_steps": 300,
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-1v1": (
@@ -356,6 +358,8 @@ CONFIGURATIONS = {
                     "invalid_pickup_dense_penalty": 0.001,
                 },
             },
+            "randomization": True,
+            "max_steps": 300,
         },
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2": (

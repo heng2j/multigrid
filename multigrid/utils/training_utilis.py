@@ -135,7 +135,6 @@ def algorithm_config(
     num_gpus: int = 0,
     lr: float | None = None,
     policies_to_train: list[int] | None = None,
-    our_agent_ids: list[str] | None = None,
     **kwargs,
 ) -> AlgorithmConfig:
     """
@@ -161,8 +160,6 @@ def algorithm_config(
         Learning rate. Default is None.
     policies_to_train : list[int] or None, optional
         List of policies to train. Default is None.
-    our_agent_ids : list[str] or None, optional
-        List of agent ids. Default is None.
     **kwargs
         Additional keyword arguments.
 
@@ -290,7 +287,7 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
     def __init__(
         self,
         load_dir: str,
-        policy_name: str,
+        load_policy_names: list[str],
     ):
         """
         Initialize RestoreWeightsCallback.
@@ -299,11 +296,11 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         ----------
         load_dir : str
             The directory where the checkpoints are stored.
-        policy_name : str
-            The name of the policy to restore.
+        load_policy_names : list[str]
+            The list of names of policies to restore.
         """
         self.load_dir = load_dir
-        self.policy_name = policy_name
+        self.load_policy_names = load_policy_names
 
     def on_algorithm_init(self, *, algorithm: "Algorithm", **kwargs) -> None:
         """
@@ -314,7 +311,8 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         algorithm : Algorithm
             The algorithm being initialized.
         """
-        algorithm.set_weights({self.policy_name: self.restored_policy_weights})
+
+        algorithm.set_weights(self.restored_policy_weights)
 
     def setup(self, *args, **kwargs):
         """
@@ -329,4 +327,4 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         """
         checkpoint_path = get_checkpoint_dir(self.load_dir)
         restored_policies = Policy.from_checkpoint(checkpoint_path)
-        self.restored_policy_weights = restored_policies[self.policy_name].get_weights()
+        self.restored_policy_weights = { policy_name: restored_policies[policy_name].get_weights() for policy_name in self.load_policy_names }
