@@ -516,7 +516,7 @@ if __name__ == "__main__":
                             break
 
             # Estimate the advantage using Generalized Advantage Estimation (GAE)
-            # HW2 TODO - 
+            # HW2 TODO - Implementing GAE
             """
             NOTE:
             This section calculates the advantages and returns, which are essential parts of the PPO algorithm. 

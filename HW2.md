@@ -60,11 +60,10 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 - Please tag your codebase with new release v1.1 
 
 ---
-## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
-Checkout the CleanRL PPO implementation and configuration in [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) by running the following command with `--debug-mode True`.
+### Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
+First, check out the CleanRL PPO implementation and its configuration in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py). You can do this by running the following command with the `--debug-mode True` flag.
 
-
-The output of this command will print the default values of the trianing configuration and export an video of how the training scenario looks like with random actions. 
+Executing this command will display the default values of the training configuration and export a video showcasing the training scenario using random actions.
 
 Command for Task 1:
 ```shell
@@ -72,62 +71,118 @@ python multigrid/scripts/train_ppo_cleanrl.py --debug-mode True
 ```
 
 
-**Task 1 Questions:** Run the above command and take a look at the outputs on the commandline. You should find the essental informations you need for training your RL agent. 
+### Task 1 Questions
+After running the above command, observe the outputs in the command line. This will provide essential information required to train your RL agent.
 
 
-### Questions for General Deep RL Training Parameters Understanding
-***Q.1*** Can you report the following numbers from commandline outputs? And would you please describe the role for each of the following parameters in 1-2 sentences on the their role in the training loop and how these values affect training?
+#### Questions for General Deep RL Training Parameters Understanding
+**Q.1** From the command line outputs, can you report the following parameters? Additionally, please describe the role of each parameter in the training loop and explain how these values influence training in 1-2 sentences.
 
-- num_envs
-- batch_size
-- num_minibatches
-- minibatch_size
-- total_timesteps
-- num_updates - What is the role of num_updates?
-- num_steps
-- update_epochs
+- **num_envs**: 
+- **batch_size**: 
+- **num_minibatches**: 
+- **minibatch_size**: 
+- **total_timesteps**: 
+- **num_updates**: 
+- **num_steps**: 
+- **update_epochs**: 
 
-***Q.2*** How are these values relate or indicate an algorithm's Sample Efficiency? 
+**Q.2** How do these values relate to an algorithm's Sample Efficiency?
 
-Recall from Week 1, `Sample Efficiency` is The ability an algorithm to converge to an optimal solution with minimal sampling of experience data (trajectory from steps) from the environment
+> **Note**: From Week 1, recall that `Sample Efficiency` refers to the ability of an algorithm to converge to an optimal solution with minimal sampling of experience data (trajectory from steps) from the environment.
 
 
-**Tips:**
-- Watch [Part 1 of 3 — Proximal Policy Optimization Implementation: 11 Core Implementation Details](https://www.youtube.com/watch?v=MEt6rrxH8W4) as mentioned in Week 2's Curriclum
-- Extensive comments and doctstrings have been added on top of the original [CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py) for your references 
-- You can try different configuraitons for the V2 environemnt in `CONFIGURATIONS` in [envs/__init__.py]
-- Pleae feel free to play with various arguments in [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) to get familalr with thie new training script, the parameters, and the meaning of the commandline outputs.
 
-***Notes:***
+#### Tips:
+- Refer to [Part 1 of 3 — Proximal Policy Optimization Implementation: 11 Core Implementation Details](https://www.youtube.com/watch?v=MEt6rrxH8W4) from Week 2's Curriculum.
+- Extensive comments and docstrings have been added atop the original [CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py) for your reference.
+- Explore different configurations for the V2 environment in `CONFIGURATIONS` within [envs/__init__.py].
+- Feel free to experiment with various arguments in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py) to familiarize yourself with this training script, its parameters, and the significance of the command line outputs.
 
-1. We only use the CleanRL implementation in the first 2 main tasks in HW2 but it is the cleanest and simplest way to learn the in and out of the algorithms
-2. It is encouraged to take a look at other implementations of ppo in CleanRL's official repos. For examples:
+#### Notes:
+1. We only utilize the CleanRL PPO implementation in the first three main tasks of HW2. However, it offers a clean and straightforward way to grasp the ins and outs of the algorithms.
+2. It's beneficial to explore other PPO implementations in CleanRL's official repository. For example:
     - [ppo_atari.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari.py)
     - [ppo_atari_lstm.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari_lstm.py)
-    - [ppo_continuous_action.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action.py) 
-
+    - [ppo_continuous_action.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_continuous_action.py)
 
 
 
 ---
 ## Task 2 - Understand the Dataflow in Deep RL training Loop and Implement the Technique to reduce variance in Learning 
 
-### Questions for Understanding the Deep RL training Loop
-***Q.1*** As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/), PPO leverages an efficient paradigm known as the vectorized architecture which contained 2 phases in the training loop:
+In this task, you will delve into the specifics of the vectorized training architecture, which consists of two pivotal phases: the Rollout Phase and the Learning Phase. This is the parallelized training architecture that many Deep RL algorithms, including PPO used. You will also explore the techniques employed by PPO to reduce variance in learning, particularly focusing on the Generalized Advantage Estimation (GAE). You will enhance your understanding by identifying these phases in the code and implementing GAE to reduce variance during training in the Learning Phase when using the diversed data collected during the Rollout Phase.
 
-`Rollout phase` : The agent samples actions for the N environments and continue to step them for a fixed number of M steps
-`Learning phase`: The agent in principal learns from the collected data in the rollout phase: data of length NM, next_obs and done
+### Questions to Enhance Understanding of the Deep RL Training Loop
+***Q.1*** As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/), PPO employs a streamlined paradigm known as the vectorized architecture. This architecture encompasses two phases within the training loop:
+
+- **Rollout Phase**: During this phase, the agent samples actions for 'N' environments and continues to process them for a designated 'M' number of steps.
+
+- **Learning Phase**: In this phase, fundamentally, the agent learns from the data collected during the rollout phase. This data, with a length of NM, includes 'next_obs' and 'done'.
+
+Utilizing your baseline codebase tagged `v1.1`, please pinpoint the `Rollout Phase` and the `Learning Phase` within the codebase, indicating specific line numbers. 
+
+For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211) represent the Rollout Phase in their PPO implementation.  
 
 
-From your baseline codebase with tag `v1.1`, Please identify the `Rollout Phase` and the `Learning Phase` in the code base with given line numbers of code. 
+
+**Q.2 How does PPO Reduce Variance? By Utilizing Generalized Advantage Estimation (GAE)?**
+
+> **Note**: 
+  PPO employs the Generalized Advantage Estimation (GAE) method for advantage calculation, merging multiple n-step estimators into a singular estimate, thereby mitigating variance and fostering more stable and efficient training.
+
+  GAE amalgamates multiple n-step advantage estimators into a singular weighted estimator represented as:
+  
+     A_t^(GAE)(gamma, lambda) = SUM(gamma*lambda)^i * delta_(t+i)
+
+  
+  where:
+  - `delta_t` represents the temporal difference error defined formally as delta_t = r_t + gamma * V(s_(t+1)) - V(s_t)
+
+  - `gamma` is the discount factor denoting the weighting of future rewards
+  - `lambda` is a hyperparameter within the range [0,1], mediating the balance between bias and variance in advantage estimation
+
+  **References**:
+  "High-Dimensional Continuous Control Using Generalized Advantage Estimation" by John Schulman et al.
 
 
-For example these following lines in  [CleanRL ppo.py][https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211] are the Rollout Phase for their PPO implementation. 
+If you run the following training command to train an agent, you are expected to see ValErrors from blanks that needed to be filled to implement and enable Generalized Advantage Estimation (GAE). Please make use of the comments in the code to help you to implement GAE. 
+
+
+Command for Task 2:
+```shell
+python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4
+```
+
+#### Tips:
+- Useful comments has been appended to the code for your guidance.
+- For further insight, you might refer to the ["Generalized Advantage Estimation" section in "The 37 Implementation Details of Proximal Policy Optimization"](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/).
+
+#### Notes:
+- While GAE is a potent tool to mitigate variance during Deep RL training, you might explore other methodologies as well.
+
+
+---
+
+## Task 3 - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
 
 
 
+Command for Task 3:
+```shell
+python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4
+```
 
-***Q.2 How did PPO Reduce Variance?*** 
+
+
+ (via --target-kl 0.01), 
+
+
+
+ Report differences of training metrics
+
+
+
 
 
 Measure sample effiicency
@@ -136,68 +191,6 @@ Wall clock time is not the same as sample efficiency
 
 
 
-
-It is important to understand next_obs and next_done’s role to help transition between phases: At the end of the j
--th rollout phase, next_obs can be used to estimate the value of the final state during learning phase, and in the begining of the (j+1)
--th rollout phase, next_obs becomes the initial observation in data. Likewise, next_done tells if next_obs is actually the first observation of a new episode. This intricate design allows PPO to continue step the sub-environments, and because agent always learns from fixed-length trajectory segments after M
- steps, PPO can train the agent even if the sub-environments never terminate or truncate. This is in principal why PPO can learn in long-horizon games that last 100,000 steps (default truncation limit for Atari games in gym) in a single episode.
-
-
-
-
-
-
-PPO uses a simpler clipped surrogate objective, omitting the expensive second-order optimization presented in TRPO
-
-Vanaela PG is high variance, how did PPO  
-
-
-
-In a model-free setting, if the agent doesn't have the model to model the transition probability even P(s1), how does it lean without the model for the world?
-  - Rollout 
-  - Trail and Error? Which part? Grad maximum likelihood
-  - how to reduce high variance? 
-    - reward to go
-      - MDP has some randomness 
-      - fewer the sample reward to go, the higher the variance is 
-    - subtract baselines: subtracting a baseline is unbiased in expectation
-    - Differece of Q value and the value functions 
-    - Q - V = Advantage 
-      - The better A estimate, the lower the variance
-
-With multiple vectorized training env running in parallel, what happend if one of the i-th sub-environment is done (terminated or truncated) ?
-
-
-
-
-
-
-Command for Task 2:
-```shell
-python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single --num-workers 10 --num-gpus 0 --name --training-scheme DTDE
-```
-
-**Tips:**
-- You can set `--local-mode` to True and use the VSCode debugger to walk through the code for debugging.
-- Check the original definition of `self.observation_space` in [agent.py](multigrid/core/agent.py) and the new requirements in `CompetativeRedBlueDoorWrapper` in [wrappers.py](multigrid/wrappers.py) to see how the observation for the agents should be defined in `MultiGrid-CompetativeRedBlueDoor-v3`. Then you will know how to match them with the observations you are generating.
-
-For training. Your training batch size should be larger than the horizon so that you're collecting multiple rollouts when evaluating the performance of your trained policy. For example, if the horizon is 1000 and the training batch size is 5000, you'll collect approximately 5 trajectories (or more if any of them terminate early).
-
-***Note:*** 
-
-You might encounter a `ValueError` for mismatching observation and observation space if you run the above command. Make sure to handle this exception and implement the correct observation to avoid it.
-
-
----
-
-## Task 3 - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
-
-
- (via --target-kl 0.01), 
-
-
-
- Report differences of training metrics
 
 
 
