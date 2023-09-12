@@ -85,6 +85,7 @@ def train(
     experiment_name: str = "testing_experiment",
     training_scheme: str = "CTCE",
     policies_to_load: list[str] | None = None,
+    restore_all_policies_from_checkpoint: bool = False,
 ):
     """Main training loop for RLlib algorithms.
 
@@ -123,7 +124,7 @@ def train(
         ]
 
     if policies_to_load:
-        callbacks.append(RestoreWeightsCallback(load_dir=load_dir, policy_name=policies_to_load))
+        callbacks.append(RestoreWeightsCallback(load_dir=load_dir, load_policy_names=policies_to_load))
 
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
     tune.run(
@@ -132,7 +133,7 @@ def train(
         config=config,
         local_dir=save_dir,
         verbose=1,
-        restore=get_checkpoint_dir(load_dir),
+        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None,
         checkpoint_freq=10,
         checkpoint_at_end=True,
         progress_reporter=reporter,
