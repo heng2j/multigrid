@@ -138,6 +138,7 @@ def train(
         checkpoint_at_end=True,
         progress_reporter=reporter,
         callbacks=callbacks,  
+        name=experiment_name,
     )
     ray.shutdown()
 
@@ -167,7 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
-        type=str,  default='/proj/autonomy/rl_irad/team/heng/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_77a98_00000_0_2023-09-11_22-02-46/checkpoint_000190',
+        type=str,  default='submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_77a98_00000_0_2023-09-11_22-02-46/checkpoint_000180',
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(

@@ -485,7 +485,6 @@ if __name__ == "__main__":
             next_done : torch.Tensor
                 Flag indicating if the episode ended after taking an action.
             """
-
             for step in range(0, args.num_steps):
                 global_step += 1 * args.num_envs
                 obs[step] = next_obs
