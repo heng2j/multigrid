@@ -71,6 +71,7 @@ def save_evaluation_metrics(episodes_data: List[Dict], save_path: Path, scenario
 def evaluation(
     algorithm: Algorithm,
     num_episodes: int = 100,
+    policies_to_eval: list[str] = ["red_0"]
 ) -> list[np.ndarray]:
     """
     Visualizes trajectories from trained agents and collects evaluation data.
@@ -116,13 +117,21 @@ def evaluation(
                 episode_rewards[agent_id] += rewards[agent_id]
 
         frames.append(env.get_frame())
-        solved = all([env.env.env.red_door.is_open, (env.env.env.step_count < env.max_steps)])
+        opponents = [agent for agent in env.env.env.agents if agent.name not in policies_to_eval]
+
+
+        done_dict = {}
+        for policy_name in policies_to_eval:
+            done_dict = {**done_dict, **infos[policy_name]}
+
+
+        solved = any([env.env.env.red_door.is_open, all([opponent.terminated for opponent in opponents])]) and (env.env.env.step_count < env.max_steps)
         print("\n", "Rewards:", episode_rewards)
         print("\n", "Total Time Steps:", env.env.env.step_count)
         print("\n", "Solved:", solved)
 
         # Set episode data
-        episodes_data.append({**episode_rewards, **{"Episode Length": env.env.env.step_count, "Solved": solved}})
+        episodes_data.append({**episode_rewards,  **done_dict, **{"Episode Length": env.env.env.step_count, "Solved": solved} })
 
     env.close()
 
@@ -173,6 +182,7 @@ def main_evaluation(args):
     frames, episodes_data = evaluation(
         algorithm,
         num_episodes=args.num_episodes,
+        policies_to_eval=args.policies_to_eval
     )
 
     save_evaluation_metrics(episodes_data=episodes_data, save_path=save_path, scenario_name=scenario_name)
@@ -200,6 +210,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--num-episodes", type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument("--load-dir", type=str, help="Checkpoint directory for loading pre-trained policies.")
+    parser.add_argument(
+        "--policies-to-eval", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"  
+    )
     parser.add_argument("--gif", type=str, help="Store output as GIF at given path.")
     parser.add_argument("--render-mode", type=str, default="rgb_array", help="Can be either 'human' or 'rgb_array.'")
     parser.add_argument(
