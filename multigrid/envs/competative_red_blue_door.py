@@ -284,7 +284,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 "door_open_done": False,
                 "got_eliminated_done": False,
                 "eliminated_opponents_done": False,
-                "eliminated_num": 0,
+                "eliminated_opponent_num": 0,
             }
             for team in list(self.team_index_dict.keys())
         }
@@ -335,7 +335,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 "door_open_done": False,
                 "eliminated_opponents_done": False,
                 "got_eliminated_done": False,
-                "eliminated_num": 0,
+                "eliminated_opponent_num": 0,
             }
             for agent in self.agents
         }
@@ -413,6 +413,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                             info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name][
                                 "eliminated_opponents_done"
                             ] = True
+                            info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name][
+                                "eliminated_opponent_num"
+                            ] += 1
 
         elif action == Action.pickup:
             if (
@@ -865,7 +868,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 "door_open_done": False,
                 "eliminated_opponents_done": False,
                 "got_eliminated_done": False,
-                "eliminated_num": 0,
+                "eliminated_opponent_num": 0,
             }
             for agent in self.agents
         }
@@ -943,6 +946,10 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                             info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name][
                                 "eliminated_opponents_done"
                             ] = True
+                            info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name][
+                                "eliminated_opponent_num"
+                            ] += 1
+
 
         elif action == Action.pickup:
             if (
