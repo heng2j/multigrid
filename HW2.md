@@ -126,7 +126,8 @@ For example these following lines in  [CleanRL ppo.py][https://github.com/vwxyzj
 
 
 
-***Q.2*** 
+
+***Q.2 How did PPO Reduce Variance?*** 
 
 
 Measure sample effiicency

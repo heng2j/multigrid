@@ -70,6 +70,8 @@ def configure_algorithm(args):
     config.seed = args.seed
     config.callbacks(EvaluationCallbacks)
     config.environment(disable_env_checking=False)
+
+
     return config
 
 
@@ -164,7 +166,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
-        type=str,  #default='/proj/autonomy/rl_irad/team/heng/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_43c52_00000_0_2023-09-07_22-49-01/checkpoint_000130',
+        type=str,  default='/proj/autonomy/rl_irad/team/heng/code/multigrid/submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_77a98_00000_0_2023-09-11_22-02-46/checkpoint_000190',
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(
@@ -180,10 +182,10 @@ if __name__ == "__main__":
         "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0", "blue_0"], help="List of agent ids to train"  
+        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"  
     )
     parser.add_argument(
-        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"  
+        "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"  
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
