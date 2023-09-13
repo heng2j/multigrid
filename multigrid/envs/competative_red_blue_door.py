@@ -397,7 +397,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name]["got_eliminated_done"] = True
                 self.grid.set(*fwd_obj.pos, None)
                 fwd_obj.pos = (
-                    (2, 2) if fwd_obj.color == "blue" else (13, 2)
+                    (13, 2) if fwd_obj.color == "blue" else (2, 2) 
                 )  # NOTE This is not scalabe and only works in 2v2 at most
                 reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]
                 reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game
@@ -930,7 +930,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name]["got_eliminated_done"] = True
                 self.grid.set(*fwd_obj.pos, None)
                 fwd_obj.pos = (
-                    (2, 2) if fwd_obj.color == "blue" else (13, 2)
+                    (13, 2) if fwd_obj.color == "blue" else (2, 2) 
                 )  # NOTE This is not scalabe and only works in 2v2 at most
                 reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]
                 reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game

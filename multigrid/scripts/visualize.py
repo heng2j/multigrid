@@ -214,6 +214,9 @@ if __name__ == "__main__":
         "--policies-to-eval", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"  
     )
     parser.add_argument("--gif", type=str, help="Store output as GIF at given path.")
+    parser.add_argument(
+        "--name", type=str, default="<my_experinemnt>", help="Distinct name to track your experinemnt in save-dir"
+    )
     parser.add_argument("--render-mode", type=str, default="rgb_array", help="Can be either 'human' or 'rgb_array.'")
     parser.add_argument(
         "--save-dir",

@@ -149,9 +149,10 @@ For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/c
 If you run the following training command to train an agent, you are expected to see ValErrors from blanks that needed to be filled to implement and enable Generalized Advantage Estimation (GAE). Please make use of the comments in the code to help you to implement GAE. 
 
 
+
 Command for Task 2:
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4
+python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
 #### Tips:
@@ -162,83 +163,90 @@ python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiG
 - While GAE is a potent tool to mitigate variance during Deep RL training, you might explore other methodologies as well.
 
 
+
 ---
 
-## Task 3 - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
+## Task 3 - Tuning the 🎲 **Exploration & Exploitation Strategies** using Algorithm-Specific Hyperparameters
 
+Having implemented GAE in Task 2, re-run the training command provided below to commence agent training. You're encouraged to adjust or introduce additional parameters as required.
 
-
-Command for Task 3:
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4
+python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
+### Deepening Your Understanding of the Deep RL Training Loop
+***Q.1*** Train a baseline agent using default or adjusted parameter values. Capture and present Tensorboard screenshots to report the following training metrics. Indicate the `Sample Effiicency`, the number of training timesteps and policy updates, required to achieve the Training Baseline Thresholds:
 
+- **episodic_length**
+- **episodic_return**
+- **policy_updates**
+- **entropy**
+- **explained_variance**
+- **value_loss**
+- **policy_loss**
+- **approx_kl**
 
- (via --target-kl 0.01), 
+**Agent Training Baseline Thresholds (Q.1 & Q2)**:
+- `episodic_length` should converge to a solution within 40 time steps and maintain for at least 100k time steps at the end of training.
+- `episodic_return` should converge to consistently achieve 2.0+ returns, enduring for a minimum of the last 100k time steps.
+- `explained_variance` should stabilize at a level above 0.6 for at least the last 100k time steps.
+- `entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
+***Q.2*** If your baseline agent struggles to achieve the Training Baseline Thresholds, or if there's potential for enhancment, now you are getting the chance to fine-tuning the following PPO-specific parameters discussed in class to improve the performance of your agent. You may want to run multiple versions of experinements, so remember to modify `--exp-name` to differentiate between agent configurations. For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds. (Including links to their videos will be ideal)
 
+- **gamma**
+- **gae-lambda**
+- **clip-coef**
+- **clip-vloss**
+- **ent-coef**
+- **vf-coef**
+- **target-kl**
 
- Report differences of training metrics
+Additionally, consider tweaking the following generic Deep RL hyperparameters:
 
+- **num_envs**
+- **batch_size**
+- **num_minibatches**
+- **minibatch_size**
+- **total_timesteps**
+- **num_updates**
+- **num_steps**
+- **update_epochs**
 
-
-
-
-Measure sample effiicency
-
-Wall clock time is not the same as sample efficiency 
-
-
-
-
-
-
-
-As mentioned in 
-Value Function Loss Clipping may not be importan as per Engstrom, Ilyas, et al., (2020) find no evidence that the value function loss clipping helps with the performance. Andrychowicz, et al. (2021) suggest value function loss clipping even hurts performance (decision C13, figure 43).
-We implemented this detail because this work is more about high-fidelity reproduction of prior results.
-
-
-
-
-
-Monitor and track your runs using Tensorboard with the following command:
-```shell
-tensorboard --logdir submission/ray_results/
-```
 
 **Tips:**
-- You can filter the plots using the following filters:
+- Monitor and track your runs using Tensorboard with the following command:
+  ```shell
+  tensorboard --logdir submission/cleanRL/runs
+  ```
+- Please refer Week2 lecture slide for the definition of the PPO-specific parameters
+- As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/): 
+  - The significance of Value Function Loss Clipping is debatable. Engstrom, Ilyas, et al., (2020) didn't find evidence supporting its performance boost. In contrast, Andrychowicz, et al. (2021) inferred it might even hurt overall performance.
+  - For Early Stopping, consider setting the target kl to `0.01`, as demonstrated in [OpenAI's PPO PyTorch Implementation](https://spinningup.openai.com/en/latest/algorithms/ppo.html#documentation-pytorch-version). 
 
-```
-episode_len_mean|ray/tune/episode_reward_mean|episode_reward_min|entropy|vf|loss|kl|cpu|ram
-```
+
+---
+
+## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
+
+As you get familiar with PPO by wroking through the CleanRL implementation, now we can circle back to RLlib to apply the same understanding of parameter tuning to solve a 1v1 scenario with a pretrained opponent.
+
+First of all, it is recommened to run the following command to visualize the new scenario:
 
 
-- To visualize a specific checkpoint, use the following command:
 ```shell
-python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single  --num-episodes 10  --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode human --gif DTDE-Red-Single
+python multigrid/scripts/manual_control.py --env-id MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1
 ```
-##### Replace `XXXX` and `YYY` with the corresponding number of your checkpoint.
+
+This 1v1 scenario is a deth match sceanrio, where your Red agent is competing with a pre-trained Blue angent to solve the scenario by the following ways:
+
+  1. Go pick up the Red key and then go to open the Red door with the key
+  2. Go and facing the Blue agent and apply the [`toggle`](multigrid/core/actions.py) action to lock Blue agent in their room. 
+
+* Please expect the `manual_control.py` crash if you start to manually step through the scenario with your keyboard. Since `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` is a multi agent scenario, `manual_control.py` current' doesn't support manually contol multiple agents with multi actions. 
 
 
-- If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
-
-
-## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
-
----
-
-
-
-
-
-
-## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
-
----
-
+Once you un
 
 Command for Task 4:
 ```shell
@@ -246,14 +254,33 @@ python multigrid/scripts/train.py --local-mode False --env MultiGrid-Competative
 ```
 
 
+Here are the PPO-specific parameters in RLLib:
+- **gamma**
+- **gae-lambda**
+- **clip-coef**
+- **clip-vloss**
+- **ent-coef**
+- **vf-coef**
+- **target-kl**
 
+
+
+
+For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds
+
+
+**Agent Training Baseline Thresholds (Q.1)**:
+- `episodic_length` should converge to a solution within 40 time steps and maintain for at least 100k time steps at the end of training.
+- `episodic_return` should converge to consistently achieve 2.0+ returns, enduring for a minimum of the last 100k time steps.
+- `explained_variance` should stabilize at a level above 0.6 for at least the last 100k time steps.
+- `entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
 
 **Tips:**
 - You can filter the plots using the following filters:
 
 ```
-episode_len_mean|ray/tune/episode_reward_mean|episode_reward_min|entropy|vf|loss|kl|cpu|ram
+red_0/door_open_done|blue_0/door_open_done|blue_0/eliminated_opponents_done|red_0/eliminated_opponents_done|ray/tune/episode_len_mean
 ```
 
 
@@ -269,17 +296,130 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 
 
-## Task 5 - Submit your homework on Github Classroom
-
-You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. 
-
-Please put your submission under the `submission/` folder. And you can keep your `homework1.ipynb` and related files under `notebooks/` if you are taking the notebook route.
 
 
-During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
+---
+## Extra Credit: Exploring Different RLLib Algorithms
+Are you interested in challenging yourself further? See if you can solve the same scenario using alternative [Deep RL Algorithms](https://docs.ray.io/en/latest/rllib/rllib-algorithms.html#available-algorithms-overview) provided by RLLib.
 
-For students not using the PRO version of Google CodeLab, 
+To experiment with different algorithms, adjust the `--algo` flag to specify an alternate RLlib-registered algorithm.
+
+**Tips**:
+- Review the supported conditions for each algorithm. Look for specific requirements or features like `Discrete Actions`, `Continuous Actions`, `Multi-Agent`, and `Model Support`.
+- Be aware: this RL class codebase is tested for PPO. Switching directly to other algorithms may introduce unexpected issues. The most straightforward adjustments might involve changing algorithm-specific parameters. More complex modifications could entail code changes to accommodate specific observation or action spaces.
+
+
+
+---
+
+## Task 5 - Homework Submission via Github Classroom
+
+### Submission Requirements:
+
+1. **CleanRL Agent**: 
+    - Commit and push your best-performing cleanRL agent, ensuring it meets the minimum required thresholds described in the Task, to [submission/cleanRL](submission/cleanRL).
+    - For videos, save them to [submission/cleanRL/videos](submission/cleanRL/videos). Please be mindful regarding video size and retain only the most representative ones. Rename the videos as needed for clarity.
+
+2. **RLlib Agents**: 
+    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results).
+
+3. **RLlib Agents Evaluation Reports**: 
+    - Commit and push relevant RLlib agent evaluation results: `<my_experiment>_eval_summary.csv`, `<my_experiment>_episodes_data.csv`, and `<my_experiment>.gif` to [submission/evaluation_reports](submission/evaluation_reports).
+
+4. **Answers to Questions**:
+    - For question answers, either:
+      - Update the provided [homework2.ipynb](notebooks/homework2.ipynb) notebook, or 
+      - Submit a separate `HW2_Answer.md` file under [submission](submission).
+
+5. **MLFlow Artifacts**:
+    - Ensure you commit and push the MLFlow artifacts to [submission](submission) (Which should be automatic).
+
+
+#### Tips:
+- Retain only the top-performing checkpoints in [submission/ray_results](submission/ray_results).
+    - Refer to the baseline performance thresholds specified for each agent training task.
+    - Uploading numerous checkpoints, particularly underperforming ones, may cause the CI/CD to fail silently due to time constraints.
+    
+- Executing [tests/test_evaluation.py](tests/test_evaluation.py) with `pytest` should generate and push the necessary results to [submission/evaluation_reports](submission/evaluation_reports).
+
+- For an exemplar submission that fulfills all the requirements and successfully passing the Autograding Github Actions, please checkout [Example Submission](https://github.com/STRDeepRL/week-1-intro-to-deep-rl-and-agent-training-environments-heng4str).
+
+- Always place your submissions within the `submission/` directory. If opting for the notebook approach, please maintain your edited `homework1.ipynb` and related documents under `notebooks/`.
+
+- **Honesty System**: If OS compatibility issues hinder task completion, you're permitted to modify files outside the `EXCEPTION_FILES` listed in [tests/test_codebase.py](tests/test_codebase.py). Add those modified files to the list in your own `test_codebase.py`. However, ensure these changes don't impact your Agent Training Performance, as the centralized evaluation in Week 4's Agent Competition won't consider these changes.
+
+- If you would like to showcase your work at the begining of the class, please notify the class facilitators in advance.
 
 
 ***Note:*** 
 Please beaware that the [File Size Check GitHub Action Workflow](.github/workflows/check_file_size.yml) will check the total files size for folers "submission/" "notebooks/", to ensure each of them will not exceed 5MBs. Please ensure to only submit the checkpoints, the notebooks and the MLFlow artifacts that are meant for grading by the Github Action CI/CD pipeline.
+
+
+
+---
+
+## Appendix:
+
+Here are definition of the Training Metrics:
+- **episodic_length**: 
+  - **Definition**: The number of time steps taken by the agent in an episode before it terminates (either by achieving its goal, failing, or reaching a maximum time step limit).
+  - **Relevance**: A shorter episodic length, especially in tasks where the goal is to achieve something in minimal time, can indicate more efficient learning and problem solving by the agent.
+
+- **episodic_return**: 
+  - **Definition**: The cumulative reward obtained by the agent over a complete episode. It's a discounted sum of rewards received at each time step during an episode.
+  - **Relevance**: Higher episodic returns indicate better policy performance, with the agent effectively maximizing its cumulative reward.
+
+- **policy_updates**: 
+  - **Definition**: The number of times the agent's policy has been updated during training. This is usually incremented each time backpropagation is performed to update the policy's parameters.
+  - **Relevance**: Keeping track of policy updates can help in analyzing the agent's convergence rate and the effect of each update on overall performance.
+
+- **entropy**: 
+  - **Definition**: A measure of the randomness in the agent's policy. In the context of RL, it quantifies the uncertainty in an agent's actions.
+  - **Relevance**: Encouraging higher entropy can help promote exploration, while lower entropy indicates a more deterministic policy. Balancing exploration (high entropy) and exploitation (low entropy) is crucial in many tasks.
+
+- **explained_variance**: 
+  - **Definition**: A statistical measure that captures the proportion of the variance in the dependent variable that's "explained" by the independent variables in a regression model.
+  - **Relevance**: In RL, it can indicate how well the value function approximates the expected return. A value closer to 1 suggests the value function is a good predictor, whereas values closer to 0 suggest poor prediction.
+
+- **value_loss**: 
+  - **Definition**: The discrepancy between the predicted value of states (by the value function) and the actual returns observed. Typically calculated as the mean squared error between these two.
+  - **Relevance**: Minimizing value loss ensures the agent has an accurate estimate of future rewards, which is crucial for making optimal decisions.
+
+- **policy_loss**: 
+  - **Definition**: Represents the loss in the agent's policy. It's often calculated based on how much the current policy deviates from a previously successful policy (in PPO, this is related to the clipped objective function).
+  - **Relevance**: Monitoring policy loss ensures that updates to the policy push it towards better performance without drastic changes that might destabilize learning.
+
+- **approx_kl**: 
+  - **Definition**: Short for "approximate Kullback-Leibler divergence." It measures how one probability distribution diverges from a second, expected probability distribution. In PPO, it's used to quantify the difference between the old and new policies.
+  - **Relevance**: Keeping the KL divergence low ensures that the policy doesn't change too dramatically during updates, preserving stability in training.
+
+
+Here are definition of the PPO-specific parameters used in the CleanRL Implementation:
+
+- **gamma** (`γ`):
+  - **Definition**: Known as the discount factor, it's a number between 0 and 1 that represents the agent's consideration for future rewards. 
+  - **Relevance**: A higher `γ` makes the agent prioritize long-term reward over short-term reward, while a lower value does the opposite. Tuning `γ` affects how the agent balances immediate vs. future rewards.
+
+- **gae-lambda** (`λ`):
+  - **Definition**: Used in Generalized Advantage Estimation (GAE). It's a factor in the range of 0 and 1 that determines the trade-off between using more of the raw rewards (`λ = 0`) versus more of the estimated value function (`λ = 1`) when computing the advantage.
+  - **Relevance**: Adjusting `λ` can help strike a balance between bias and variance in the advantage estimate, potentially stabilizing training and improving performance.
+
+- **clip-coef**:
+  - **Definition**: In PPO, it's the epsilon in the objective function's clipping mechanism. The objective is clipped to be within the range of `(1-epsilon, 1+epsilon)`, preventing large policy updates.
+  - **Relevance**: This coefficient prevents overly aggressive updates to the policy, ensuring stable training. Changing its value affects the size of acceptable policy updates.
+
+- **clip-vloss**:
+  - **Definition**: Value function loss clipping coefficient. It restricts the value function's update to keep the loss changes within a certain range.
+  - **Relevance**: Similar to the policy clipping mechanism, this coefficient can be adjusted to stabilize the training of the value function, especially when significant value changes are observed.
+
+- **ent-coef**:
+  - **Definition**: Entropy coefficient. It scales the entropy bonus in the PPO objective function.
+  - **Relevance**: Adjusting this coefficient affects the balance between exploration and exploitation. A higher entropy coefficient encourages more exploration.
+
+- **vf-coef**:
+  - **Definition**: Value function coefficient. It's a scaling factor that determines the weight of the value function loss in the overall PPO loss.
+  - **Relevance**: Adjusting this parameter can balance the importance of the value function loss compared to the policy loss, affecting how the agent learns to estimate state values versus improving its policy.
+
+- **target-kl**:
+  - **Definition**: Target Kullback-Leibler (KL) divergence. It's a threshold used in some PPO implementations to apply early stopping to prevent large policy updates. If the KL divergence between the new and old policy exceeds this target, the update can be skipped or the learning rate can be adjusted.
+  - **Relevance**: Ensures policy updates do not stray too far from the original policy, maintaining training stability.
