@@ -227,61 +227,96 @@ Additionally, consider tweaking the following generic Deep RL hyperparameters:
 
 ---
 
-## Task 4 - Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
+## Task 4: Bring the Lessons Learned from CleanRL to RLlib to solve a a 1v1, 🤖 🆚 🤖 Scenario 
 
-As you get familiar with PPO by wroking through the CleanRL implementation, now we can circle back to RLlib to apply the same understanding of parameter tuning to solve a 1v1 scenario with a pretrained opponent.
+As you get familiar with PPO by wroking through the CleanRL implementation, let's pivot back to RLlib. We'll harness our understanding of hyperparameter tuning to address a 1v1 competition with a pretrained opponent.
 
-First of all, it is recommened to run the following command to visualize the new scenario:
+### 🎮 Visualizing the Scenario:
 
+Kick-off by visualizing this new environment:
 
 ```shell
 python multigrid/scripts/manual_control.py --env-id MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1
 ```
 
-This 1v1 scenario is a deth match sceanrio, where your Red agent is competing with a pre-trained Blue angent to solve the scenario by the following ways:
+In this death match scenario, your 'Red' agent will play against a pre-trained 'Blue' agent. The objective can be achieved in two ways:
 
-  1. Go pick up the Red key and then go to open the Red door with the key
-  2. Go and facing the Blue agent and apply the [`toggle`](multigrid/core/actions.py) action to lock Blue agent in their room. 
+  1. Grab the Red key and then unlock the Red door.
+  2. Confront the Blue agent and use the [`toggle`](multigrid/core/actions.py) action, effectively trapping the Blue agent in their locked Blue room.
 
-* Please expect the `manual_control.py` crash if you start to manually step through the scenario with your keyboard. Since `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` is a multi agent scenario, `manual_control.py` current' doesn't support manually contol multiple agents with multi actions. 
+> **Note**: The `manual_control.py` script might crash when trying to navigate the scenario manually. This is due to the multi-agent nature of the `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` scenario. Current support doesn't extend to controlling multiple agents with diverse actions.
 
 
-Once you un
+### Starting Training:
 
-Command for Task 4:
+Once you are familiar with the new sceanrio `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1`, run the following command to train a baseline agent:
+
 ```shell
-python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-workers 10 --num-gpus 0 --name 1v1_death_match --training-scheme DTDE --policies-to-train red_0  --policies-to-load blue_0 --load-dir 
+python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-workers 10 --num-gpus 0 --name 1v1_death_match_baseline --training-scheme DTDE --policies-to-train red_0  --policies-to-load blue_0 --load-dir submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250
 ```
+
+### Q.1 Metrics to Report:
+
+As the same as Task 2&3, document the following training metrics, showcasing them with screenshots. Also, detail the number of timesteps and policy updates that meet or exceed the Training Baseline Thresholds.
+
+Here are the RLLib and Scenario specific metrics:
+
+- **episode_len_mean**
+- **ray/tune/policy_reward_mean/red_0**
+- **ray/tune/policy_reward_mean/blue_0**
+- **ray/tune/sampler_results/custom_metrics/red_0/door_open_done_mean**
+- **ray/tune/sampler_results/custom_metrics/blue_0/door_open_done_mean**
+- **ray/tune/sampler_results/custom_metrics/red_0/eliminated_opponents_done_mean**
+- **ray/tune/sampler_results/custom_metrics/blue_0/eliminated_opponents_done_mean**
+- **ray/tune/counters/num_agent_steps_trained**
+- **ray/tune/counters/num_agent_steps_sampled**
+- **ray/tune/counters/num_env_steps_sampled**
+- **ray/tune/counters/num_env_steps_trained**
+- **episodes_total**
+- **episodes_this_iter**
+- **red_0/learner_stats/cur_kl_coeff**
+- **red_0/learner_stats/entropy**
+- **red_0/learner_stats/grad_gnorm**
+- **red_0/learner_stats/kl**
+- **red_0/learner_stats/policy_loss**
+- **red_0/learner_stats/total_loss**
+- **red_0/learner_stats/vf_explained_var**
+- **red_0/learner_stats/vf_loss**
+- **red_0/num_grad_updates_lifetime**
+
 
 
 Here are the PPO-specific parameters in RLLib:
 - **gamma**
-- **gae-lambda**
-- **clip-coef**
-- **clip-vloss**
-- **ent-coef**
-- **vf-coef**
-- **target-kl**
+- **lambda_**
+- **kl_coeff**
+- **kl_target**
+- **clip_param**
+- **grad_clip**
+- **vf_clip_param**
+- **vf_loss_coeff**
+- **entropy_coeff**
 
 
+
+**Agent Training Baseline Thresholds (Q.1)**:
+- `episode_len_mean` should converge to a solution within 20 time steps and maintain for at least 100k time steps at the end of training.
+- `ray/tune/policy_reward_mean/red_0` should converge to consistently achieve 1.3+ returns, enduring for a minimum of the last 100k time steps.
+- `explained_variance` should stabilize at a level above 0.4 for at least the last 100k time steps.
+- `red_0/learner_stats/entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
 
 For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds
 
 
-**Agent Training Baseline Thresholds (Q.1)**:
-- `episodic_length` should converge to a solution within 40 time steps and maintain for at least 100k time steps at the end of training.
-- `episodic_return` should converge to consistently achieve 2.0+ returns, enduring for a minimum of the last 100k time steps.
-- `explained_variance` should stabilize at a level above 0.6 for at least the last 100k time steps.
-- `entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
-
-
 **Tips:**
+- Take a look at the configuration of `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` in  [envs/__init__.py](multigrid/envs/__init__.py)
 - You can filter the plots using the following filters:
 
 ```
-red_0/door_open_done|blue_0/door_open_done|blue_0/eliminated_opponents_done|red_0/eliminated_opponents_done|ray/tune/episode_len_mean
+eliminated_opponents_done_mean|episode_len_mean|num_agent_steps_trained|num_agent_steps_sampled|num_env_steps_sampled|num_env_steps_trained|episodes_total|red_0/learner_stats/cur_kl_coeff|red_0/learner_stats/entropy|red_0/learner_stats/grad_gnorm|red_0/learner_stats/kl|red_0/learner_stats/policy_loss|red_0/learner_stats/total_loss|red_0/learner_stats/vf_explained_var|red_0/learner_stats/vf_loss|red_0/num_grad_updates_lifetime|ray/tune/policy_reward_mean/red_0|ray/tune/policy_reward_mean/blue_0
 ```
+- RLlib Tune may report metrics with different names but pointing to the same metric. For example, `ray/tune/sampler_results/custom_metrics/blue_0/door_open_done_mean` is the same as `ray/tune/custom_metrics/blue_0/door_open_done_mean` so just report one is fine.
 
 
 - To visualize a specific checkpoint, use the following command:
@@ -292,9 +327,6 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 
 - If running on Colab, use the `%tensorboard` [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) to achieve the same; see the [notebook](notebooks/homework1.ipynb) for more details.
-
-
-
 
 
 
@@ -360,7 +392,7 @@ Please beaware that the [File Size Check GitHub Action Workflow](.github/workflo
 
 ## Appendix:
 
-Here are definition of the Training Metrics:
+Here are definition of the Training Metrics in CleanRL:
 - **episodic_length**: 
   - **Definition**: The number of time steps taken by the agent in an episode before it terminates (either by achieving its goal, failing, or reaching a maximum time step limit).
   - **Relevance**: A shorter episodic length, especially in tasks where the goal is to achieve something in minimal time, can indicate more efficient learning and problem solving by the agent.
@@ -394,7 +426,7 @@ Here are definition of the Training Metrics:
   - **Relevance**: Keeping the KL divergence low ensures that the policy doesn't change too dramatically during updates, preserving stability in training.
 
 
-Here are definition of the PPO-specific parameters used in the CleanRL Implementation:
+Here are definition of the PPO-specific parameters used in CleanRL:
 
 - **gamma** (`γ`):
   - **Definition**: Known as the discount factor, it's a number between 0 and 1 that represents the agent's consideration for future rewards. 
@@ -423,3 +455,8 @@ Here are definition of the PPO-specific parameters used in the CleanRL Implement
 - **target-kl**:
   - **Definition**: Target Kullback-Leibler (KL) divergence. It's a threshold used in some PPO implementations to apply early stopping to prevent large policy updates. If the KL divergence between the new and old policy exceeds this target, the update can be skipped or the learning rate can be adjusted.
   - **Relevance**: Ensures policy updates do not stray too far from the original policy, maintaining training stability.
+
+
+
+Here are definition of the PPO-specific parameters used in RLLib:
+
