@@ -60,7 +60,7 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 - Please tag your codebase with new release v1.1 
 
 ---
-### Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
+## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
 First, check out the CleanRL PPO implementation and its configuration in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py). You can do this by running the following command with the `--debug-mode True` flag.
 
 Executing this command will display the default values of the training configuration and export a video showcasing the training scenario using random actions.
@@ -100,7 +100,7 @@ After running the above command, observe the outputs in the command line. This w
 - Feel free to experiment with various arguments in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py) to familiarize yourself with this training script, its parameters, and the significance of the command line outputs.
 
 #### Notes:
-1. We only utilize the CleanRL PPO implementation in the first three main tasks of HW2. However, it offers a clean and straightforward way to grasp the ins and outs of the algorithms.
+1. We only utilize the CleanRL PPO implementation in the first three main tasks of HW2. However, it offers a clean and straightforward way to grasp the ins and outs of the algorithm.
 2. It's beneficial to explore other PPO implementations in CleanRL's official repository. For example:
     - [ppo_atari.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari.py)
     - [ppo_atari_lstm.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_atari_lstm.py)
@@ -109,9 +109,9 @@ After running the above command, observe the outputs in the command line. This w
 
 
 ---
-## Task 2 - Understand the Dataflow in Deep RL training Loop and Implement the Technique to reduce variance in Learning 
+## Task 2 - Understand the Deep RL Training Loop Dataflow & Implement Techniques to Minimize Learning Variance
 
-In this task, you will delve into the specifics of the vectorized training architecture, which consists of two pivotal phases: the Rollout Phase and the Learning Phase. This is the parallelized training architecture that many Deep RL algorithms, including PPO used. You will also explore the techniques employed by PPO to reduce variance in learning, particularly focusing on the Generalized Advantage Estimation (GAE). You will enhance your understanding by identifying these phases in the code and implementing GAE to reduce variance during training in the Learning Phase when using the diversed data collected during the Rollout Phase.
+In this task, you will delve into the specifics of the vectorized training architecture, which consists of two pivotal phases: the `Rollout Phase` and the `Learning Phase`. This is the parallelized training architecture that many Deep RL algorithms, including PPO used. You will also explore the techniques employed by PPO to reduce variance in learning, particularly focusing on the Generalized Advantage Estimation (GAE). You will enhance your understanding by identifying these phases in the code and implementing GAE to reduce variance of the training data before the `Learning Phase` when using the diversed data collected from the `Rollout Phase`.
 
 ### Questions to Enhance Understanding of the Deep RL Training Loop
 ***Q.1*** As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/), PPO employs a streamlined paradigm known as the vectorized architecture. This architecture encompasses two phases within the training loop:
@@ -122,11 +122,11 @@ In this task, you will delve into the specifics of the vectorized training archi
 
 Utilizing your baseline codebase tagged `v1.1`, please pinpoint the `Rollout Phase` and the `Learning Phase` within the codebase, indicating specific line numbers. 
 
-For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211) represent the Rollout Phase in their PPO implementation.  
+* For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211) represent the Rollout Phase in their PPO implementation.  
 
 
 
-**Q.2 How does PPO Reduce Variance? By Utilizing Generalized Advantage Estimation (GAE)?**
+**Q.2 How does PPO Reduce Variance? By Utilizing Generalized Advantage Estimation (GAE)? What is that?**
 
 > **Note**: 
   PPO employs the Generalized Advantage Estimation (GAE) method for advantage calculation, merging multiple n-step estimators into a singular estimate, thereby mitigating variance and fostering more stable and efficient training.
@@ -146,7 +146,7 @@ For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/c
   "High-Dimensional Continuous Control Using Generalized Advantage Estimation" by John Schulman et al.
 
 
-If you run the following training command to train an agent, you are expected to see ValErrors from blanks that needed to be filled to implement and enable Generalized Advantage Estimation (GAE). Please make use of the comments in the code to help you to implement GAE. 
+If you run the following training command to train an agent, you are expected to see ValueErrors from blanks that needed to be filled to implement and enable Generalized Advantage Estimation (GAE). Please make use of the comments in the code to help you to implement GAE. 
 
 
 
@@ -156,25 +156,21 @@ python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiG
 ```
 
 #### Tips:
-- Useful comments has been appended to the code for your guidance.
+- Useful comments has been added to the code for your guidance.
 - For further insight, you might refer to the ["Generalized Advantage Estimation" section in "The 37 Implementation Details of Proximal Policy Optimization"](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/).
-
-#### Notes:
-- While GAE is a potent tool to mitigate variance during Deep RL training, you might explore other methodologies as well.
-
 
 
 ---
 
 ## Task 3 - Tuning the 🎲 **Exploration & Exploitation Strategies** using Algorithm-Specific Hyperparameters
 
-Having implemented GAE in Task 2, re-run the training command provided below to commence agent training. You're encouraged to adjust or introduce additional parameters as required.
+Having implemented GAE in Task 2, re-run the training command provided below to start agent training. You're encouraged to adjust or introduce additional parameters as required.
 
 ```shell
 python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
-### Deepening Your Understanding of the Deep RL Training Loop
+### Deepening Your Understanding to Interpret Your Results
 ***Q.1*** Train a baseline agent using default or adjusted parameter values. Capture and present Tensorboard screenshots to report the following training metrics. Indicate the `Sample Effiicency`, the number of training timesteps and policy updates, required to achieve the Training Baseline Thresholds:
 
 - **episodic_length**
@@ -186,12 +182,13 @@ python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiG
 - **policy_loss**
 - **approx_kl**
 
-**Agent Training Baseline Thresholds (Q.1 & Q2)**:
+**Agent Training Baseline Thresholds (for both Q.1 & Q2)**:
 - `episodic_length` should converge to a solution within 40 time steps and maintain for at least 100k time steps at the end of training.
 - `episodic_return` should converge to consistently achieve 2.0+ returns, enduring for a minimum of the last 100k time steps.
 - `explained_variance` should stabilize at a level above 0.6 for at least the last 100k time steps.
 - `entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
+### Hands-on Experiences on PPO-Specific Hyperparameters
 ***Q.2*** If your baseline agent struggles to achieve the Training Baseline Thresholds, or if there's potential for enhancment, now you are getting the chance to fine-tuning the following PPO-specific parameters discussed in class to improve the performance of your agent. You may want to run multiple versions of experinements, so remember to modify `--exp-name` to differentiate between agent configurations. For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds. (Including links to their videos will be ideal)
 
 - **gamma**
@@ -227,7 +224,7 @@ Additionally, consider tweaking the following generic Deep RL hyperparameters:
 
 ---
 
-## Task 4: Bring the Lessons Learned from CleanRL to RLlib to solve a a 1v1, 🤖 🆚 🤖 Scenario 
+## Task 4: Bring the Lessons Learned from CleanRL to RLlib to solve a 1v1, 🤖 🆚 🤖 Scenario 
 
 As you get familiar with PPO by wroking through the CleanRL implementation, let's pivot back to RLlib. We'll harness our understanding of hyperparameter tuning to address a 1v1 competition with a pretrained opponent.
 
@@ -321,7 +318,7 @@ eliminated_opponents_done_mean|episode_len_mean|num_agent_steps_trained|num_agen
 
 - To visualize a specific checkpoint, use the following command:
 ```shell
-python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single  --num-episodes 10  --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode human --gif DTDE-Red-Single
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1  --num-episodes 10  --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode human --gif DTDE-1v1-testing
 ```
 ##### Replace `XXXX` and `YYY` with the corresponding number of your checkpoint.
 
@@ -460,3 +457,38 @@ Here are definition of the PPO-specific parameters used in CleanRL:
 
 Here are definition of the PPO-specific parameters used in RLLib:
 
+- **gamma** (`γ`):
+  - **Definition**: Known as the discount factor, it's a number between 0 and 1 that represents the agent's consideration for future rewards. 
+  - **Relevance**: A higher `γ` makes the agent prioritize long-term reward over short-term reward, while a lower value does the opposite. Tuning `γ` affects how the agent balances immediate vs. future rewards.
+
+- **lambda_**:
+  - **Definition**: Used in Generalized Advantage Estimation (GAE). It's a factor in the range of 0 and 1 that determines the trade-off between using more of the raw rewards (`λ = 0`) versus more of the estimated value function (`λ = 1`) when computing the advantage.
+  - **Relevance**: Adjusting `λ` can help strike a balance between bias and variance in the advantage estimate, potentially stabilizing training and improving performance.
+
+- **kl_coeff**:
+  - **Definition**: A scaling factor on the KL-divergence term in the objective. KL-divergence measures the difference between the new and old policy distributions.
+  - **Relevance**: Balances the KL penalty with the PPO objective. Adjusting this influences the magnitude of policy updates, potentially affecting training stability.
+
+- **kl_target**:
+  - **Definition**: The desired KL divergence between the old and new policy. 
+  - **Relevance**: Acts as a regulator for `kl_coeff`. If KL divergence drifts from this target, `kl_coeff` is adjusted to bring it back, ensuring policy updates remain controlled.
+
+- **clip_param**:
+  - **Definition**: The epsilon value for PPO's clipping mechanism. It bounds the ratio of policy probabilities to ensure limited policy updates.
+  - **Relevance**: It prevents excessively large policy updates, ensuring stability during training.
+
+- **grad_clip**:
+  - **Definition**: Parameter that determines the maximum allowed gradient norm during training.
+  - **Relevance**: Clipping the gradients prevents large updates, offering more stable training, especially in scenarios with sharp loss landscapes.
+
+- **vf_clip_param**:
+  - **Definition**: The epsilon value for clipping the value function updates.
+  - **Relevance**: It restricts the magnitude of value function updates, adding stability to the learning process.
+
+- **vf_loss_coeff**:
+  - **Definition**: Coefficient for the value function loss in the PPO loss function.
+  - **Relevance**: Balances the importance of value function updates compared to policy updates, influencing how the agent trades off between value estimation and policy improvement.
+
+- **entropy_coeff**:
+  - **Definition**: Coefficient to scale the entropy bonus term in the PPO objective.
+  - **Relevance**: Entropy encourages exploration, so adjusting this parameter can influence how much the agent explores the environment versus exploiting known strategies.
