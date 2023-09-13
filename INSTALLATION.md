@@ -11,9 +11,9 @@ A. (Recommended) Install with conda:
 	This install will modify the `PATH` variable in your bashrc.
 	You need to open a new terminal for that path change to take place (to be able to find 'conda' in the next step).
 
-	2. Create a conda environment that will contain python 3.9 or later
+	2. Create a conda environment that will contain python 3.10 or later
 	```
-	conda create -n rl_class python=3.9
+	conda create -n rl_class python=3.10
 	```
 
 	3. activate the environment (do this every time you open a new terminal and want to run code):
