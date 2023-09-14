@@ -80,6 +80,8 @@ class ManualControl:
             "space": Action.toggle,
             "pageup": Action.pickup,
             "pagedown": Action.drop,
+            "page up": Action.pickup,
+            "page down": Action.drop,
             "tab": Action.pickup,
             "left shift": Action.drop,
             "enter": Action.done,
@@ -94,7 +96,7 @@ class ManualControl:
                     actions[i] = Action.done
                 self.step(actions)
         else:
-            print(key)
+            print(f'Error - Unrecognized Key: {key}')
 
 
 if __name__ == "__main__":

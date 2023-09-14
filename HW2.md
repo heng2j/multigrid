@@ -133,7 +133,7 @@ Utilizing your baseline codebase tagged `v1.1`, please pinpoint the `Rollout Pha
 
   GAE amalgamates multiple n-step advantage estimators into a singular weighted estimator represented as:
   
-     A_t^(GAE)(gamma, lambda) = SUM(gamma*lambda)^i * delta_(t+i)
+      A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
 
   
   where:

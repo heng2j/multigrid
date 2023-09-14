@@ -3,10 +3,10 @@ name: Run Codebase Tests
 on:
   push:
     branches:
-      - hw1 
+      - hw2 
   pull_request:
     branches:
-      - hw1
+      - hw2
 
 jobs:
   test:
@@ -34,4 +34,4 @@ jobs:
         # Add any other dependencies here
 
     - name: Run tests
-      run: pytest tests/test_for_completion_hw1.py
+      run: pytest tests/test_for_completion_hw2.py
