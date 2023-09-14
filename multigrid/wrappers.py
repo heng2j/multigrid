@@ -298,6 +298,7 @@ class SingleAgentWrapperV2(gym.Wrapper):
     def __init__(self, env: MultiGridEnv):
         """ """
         super().__init__(env)
+        # We only take the shape of the observation_space["image"] for this wrapper
         self.observation_space = env.agents[0].observation_space["image"]
         self.action_space = env.agents[0].action_space
 
@@ -355,10 +356,9 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
 
         # HW2 NOTE 1:
         # This basic implementation of PPO in CleanRL is not using spaces.Dict as the observation space
-        # Instead, one of the alternative is use the one-hot encoding of a partially observable agent view
+        # Instead, one of the many alternatives is use the one-hot encoding of a partially observable agent view
         # And add one more dimention to the shape of the observations to include the direction in the Box observation space
-        # In this wrapper, we need to increase the dimention of the box observation space by 1
-        # Can you update the dimension of the observation? 
+        # * If you think of a better way to enrich the observation to improve the performance of the agent, please feel free to make the changes
         self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent's observation spaces
@@ -373,7 +373,7 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
 
         # HW2 NOTE 2:
         # This basic implementation of PPO in CleanRL only works with single agent
-        # Please update the observation_space to use the one and only agent's updated image observation space?
+        # That's why we are taking the single observation_space from the first agent 
         self.observation_space = self.env.agents[0].observation_space["image"] 
 
 
@@ -396,8 +396,9 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         
         # HW2 NOTE 3:
         # The obs we are receiveing from the unwrapped environment will not match the observation space that we defined for this wrapper
-        # Can you modify the obs[agent_id]["direction"] and concatenate obs[agent_id]["direction"] and obs[agent_id]["image"] and use it as the obs output?
-        # The output shape should match the shape of the observation space
+        # The original obs contain all raw observation features like "image" and "direction"
+        # Here we simply using concatenation to combine both "image" and "direction" 
+        # which create an observation that match the observation space we defined for this wrapper
         obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
         obs[agent_id]["direction"] = np.full((obs[agent_id]["image"].shape[:2] + (1,)), obs[agent_id]["direction"]).astype('uint8')
         obs = np.concatenate((obs[agent_id]["direction"] , obs[agent_id]["image"]), axis=2, )

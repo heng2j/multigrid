@@ -90,7 +90,7 @@ def train(
     """Main training loop for RLlib algorithms.
 
     This function initializes Ray, runs the training loop, and handles
-    checkpoints and logging.
+    checkpoints, logging, and custom callbacks.
 
     Parameters
     ----------
@@ -107,39 +107,56 @@ def train(
     local_mode : bool, optional
         Whether to run Ray in local mode (for debugging).
     experiment_name : str, optional
-        Name of the experiment for logging.
+        Descriptive name for the experiment, used for logging purposes.
     training_scheme : str, optional
         Training scheme, can be either 'CTCE', 'DTDE', or 'CTDE'.
+    policies_to_load : list[str], optional
+        List of policy names to restore from checkpoint if `load_dir` is provided.
+    restore_all_policies_from_checkpoint : bool, optional
+        If True, restores all policies from the specified checkpoint in `load_dir`. Otherwise, only restores specified policies in `policies_to_load`.
 
     Returns
     -------
     None
     """
 
-    # Construct the final callbacks
+    # Assemble the list of callbacks
     callbacks=[
-            MLflowLoggerCallback(
-                tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=TAGS, save_artifact=True
-            ),
-        ]
+        # Logger callback for MLflow integration
+        MLflowLoggerCallback(
+            tracking_uri="./submission/mlflow",
+            experiment_name=experiment_name,
+            tags=TAGS,
+            save_artifact=True
+        ),
+    ]
 
+    # Add a callback to restore specific policy weights if policies are specified
     if policies_to_load:
         callbacks.append(RestoreWeightsCallback(load_dir=load_dir, load_policy_names=policies_to_load))
 
+    # Initialize Ray
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
+
+    # Run the training loop using Ray's `tune` API
     tune.run(
         CentralizedCritic if training_scheme == "CTDE" else algo,
         stop=stop_conditions,
         config=config,
         local_dir=save_dir,
         verbose=1,
-        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None,
+        # If `restore_all_policies_from_checkpoint` is True, restore all policies from checkpoint
+        # This is helpful for continue to train your agent from last checkpoint
+        # But ensure to update the stop_conditions to allow you train beyond the original conditions
+        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None, 
         checkpoint_freq=10,
         checkpoint_at_end=True,
         progress_reporter=reporter,
         callbacks=callbacks,  
         name=experiment_name,
     )
+
+    # Shutdown Ray once training is completed
     ray.shutdown()
 
 
@@ -168,7 +185,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
-        type=str,  default='submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_77a98_00000_0_2023-09-11_22-02-46/checkpoint_000180',
+        type=str,  default='submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250',
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(

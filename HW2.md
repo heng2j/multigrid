@@ -34,7 +34,7 @@ Choose to run the code on either Google Colab or your local machine:
 ## Recommended Steps to Get Familiar with the new Code
 We recommend reading the files in the following order. For some files, you will need to fill in the sections labeled `HW2 TODO` or `HW2 FIXME`.
 
-- [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) # New✨ [CleanRL](https://docs.cleanrl.dev/)  with high-quality single-file implementation with research-friendly features which implemented all details on how PPO works with ~400 lines of code 
+- [multigrid/scripts/train_ppo_cleanrl.py](multigrid/scripts/train_ppo_cleanrl.py) # New✨ [CleanRL](https://docs.cleanrl.dev/)  with high-quality single-file implementation with research-friendly features which implemented all details on how PPO works with ~400 lines of code (without additional reference comments)
 - [envs/competative_red_blue_door.py](multigrid/envs/competative_red_blue_door.py) & [envs/__init__.py](multigrid/envs/__init__.py) # Take a look at the V2 versions of new `CompetativeRedBlueDoorEnvV2`
 - [wrappers.py](multigrid/wrappers.py) # Take a look at the V2 versions of new wrappers
 - [scripts/train.py](multigrid/scripts/train.py) & [multigrid/utils/training_utilis.py](multigrid/utils/training_utilis.py )  # Take a look at how we are loading a pre-trained checkpoint in RLlib
@@ -49,7 +49,7 @@ Look for sections marked with `HW2` to understand how your changes will be utili
 Depending on your chosen setup, refer to [scripts/train.py](multigrid/scripts/train.py) and [scripts/visualize.py](multigrid/scripts/visualize.py) (if running locally), or [notebooks/homework2.ipynb](notebooks/homework2.ipynb) (if running on Colab).
 
 
-If you're debugging, you might want to use VSCode's debugger. If you're running on Colab, adjust the `#@params` in the `Args` class as per the command-line arguments above.
+If you're debugging, you might want to use VSCode's debugger. If you're running on Colab, adjust the `#@params` in the `Args` class as per the command-line arguments when running locally.
 
 
 ---
@@ -76,7 +76,7 @@ After running the above command, observe the outputs in the command line. This w
 
 
 #### Questions for General Deep RL Training Parameters Understanding
-**Q.1** From the command line outputs, can you report the following parameters? Additionally, please describe the role of each parameter in the training loop and explain how these values influence training in 1-2 sentences.
+**Q.1** From the command line outputs, can you report the values for the following parameters from the command line outputs? Additionally, please describe the role of each parameter in the training loop and explain how these values influence training in a sentence or two. This exercise can help you grasp the fundamentals of `Sample Efficiency` and understand the tradeoffs when scaling your training process in a parallel fashion.  
 
 - **num_envs**: 
 - **batch_size**: 
@@ -87,7 +87,6 @@ After running the above command, observe the outputs in the command line. This w
 - **num_steps**: 
 - **update_epochs**: 
 
-**Q.2** How do these values relate to an algorithm's Sample Efficiency?
 
 > **Note**: From Week 1, recall that `Sample Efficiency` refers to the ability of an algorithm to converge to an optimal solution with minimal sampling of experience data (trajectory from steps) from the environment.
 
@@ -152,7 +151,7 @@ If you run the following training command to train an agent, you are expected to
 
 Command for Task 2:
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
+python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
 #### Tips:
@@ -167,7 +166,7 @@ python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiG
 Having implemented GAE in Task 2, re-run the training command provided below to start agent training. You're encouraged to adjust or introduce additional parameters as required.
 
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-gpus 0 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
+python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
 ### Deepening Your Understanding to Interpret Your Results
@@ -182,7 +181,7 @@ python multigrid/scripts/train_ppo_cleanrl.py --local-mode False --env-id MultiG
 - **policy_loss**
 - **approx_kl**
 
-**Agent Training Baseline Thresholds (for both Q.1 & Q2)**:
+**CleanRL Agent Training Baseline Thresholds for Your Reference**:
 - `episodic_length` should converge to a solution within 40 time steps and maintain for at least 100k time steps at the end of training.
 - `episodic_return` should converge to consistently achieve 2.0+ returns, enduring for a minimum of the last 100k time steps.
 - `explained_variance` should stabilize at a level above 0.6 for at least the last 100k time steps.
@@ -296,11 +295,22 @@ Here are the PPO-specific parameters in RLLib:
 
 
 
-**Agent Training Baseline Thresholds (Q.1)**:
+**Rllib Agent Training Baseline Thresholds for Your Reference**:
 - `episode_len_mean` should converge to a solution within 20 time steps and maintain for at least 100k time steps at the end of training.
 - `ray/tune/policy_reward_mean/red_0` should converge to consistently achieve 1.3+ returns, enduring for a minimum of the last 100k time steps.
 - `explained_variance` should stabilize at a level above 0.4 for at least the last 100k time steps.
 - `red_0/learner_stats/entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
+
+**Rllib Agent Behavior Analysis Thresholds**
+The following Metrics are Behavior-specific metrics. It depends on how your agent emerges into certain specific behaviors to achieve the RL objective to maximize the discounted sum of rewards from time step t to the end of the game. So, how to achieve the maximum return depends on the training environment's world dynamic and the agent's reward structures. So, the "Player Archetypes" of your agent can be varied. 
+
+Our training scenario can be interpreted as a Zero-Sum game. Therefore, if your agent learned to solve a particular scenario by unlocking the door first, your Red agent should dominate this metric. Vice Versa.
+- **ray/tune/sampler_results/custom_metrics/red_0/door_open_done_mean**
+- **ray/tune/sampler_results/custom_metrics/blue_0/door_open_done_mean**
+
+As mentioned above, if your agent learned to solve a particular scenario by eliminating the opponent first, your Red agent should dominate this metric. Vice Versa.
+- **ray/tune/sampler_results/custom_metrics/red_0/eliminated_opponents_done_mean**
+- **ray/tune/sampler_results/custom_metrics/blue_0/eliminated_opponents_done_mean**
 
 
 For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds
@@ -373,7 +383,7 @@ To experiment with different algorithms, adjust the `--algo` flag to specify an 
 
 - For an exemplar submission that fulfills all the requirements and successfully passing the Autograding Github Actions, please checkout [Example Submission](https://github.com/STRDeepRL/week-1-intro-to-deep-rl-and-agent-training-environments-heng4str).
 
-- Always place your submissions within the `submission/` directory. If opting for the notebook approach, please maintain your edited `homework1.ipynb` and related documents under `notebooks/`.
+- Always place your submissions within the `submission/` directory. If opting for the notebook approach, please maintain your edited `homework2.ipynb` and related documents under `notebooks/`.
 
 - **Honesty System**: If OS compatibility issues hinder task completion, you're permitted to modify files outside the `EXCEPTION_FILES` listed in [tests/test_codebase.py](tests/test_codebase.py). Add those modified files to the list in your own `test_codebase.py`. However, ensure these changes don't impact your Agent Training Performance, as the centralized evaluation in Week 4's Agent Competition won't consider these changes.
 

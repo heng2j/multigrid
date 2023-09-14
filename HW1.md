@@ -124,17 +124,42 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 ---
 
-## Task 4 - Submit your homework on Github Classroom
 
-You can submit your results and documentations on a Jupyter Notebook or via Google CoLab Notebook. 
+## Task 4 - Homework Submission via Github Classroom
 
-Please put your submission under the `submission/` folder. And you can keep your `homework1.ipynb` and related files under `notebooks/` if you are taking the notebook route.
+### Submission Requirements:
+
+1. **RLlib Agents**: 
+    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results).
+
+2. **RLlib Agents Evaluation Reports**: 
+    - Commit and push relevant RLlib agent evaluation results: `<my_experiment>_eval_summary.csv`, `<my_experiment>_episodes_data.csv`, and `<my_experiment>.gif` to [submission/evaluation_reports](submission/evaluation_reports).
+
+3. **Answers to Questions**:
+    - For question answers, either:
+      - Update the provided [homework1.ipynb](notebooks/homework1.ipynb) notebook, or 
+      - Submit a separate `HW1_Answer.md` file under [submission](submission).
+
+4. **MLFlow Artifacts**:
+    - Ensure you commit and push the MLFlow artifacts to [submission](submission) (Which should be automatic).
 
 
-During each training, Ray Tune will generate the MLFlow artifacts to your local directory. You will need to push your MLFlow artifacts along with your RLlib checkpoints to your submission folder in your repo.
+#### Tips:
+- Retain only the top-performing checkpoints in [submission/ray_results](submission/ray_results).
+    - Refer to the baseline performance thresholds specified for each agent training task.
+    - Uploading numerous checkpoints, particularly underperforming ones, may cause the CI/CD to fail silently due to time constraints.
+    
+- Executing [tests/test_evaluation.py](tests/test_evaluation.py) with `pytest` should generate and push the necessary results to [submission/evaluation_reports](submission/evaluation_reports).
 
-For students not using the PRO version of Google CodeLab, 
+- For an exemplar submission that fulfills all the requirements and successfully passing the Autograding Github Actions, please checkout [Example Submission](https://github.com/STRDeepRL/week-1-intro-to-deep-rl-and-agent-training-environments-heng4str).
+
+- Always place your submissions within the `submission/` directory. If opting for the notebook approach, please maintain your edited `homework1.ipynb` and related documents under `notebooks/`.
+
+- **Honesty System**: If OS compatibility issues hinder task completion, you're permitted to modify files outside the `EXCEPTION_FILES` listed in [tests/test_codebase.py](tests/test_codebase.py). Add those modified files to the list in your own `test_codebase.py`. However, ensure these changes don't impact your Agent Training Performance, as the centralized evaluation in Week 4's Agent Competition won't consider these changes.
+
+- If you would like to showcase your work at the begining of the class, please notify the class facilitators in advance.
 
 
 ***Note:*** 
 Please beaware that the [File Size Check GitHub Action Workflow](.github/workflows/check_file_size.yml) will check the total files size for folers "submission/" "notebooks/", to ensure each of them will not exceed 5MBs. Please ensure to only submit the checkpoints, the notebooks and the MLFlow artifacts that are meant for grading by the Github Action CI/CD pipeline.
+

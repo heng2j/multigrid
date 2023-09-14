@@ -48,7 +48,7 @@ CONFIGURATIONS = {
         {
             "size": 8,
             "allow_agent_overlap": False,
-            "has_obsticle": True,
+            "has_obsticle": False,
             "teams": {"red": 1},
             "agents": 1,
             "training_scheme": "DTDE",
@@ -65,8 +65,6 @@ CONFIGURATIONS = {
             "max_steps": 1000,
         },
     ),
-    
-    
     "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle": (
         CompetativeRedBlueDoorEnvV2,
         {
@@ -88,11 +86,6 @@ CONFIGURATIONS = {
             },
             "max_steps": 1000,
         },
-    ),
-    
-    "MultiGrid-CompetativeRedBlueDoor-v3": (
-        CompetativeRedBlueDoorEnvV3,
-        {"size": 8, "allow_agent_overlap": False, "has_obsticle": True, "teams": {"red": 2, "blue": 2}, "agents": 4},
     ),
     "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single": (
         CompetativeRedBlueDoorEnvV3,
