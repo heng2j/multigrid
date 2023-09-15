@@ -317,7 +317,7 @@ class Agent(nn.Module):
 
 def main(args):
 
-    experiment_info = f"{TAGS['user_name']}__{TAGS['git_commit_hash'][:5]}"
+    experiment_info = f"{TAGS['user_name']}__{str(TAGS['git_commit_hash'])[:7]}"
     run_name = f"{args.env_id}__{args.exp_name}__{experiment_info}__{args.seed}__{int(time.time())}"
 
     if args.save_checkpoint:
