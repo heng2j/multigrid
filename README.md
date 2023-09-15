@@ -38,7 +38,9 @@ This course provides a four-week learning experience facilitated by two instruct
 - Lecture Format: 90-minute lectures are held every other Friday, starting from 09/08/2023. Each lecture consists of a 50-minute talk followed by 30-minute in-class hands-on exercises. Selected student homework showcases will be presented at the beginning of each class.
 - Homework Format: All students will solve the same task with their agents to try to beat the baseline performance threshold. Students are using the same RL framework and environments with clear directions on where to modify the code for their assignments. Extra credit assignments will encourage students to be creative and apply their domain knowledge and expertise to push beyond course materials. Instructors will run students’ agents in the evaluation framework and provide performance results on the leaderboard for in-class discussions.
 
-# MultiGrid
+
+# References:
+---
 ## Reference to MultiGrid
 
 Our course materials were built on top of the public repository "MultiGrid" by Ini Oguntola. MultiGrid provides a collection of fast multi-agent discrete gridworld environments for reinforcement learning. It is designed to be fast and easily customizable. For more information, you can visit the original [MultiGrid repository](https://github.com/ini/multigrid).
@@ -60,9 +62,9 @@ Our course materials were built on top of the public repository "MultiGrid" by I
   year = {2023},
 }
 ```
+---
 
 
-# CleanRL
 ## Reference to CleanRL
 Our course materials incorporate insights from "CleanRL", a project led by Shengyi(Costa) Huang alongside collaborators. CleanRL is renowned for its high-quality single-file implementations of deep reinforcement learning algorithms. The principal objective of CleanRL is to offer simplified yet efficient codebases for understanding and integrating deep RL algorithms. For a deeper dive into the intricacies, methodologies, and implementations, you can review the original [CleanRL repository](https://github.com/vwxyzjn/cleanrl) or refer to their publication in the Journal of Machine Learning Research.
 
