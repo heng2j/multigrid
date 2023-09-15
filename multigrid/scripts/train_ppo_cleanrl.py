@@ -18,7 +18,10 @@ import os
 import random
 import time
 from distutils.util import strtobool
+from pathlib import Path
+import json
 import pprint
+import git
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -38,8 +41,22 @@ from multigrid.wrappers import SingleAgentWrapperV2, CompetativeRedBlueDoorWrapp
 REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
 os.chdir(REPO_ROOT)
 
+# Constants
+SUBMISSION_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/submission_config.json"), key=os.path.getmtime
+)[-1]
+
+with open(SUBMISSION_CONFIG_FILE, "r") as file:
+    submission_config_data = file.read()
+
+submission_config = json.loads(submission_config_data)
+
+SUBMITTER_NAME = submission_config["name"]
+
 # Define the submission folder's path
 SUBMISSION_FOLDER = "submission/cleanRL"
+
+TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head.commit}
 
 # Define the frequency to save checkpoints of the model during training.
 CHECKPOINT_FREQUENCY = 50
@@ -298,14 +315,10 @@ class Agent(nn.Module):
         return action, probs.log_prob(action), probs.entropy(), self.critic(x)
 
 
-if __name__ == "__main__":
-    args = parse_args()
+def main(args):
 
-    print("\n======== Algorithm Configurations ========")
-    pp.pprint(vars(args))
-    print("==========================================\n")
-
-    run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    experiment_info = f"{TAGS['user_name']}__{TAGS['git_commit_hash'][:5]}"
+    run_name = f"{args.env_id}__{args.exp_name}__{experiment_info}__{args.seed}__{int(time.time())}"
 
     if args.save_checkpoint:
         checkpoint_folder = f"{SUBMISSION_FOLDER}/checkpoints/{run_name}"
@@ -748,3 +761,14 @@ if __name__ == "__main__":
 
     envs.close()
     writer.close()
+
+
+if __name__ == "__main__":
+
+    args = parse_args()
+
+    print("\n======== Algorithm Configurations ========")
+    pp.pprint(vars(args))
+    print("==========================================\n")
+
+    main(args)
