@@ -64,7 +64,7 @@ Our course materials were built on top of the public repository "MultiGrid" by I
 
 # CleanRL
 ## Reference to CleanRL
-
+Our course materials incorporate insights from "CleanRL", a project led by Shengyi(Costa) Huang alongside collaborators. CleanRL is renowned for its high-quality single-file implementations of deep reinforcement learning algorithms. The principal objective of CleanRL is to offer simplified yet efficient codebases for understanding and integrating deep RL algorithms. For a deeper dive into the intricacies, methodologies, and implementations, you can review the original [CleanRL repository](https://github.com/vwxyzjn/cleanrl) or refer to their publication in the Journal of Machine Learning Research.
 
 ```bibtex
 @article{huang2022cleanrl,
