@@ -137,14 +137,14 @@ Utilizing your baseline codebase tagged `v2.1`, please pinpoint the `Rollout Pha
 
   GAE amalgamates multiple n-step advantage estimators into a singular weighted estimator represented as:
   
-      A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
+      A_t^GAE(γ,λ) = Σ(γλ)^i δ_(t+i)
 
   
   where:
-  - `delta_t` represents the temporal difference error defined formally as delta_t = r_t + gamma * V(s_(t+1)) - V(s_t)
-
-  - `gamma` is the discount factor denoting the weighting of future rewards
-  - `lambda` is a hyperparameter within the range [0,1], mediating the balance between bias and variance in advantage estimation
+  
+      δ_t - The temporal difference error formally defined as δ_t = r_t + γV(s_(t+1)) - V(s_t)
+      γ - Discount factor which determines the weight of future rewards
+      λ - A hyperparameter in [0,1] balancing bias and variance in the advantage estimation
 
   **References**:
   "High-Dimensional Continuous Control Using Generalized Advantage Estimation" by John Schulman et al.
