@@ -8,7 +8,3 @@ def test_train_ppo_clanrl_execution():
         assert True
     except Exception as e:
         pytest.fail(f"Execution failed with error: {e}")
-
-
-
-test_train_ppo_clanrl_execution()
