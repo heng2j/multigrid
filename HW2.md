@@ -1,7 +1,7 @@
 
 
 ---
-# Assignment 2: Intro to Deep RL with Single-Agent Training Environments
+# Assignment 2: Build Your Own PPO
 
 ## Due Date
 - **Due Date:** Thursday, September 21, 6:00 PM
