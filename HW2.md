@@ -1,26 +1,26 @@
 
 
 ---
-# Assignment 2: Intro to Deep RL with Single Agent Training Environments
+# Assignment 2: Intro to Deep RL with Single-Agent Training Environments
 
 ## Due Date
 - **Due Date:** Thursday, September 21, 6:00 PM
 
 ## Overview
-This assignment aims to provide hands-on experience to implementing the key components of Policy Gradient (PG)  and Actor-Critic (AC) Methods. Upon completion, you'll be able to:
+This assignment provides a hands-on introduction to the core components of Policy Gradient (PG) and Actor-Critic (AC) methods. By the end of this assignment, you'll be equipped to:
 
-- Having the architectual understanding of general PG and AC algorithms and the learning proccess in a Deep RL training via hand-on implemenation in [CleanRL](https://docs.cleanrl.dev/):
-  - Understand the Deep RL training Loop and Data Flow
-    - Initial Agent -> Policy Rollouts -> Rollouts Data -> Policy Training -> Update Agent -> Policy Rolluts again
-    - Understand the Deep Learning Factors of Deep RL Agent like batch sizes and learning rate 
-  - Understanding of the 🤖 **Deep RL Agent Mechanics**:
-    - The role of 💹 **Value Functions Network** aka the Actor
-    - The role of  🎯 **Policy Network** aka the Critic - 
-  - How to tune the 🎲 **Exploration & Exploitation Strategies** with Algorithm Specific Hyperparamters
-    - Having a good understanding of what those parameters are how to tune them to modify agent behavniors without directly modifying the envinorment mechanics (rewards, observations, dones etc...)
-- Explore and exploite various PG and AC algorithms within RLLib in a 🤖 🆚 🤖 scearnio 
-  - Compare and contrast how different algorithms and algorithm configs perform against a pretrained agent 
-
+- Grasp the architecture of general PG and AC algorithms and the learning process in deep RL through hands-on implementation in [CleanRL](https://docs.cleanrl.dev/):
+  - Understand the deep RL training loop and data flow:
+    - Initial Agent → Policy Rollouts → Rollout Data → Policy Training → Updated Agent → Policy Rollouts (repeat)
+  - Understand the deep learning factors like batch sizes and learning rates to measure the `Sample Efficiency` for deep RL agent.
+  - Gain insights into 🤖 **Deep RL Agent Mechanics**:
+    - Recognize the role of 💹 **Value Functions Network** (the Actor).
+    - Understand the importance of 🎯 **Policy Network** (the Critic).
+  - Learn how to make 🎲 **Exploration & Exploitation Tradoffs** with algorithm-specific hyperparameter tuning:
+    - Familiarize yourself with these parameters and understand how to adjust them to influence agent behavior without altering the environmental mechanics (rewards, observations, etc.)
+    - Understand what metrics you should use to measure the performance of your agent 
+- Experiment with various PG and AC algorithms within RLLib in a 1v1, 🤖 🆚 🤖 scenario.
+  - Compare how different algorithms and their configurations perform against a pretrained agent.
 
 The starter code for this assignment can be found [here](https://classroom.github.com/classrooms/123430433-rl2rl-deeprl/assignments/week-1-intro-to-deep-rl-and-agent-training-environments).
 
@@ -188,7 +188,7 @@ python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedB
 - `entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
 ### Hands-on Experiences on PPO-Specific Hyperparameters
-***Q.2*** If your baseline agent struggles to achieve the Training Baseline Thresholds, or if there's potential for enhancment, now you are getting the chance to fine-tuning the following PPO-specific parameters discussed in class to improve the performance of your agent. You may want to run multiple versions of experinements, so remember to modify `--exp-name` to differentiate between agent configurations. For final submitions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds. (Including links to their videos will be ideal)
+***Q.2*** If your baseline agent struggles to achieve the Training Baseline Thresholds, or if there's potential for enhancment, now you are getting the chance to fine-tuning the following PPO-specific parameters discussed in class to improve the performance of your agent. You may want to run multiple versions of experinements, so remember to modify `--exp-name` to differentiate between agent configurations. For final submissions, pick the top 3 performing or representable results and present the training metrics via screenshots and specify the number of timesteps and policy updates needed to fulfill or surpass the Training Baseline Thresholds. (Including links to their videos will be ideal)
 
 - **gamma**
 - **gae-lambda**
@@ -242,7 +242,7 @@ We invite you to investigate this by addressing the same questions outlined in T
 
 ## Task 4: Bring the Lessons Learned from CleanRL to RLlib to solve a 1v1, 🤖 🆚 🤖 Scenario 
 
-As you get familiar with PPO by wroking through the CleanRL implementation, let's pivot back to RLlib. We'll harness our understanding of hyperparameter tuning to address a 1v1 competition with a pretrained opponent.
+As you get familiar with PPO by working through the CleanRL implementation, let's pivot back to RLlib. We'll harness our understanding of hyperparameter tuning to address a 1v1 competition with a pre-trained opponent.
 
 ### 🎮 Visualizing the Scenario:
 
@@ -262,7 +262,7 @@ In this death match scenario, your 'Red' agent will play against a pre-trained '
 
 ### Starting Training:
 
-Once you are familiar with the new sceanrio `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1`, run the following command to train a baseline agent:
+Once you are familiar with the new scenario `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1`, run the following command to train a baseline agent:
 
 ```shell
 python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-workers 10 --num-gpus 0 --name 1v1_death_match_baseline --training-scheme DTDE --policies-to-train red_0  --policies-to-load blue_0 --load-dir submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250
@@ -312,13 +312,13 @@ Here are the PPO-specific parameters in RLLib:
 
 
 
-**Rllib Agent Training Baseline Thresholds for Your Reference**:
+**RLlib Agent Training Baseline Thresholds for Your Reference**:
 - `episode_len_mean` should converge to a solution within 20 time steps and maintain for at least 100k time steps at the end of training.
 - `ray/tune/policy_reward_mean/red_0` should converge to consistently achieve 1.3+ returns, enduring for a minimum of the last 100k time steps.
 - `explained_variance` should stabilize at a level above 0.4 for at least the last 100k time steps.
 - `red_0/learner_stats/entropy` should settle at values below 0.3 for a minimum of 100k final training steps.
 
-**Rllib Agent Behavior Analysis Thresholds**
+**RLlib Agent Behavior Analysis Thresholds**
 The following Metrics are Behavior-specific metrics. It depends on how your agent emerges into certain specific behaviors to achieve the RL objective to maximize the discounted sum of rewards from time step t to the end of the game. So, how to achieve the maximum return depends on the training environment's world dynamic and the agent's reward structures. So, the "Player Archetypes" of your agent can be varied. 
 
 Our training scenario can be interpreted as a Zero-Sum game. Therefore, if your agent learned to solve a particular scenario by unlocking the door first, your Red agent should dominate this metric. Vice Versa.
