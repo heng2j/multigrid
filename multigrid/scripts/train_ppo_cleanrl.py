@@ -11,7 +11,7 @@ Note: This script is expected to have restricted changes.
 
 """
 
-# Imports 
+# Imports
 import argparse
 import subprocess
 import os
@@ -48,7 +48,7 @@ CHECKPOINT_FREQUENCY = 50
 def parse_args():
     """
     Parses command-line arguments for the PPO training script.
-    
+
     Returns:
         argparse.Namespace: A namespace containing all the parsed arguments.
     """
@@ -145,7 +145,7 @@ def make_env(env_id, seed, idx, capture_video, run_name):
     --------
     >>> env_factory = make_env('CartPole-v1', 0, 0, True, 'test_run')
     """
-    
+
     def thunk():
         env = gym.make(
             env_id, agents=1, render_mode="rgb_array", screen_size=640, disable_env_checker=True
@@ -189,9 +189,9 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
     Notes
     -----
-    - Reference: Exact solutions to the nonlinear dynamics of learning in deep linear neural 
+    - Reference: Exact solutions to the nonlinear dynamics of learning in deep linear neural
       networks - Saxe, A. et al. (2013).
-    - The input tensor for the orthogonal initialization should have at least 2 dimensions. 
+    - The input tensor for the orthogonal initialization should have at least 2 dimensions.
       For tensors with more than 2 dimensions, the trailing dimensions are flattened.
 
     """
@@ -224,11 +224,12 @@ class Agent(nn.Module):
     -------
     get_value(x: torch.Tensor) -> torch.Tensor:
         Returns the estimated value of the input state/observation.
-    
+
     get_action_and_value(x: torch.Tensor, action: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         Returns the chosen action, its log probability, the entropy of the policy, and the state value.
 
     """
+
     def __init__(self, envs):
         super().__init__()
         # Define the critic network to estimate state/observation values
@@ -275,7 +276,7 @@ class Agent(nn.Module):
         x : torch.Tensor
             The state/observation tensor.
         action : torch.Tensor, optional
-            If provided, this action will be used. Otherwise, an action is sampled from the policy. 
+            If provided, this action will be used. Otherwise, an action is sampled from the policy.
 
         Returns
         -------
@@ -348,9 +349,7 @@ if __name__ == "__main__":
     The environments are created using the provided make_env function
     """
     envs = gym.vector.SyncVectorEnv(
-        [
-            make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)
-        ],  
+        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)],
     )
 
     # Check and print environment details
@@ -415,30 +414,30 @@ if __name__ == "__main__":
         """
         Main training loop for Proximal Policy Optimization (PPO) algorithm.
 
-        This loop represents the number of updates to be made to the policy during training. 
-        Each update consists of collecting some rollout trajectory data and then performing 
+        This loop represents the number of updates to be made to the policy during training.
+        Each update consists of collecting some rollout trajectory data and then performing
         a series of optimizations on the collected data to improve the policy.
 
         Parameters:
-            num_updates (int): The total number of times the policy (or agent) is updated 
+            num_updates (int): The total number of times the policy (or agent) is updated
                             throughout the entire training process.
 
-            num_steps (int): The number of consecutive interactions (steps) an agent takes 
-                            in the environment before the data is used for an update. Represents 
+            num_steps (int): The number of consecutive interactions (steps) an agent takes
+                            in the environment before the data is used for an update. Represents
                             the horizon for each rollout.
 
-            update_epochs (int): The number of times to re-use the collected data to update 
-                                the policy. For each update, the collected data is optimized over 
+            update_epochs (int): The number of times to re-use the collected data to update
+                                the policy. For each update, the collected data is optimized over
                                 'update_epochs' epochs.
 
-            batch_size (int): Total number of timesteps collected in a single rollout. It's the 
+            batch_size (int): Total number of timesteps collected in a single rollout. It's the
                             product of 'num_steps' and the number of parallel environments, 'num_envs'.
 
-            minibatch_size (int): Size of each batch of data when dividing the collected rollout 
+            minibatch_size (int): Size of each batch of data when dividing the collected rollout
                                 into multiple mini-batches for stochastic gradient descent (SGD).
 
         Note:
-            The learning rate annealing logic reduces the learning rate linearly as training 
+            The learning rate annealing logic reduces the learning rate linearly as training
             progresses. This can help stabilize learning in later stages of training.
 
         """
@@ -450,7 +449,6 @@ if __name__ == "__main__":
                 frac = 1.0 - (update - 1.0) / num_updates
                 lrnow = frac * args.learning_rate
                 optimizer.param_groups[0]["lr"] = lrnow
-
 
             # Main Rollout loop for training trajectory data collection
             """
@@ -557,7 +555,7 @@ if __name__ == "__main__":
                         nextvalues = values[t + 1]
 
                     # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
-                    # HW2 TODO - 
+                    # HW2 TODO -
                     delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
 
                     # Computing the GAE advantage at the current timestep using the recursive formula.
@@ -578,9 +576,9 @@ if __name__ == "__main__":
             # # HW2 TODO 1 - Estimate the advantage using Generalized Advantage Estimation (GAE)
             # """
             # NOTE:
-            # This section calculates the advantages and returns, which are essential parts of the PPO algorithm. 
-            # It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages. 
-            # This method combines multiple n-step estimators into a single estimate, reducing variance 
+            # This section calculates the advantages and returns, which are essential parts of the PPO algorithm.
+            # It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages.
+            # This method combines multiple n-step estimators into a single estimate, reducing variance
             # and allowing for more stable and efficient training. This block also bootstraps value if not done.
 
             # GAE combines multiple n-step advantage estimators into a single weighted estimator:
@@ -616,18 +614,18 @@ if __name__ == "__main__":
             #     # Looping through each timestep in reverse to calculate the GAE advantage using the recursive formula
             #     for t in reversed(range(args.num_steps)):
             #         if t == args.num_steps - 1:
-            #             # HW2 TODO - 
+            #             # HW2 TODO -
             #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
-            #             nextnonterminal = ________ 
+            #             nextnonterminal = ________
             #             nextvalues = next_value
             #         else:
             #             # HW2 TODO -
             #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
-            #             nextnonterminal = ________ 
+            #             nextnonterminal = ________
             #             nextvalues = values[t + 1]
 
             #         # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
-            #         # HW2 TODO - 
+            #         # HW2 TODO -
             #         # Complete the calculation for 'delta' using the formula provided above
             #         delta = ________
 
@@ -641,7 +639,7 @@ if __name__ == "__main__":
             #         #    - A_(t+1)^GAE(γ,λ) is the advantage estimate of the next timestep (which is stored in `lastgaelam`).
             #         #    - γ is the discount factor (args.gamma).
             #         #    - λ is the hyperparameter that determines the trade-off between bias and variance in the advantage estimate (args.gae_lambda).
-            #         # HW2 TODO - 
+            #         # HW2 TODO -
             #         # Fill in the blank to complete the computation for the GAE advantage at the current timestep
             #         advantages[t] = lastgaelam = ________
 
@@ -649,7 +647,6 @@ if __name__ == "__main__":
             #     # HW2 TODO -
             #     # Complete the calculation for 'returns' using the relationship between advantage and value
             #     returns = ________
-
 
             # Flatten the batch to fit the neural network's input dimensions
             # NOTE: This part is reshaping the tensor structure for ease of processing
@@ -662,7 +659,7 @@ if __name__ == "__main__":
 
             # PPO optimization: Optimize the policy and value function
             # NOTE: This loop represents the number of epochs of optimization to perform on the collected data
-            
+
             # Initializing Batching Variables
 
             # Creates an array of indices from 0 to args.batch_size-1. This will later be used to shuffle and create minibatches for stochastic optimization
@@ -675,7 +672,7 @@ if __name__ == "__main__":
             for epoch in range(args.update_epochs):
                 # The shuffle function shuffles the indices. This is done to introduce randomness in the selection of mini-batches during training
                 np.random.shuffle(b_inds)
-                
+
                 # This inner loop creates mini-batches using shuffled indices. mb_inds contains the indices for the current minibatch
                 for start in range(0, args.batch_size, args.minibatch_size):
                     end = start + args.minibatch_size
@@ -687,7 +684,7 @@ if __name__ == "__main__":
                         b_obs[mb_inds], b_actions.long()[mb_inds]
                     )
 
-                    # This calculates the difference between the new log probability, newlogprob and the old log probability b_logprobs[mb_inds] of the action. 
+                    # This calculates the difference between the new log probability, newlogprob and the old log probability b_logprobs[mb_inds] of the action.
                     # This ratio, logratio indicates how the policy has changed after optimization
                     logratio = newlogprob - b_logprobs[mb_inds]
                     ratio = logratio.exp()
@@ -700,9 +697,8 @@ if __name__ == "__main__":
                         approx_kl = ((ratio - 1) - logratio).mean()
                         clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
-
                     mb_advantages = b_advantages[mb_inds]
-                    
+
                     # Advantage Normalization
                     # NOTE: The advantages are normalized to have zero mean and unit variance. This can stabilize training
                     if args.norm_adv:
@@ -734,23 +730,22 @@ if __name__ == "__main__":
                     # NOTE: Entropy encourages exploration by penalizing deterministic policies. A higher entropy corresponds to a more explorative policy
                     entropy_loss = entropy.mean()
 
-                    # HW2 TODO - 
+                    # HW2 TODO -
                     # Combined Loss Calculation:
-                    # This line computes the combined loss for optimizing the policy network, which is composed of three main components: 
+                    # This line computes the combined loss for optimizing the policy network, which is composed of three main components:
                     # 1. Policy Gradient Loss (pg_loss): Encourages the policy to increase the probability of actions that yield higher advantages.
-                    # 2. Entropy Loss (entropy_loss): Adds an entropy bonus to encourage exploration. The `args.ent_coef` parameter scales this component. 
-                    #    - A higher value of `args.ent_coef` promotes more exploration, helping the agent to explore various strategies, 
+                    # 2. Entropy Loss (entropy_loss): Adds an entropy bonus to encourage exploration. The `args.ent_coef` parameter scales this component.
+                    #    - A higher value of `args.ent_coef` promotes more exploration, helping the agent to explore various strategies,
                     #      potentially finding more optimal paths.
                     #    - A lower value nudges the agent towards exploitation, focusing more on the strategies that are known to work well.
                     # 3. Value Loss (v_loss): Measures the error in value function estimates, with the `args.vf_coef` parameter determining its influence in the overall loss.
                     #    - A higher `args.vf_coef` emphasizes the accuracy of value estimation, potentially leading to a more stable training process.
-                    #    - A lower `args.vf_coef` gives precedence to policy improvement over value estimation, possibly leading to faster, 
+                    #    - A lower `args.vf_coef` gives precedence to policy improvement over value estimation, possibly leading to faster,
                     #      but less stable policy updates.
-                    # It's important to note that the balance between exploration and exploitation, and the stability of training 
-                    # is influenced by the careful tuning of `args.ent_coef` and `args.vf_coef`. These coefficients might require 
+                    # It's important to note that the balance between exploration and exploitation, and the stability of training
+                    # is influenced by the careful tuning of `args.ent_coef` and `args.vf_coef`. These coefficients might require
                     # adjustment based on the specifics of the environment and task.
                     loss = pg_loss - args.ent_coef * entropy_loss + v_loss * args.vf_coef
-
 
                     # Gradient Descent
                     """ 
@@ -774,8 +769,8 @@ if __name__ == "__main__":
                         break
 
             # Calculating Explained Variance:
-            # This metric indicates how well the value function (critic) is approximating the true returns. 
-            # If this is close to 1, it means our value function is doing a good job in terms of prediction. 
+            # This metric indicates how well the value function (critic) is approximating the true returns.
+            # If this is close to 1, it means our value function is doing a good job in terms of prediction.
             # If it's close to 0, it's mostly like guessing.
             y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
             var_y = np.var(y_true)
@@ -783,7 +778,6 @@ if __name__ == "__main__":
 
             # Logging Training Information
             # TRY NOT TO MODIFY: record rewards for plotting purposes
-
 
             # Log the number of Policy updates
             writer.add_scalar("charts/Policy_updates", update, global_step)
@@ -793,18 +787,18 @@ if __name__ == "__main__":
             writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
             # Log the policy loss. Lower values indicate the policy is improving in predicting better actions
             writer.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
-            # Log the entropy, which gives a sense of how random the policy's actions are 
+            # Log the entropy, which gives a sense of how random the policy's actions are
             # Higher values indicate more exploration, while lower values suggest the policy is becoming deterministic
             writer.add_scalar("losses/entropy", entropy_loss.item(), global_step)
             # Log the old KL divergence approximation between old and new policy
             writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), global_step)
-            # Log the current KL divergence approximation between old and new policy 
+            # Log the current KL divergence approximation between old and new policy
             # A large sudden increase can be a sign of policy updates being too aggressive
             writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
             # Track the fraction of actions for which the clipped objective is activated
             # This helps understand how frequently our updates are being bounded to ensure stable training
             writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
-            # Log the explained variance. A high explained variance suggests our value function 
+            # Log the explained variance. A high explained variance suggests our value function
             # is effectively capturing the variance in the returns
             writer.add_scalar("losses/explained_variance", explained_var, global_step)
             # Compute and display the number of environment steps processed per second

@@ -27,11 +27,16 @@ from ray.rllib.algorithms import AlgorithmConfig
 from ray.tune import CLIReporter
 from ray.air.integrations.mlflow import MLflowLoggerCallback
 
-from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir, EvaluationCallbacks, RestoreWeightsCallback
+from multigrid.utils.training_utilis import (
+    algorithm_config,
+    get_checkpoint_dir,
+    EvaluationCallbacks,
+    RestoreWeightsCallback,
+)
 from multigrid.rllib.ctde_torch_policy import CentralizedCritic
 
 # Set the working diretory to the repo root
-REPO_ROOT = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode('utf-8')
+REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
 os.chdir(REPO_ROOT)
 
 # Constants
@@ -52,6 +57,7 @@ TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head
 # Initialize the CLI reporter for Ray
 reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
 
+
 def configure_algorithm(args):
     """
     Create an algorithm configuration object based on command-line arguments.
@@ -70,7 +76,6 @@ def configure_algorithm(args):
     config.seed = args.seed
     config.callbacks(EvaluationCallbacks)
     config.environment(disable_env_checking=False)
-
 
     return config
 
@@ -121,13 +126,10 @@ def train(
     """
 
     # Assemble the list of callbacks
-    callbacks=[
+    callbacks = [
         # Logger callback for MLflow integration
         MLflowLoggerCallback(
-            tracking_uri="./submission/mlflow",
-            experiment_name=experiment_name,
-            tags=TAGS,
-            save_artifact=True
+            tracking_uri="./submission/mlflow", experiment_name=experiment_name, tags=TAGS, save_artifact=True
         ),
     ]
 
@@ -148,11 +150,11 @@ def train(
         # If `restore_all_policies_from_checkpoint` is True, restore all policies from checkpoint
         # This is helpful for continue to train your agent from last checkpoint
         # But ensure to update the stop_conditions to allow you train beyond the original conditions
-        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None, 
+        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None,
         checkpoint_freq=10,
         checkpoint_at_end=True,
         progress_reporter=reporter,
-        callbacks=callbacks,  
+        callbacks=callbacks,
         name=experiment_name,
     )
 
@@ -185,7 +187,8 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
-        type=str,  default='submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250',
+        type=str,
+        default="submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250",
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(
@@ -201,10 +204,10 @@ if __name__ == "__main__":
         "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"  
+        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
     )
     parser.add_argument(
-        "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"  
+        "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
 
@@ -228,5 +231,5 @@ if __name__ == "__main__":
         local_mode=args.local_mode,
         experiment_name=args.name,
         training_scheme=args.training_scheme,
-        policies_to_load=args.policies_to_load
+        policies_to_load=args.policies_to_load,
     )

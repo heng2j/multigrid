@@ -5,11 +5,11 @@ import ast
 import glob
 
 
-
 ALLOWED_FUNCTIONS_IN_CLASS = {
     "CompetativeRedBlueDoorEnvV3": ["ctce_step", "dtde_step", "_handle_steps"],
 }
-ALLOWED_CLASSES = ["CompetativeRedBlueDoorEnvV2",
+ALLOWED_CLASSES = [
+    "CompetativeRedBlueDoorEnvV2",
 ]
 
 
@@ -33,15 +33,13 @@ def test_only_exception_files_modified():
         "multigrid/envs/__init__.py",
         "multigrid/rllib/models.py",
         "multigrid/rllib/ctde_torch_policy.py",
-        "multigrid/scripts/manual_control.py"
-        "multigrid/scripts/train.py",
+        "multigrid/scripts/manual_control.py" "multigrid/scripts/train.py",
         "multigrid/scripts/visualize.py",
         "multigrid/scripts/train_ppo_cleanrl.py",
         "multigrid/scripts/train_sac_cleanrl.py",
         "multigrid/utils/training_utilis.py",
         "multigrid/wrappers.py",
         "multigrid/rllib/__init__.py",
-
     ]
 
     EXCEPTION_FOLDERS = ["submission/**", "notebooks/**"]
@@ -62,25 +60,22 @@ def test_only_exception_files_modified():
     # Remove exception files from all_files to create the locked_files set.
     locked_files = all_files - EXCEPTION_FILES
 
-
     # Check if the tag 'v2.1' exists
     list_tags_result = subprocess.run(["git", "tag"], capture_output=True, text=True)
     tags = list_tags_result.stdout.splitlines()
-    
+
     if "v2.1" in tags:
         base_commit = "v2.1"
     else:
         # If the tag doesn't exist, means it is in Github Classroom find the oldest (initial) commit hash
         oldest_commit_result = subprocess.run(
-            ["git", "rev-list", "--max-parents=0", "HEAD"], 
-            capture_output=True, text=True
+            ["git", "rev-list", "--max-parents=0", "HEAD"], capture_output=True, text=True
         )
         base_commit = oldest_commit_result.stdout.strip()
 
     # Get list of changed files between HEAD and base_commit.
     changed_files_result = subprocess.run(
-        ["git", "diff", "--name-only", base_commit, "HEAD"], 
-        capture_output=True, text=True
+        ["git", "diff", "--name-only", base_commit, "HEAD"], capture_output=True, text=True
     )
     # If the git command fails, the test should fail.
     changed_files_result.check_returncode()
@@ -116,5 +111,3 @@ def test_restrict_file_changes():
                 assert ast.dump(old_function) == ast.dump(
                     new_function
                 ), f"Unauthorized modification in {class_name}.{old_function.name}"
-
-

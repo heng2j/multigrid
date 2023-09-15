@@ -27,6 +27,7 @@ class CentralizedValueMixin:
     __init__:
         Initialize the mixin.
     """
+
     def __init__(self):
         self.compute_central_vf = self.model.central_value_function
 
@@ -41,7 +42,7 @@ def centralized_critic_postprocessing(policy, sample_batch, other_agent_batches=
     ----------
     policy :
         The policy object.
-    sample_batch : 
+    sample_batch :
         The sample batch data.
     other_agent_batches : optional
         Data from other agents.
@@ -52,7 +53,7 @@ def centralized_critic_postprocessing(policy, sample_batch, other_agent_batches=
     -------
         Post-processed sample batch.
     """
-   
+
     # Prep for our agent
     policy_id = policy._Policy__policy_id
     team_name = policy_id.split("_")[0]
@@ -125,7 +126,7 @@ def loss_with_central_critic(policy, base_policy, model, dist_class, train_batch
         The model object.
     dist_class :
         The distribution class.
-    train_batch : 
+    train_batch :
         Training batch data.
 
     Returns
@@ -133,8 +134,7 @@ def loss_with_central_critic(policy, base_policy, model, dist_class, train_batch
     tensor
         Loss value.
     """
-    
-    
+
     # Save original value function.
     vf_saved = model.value_function
 
@@ -166,6 +166,7 @@ class CTDEPPOTorchPolicy(CentralizedValueMixin, PPOTorchPolicy):
     postprocess_trajectory(self, sample_batch, other_agent_batches=None, episode=None):
         Post-process trajectory.
     """
+
     def __init__(self, observation_space, action_space, config):
         PPOTorchPolicy.__init__(self, observation_space, action_space, config)
         CentralizedValueMixin.__init__(self)
@@ -188,6 +189,7 @@ class CentralizedCritic(PPO):
     get_default_policy_class(cls, config):
         Get the default policy class for the agent.
     """
+
     @classmethod
     @override(PPO)
     def get_default_policy_class(cls, config):

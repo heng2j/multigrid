@@ -365,7 +365,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
     def _handle_steps(self, agent, agent_index, action, reward, terminated, info):
-        fwd_obj = self.grid.get(*agent.front_pos) 
+        fwd_obj = self.grid.get(*agent.front_pos)
 
         if action == Action.toggle:
             for other_agent in self.agents:
@@ -375,7 +375,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             # If fwd_obj is a door
             if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                 if (self.red_door.is_open or self.blue_door.is_open) and (fwd_obj.color == agent.color):
-
                     # Set Done Conditions for winning team
                     for this_agent in self.agents:
                         if this_agent.color == agent.color and not this_agent.terminated:
@@ -397,7 +396,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name]["got_eliminated_done"] = True
                 self.grid.set(*fwd_obj.pos, None)
                 fwd_obj.pos = (
-                    (13, 2) if fwd_obj.color == "blue" else (2, 2) 
+                    (13, 2) if fwd_obj.color == "blue" else (2, 2)
                 )  # NOTE This is not scalabe and only works in 2v2 at most
                 reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]
                 reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game
@@ -443,7 +442,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             ):
                 reward[agent_index] += (
                     self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
-                )  
+                )
                 agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                 if self.training_scheme == "DTDE" or "CTDE":
@@ -462,7 +461,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
             else:
                 # Invalid pickup action
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]  
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]
 
     def step(self, actions):
         """
@@ -677,6 +676,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
     Please checkout __init__.py in multigrid.envs for more registerd environments
     """
+
     def __init__(
         self,
         size: int = 8,
@@ -746,8 +746,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         self.observation_space = self.agents[0].observation_space["image"]
 
-
-
     def _gen_grid(self, width, height):
         """
         :meta private:
@@ -792,17 +790,32 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         # Block doors with a ball
         ball_carrying_discount_factor = (
-                self.reward_schemes.get(self.agents[0].name, {})
-                .get("dense_reward_discount_factor", {})
-                .get("ball_carrying_discount_factor", 0.9)
-            )
+            self.reward_schemes.get(self.agents[0].name, {})
+            .get("dense_reward_discount_factor", {})
+            .get("ball_carrying_discount_factor", 0.9)
+        )
 
         if self.has_obsticle:
             if "red" in set(self.teams.keys()):
-                self.grid.set(red_door_x + 1, red_door_y, Ball(color="blue", init_pos=(red_door_x + 1, red_door_y), ball_carrying_discount_factor=ball_carrying_discount_factor))
+                self.grid.set(
+                    red_door_x + 1,
+                    red_door_y,
+                    Ball(
+                        color="blue",
+                        init_pos=(red_door_x + 1, red_door_y),
+                        ball_carrying_discount_factor=ball_carrying_discount_factor,
+                    ),
+                )
             if "blue" in set(self.teams.keys()):
-                self.grid.set(blue_door_x - 1, blue_door_y, Ball(color="red", init_pos=(blue_door_x - 1, blue_door_y), ball_carrying_discount_factor=ball_carrying_discount_factor))
-                
+                self.grid.set(
+                    blue_door_x - 1,
+                    blue_door_y,
+                    Ball(
+                        color="red",
+                        init_pos=(blue_door_x - 1, blue_door_y),
+                        ball_carrying_discount_factor=ball_carrying_discount_factor,
+                    ),
+                )
 
         # Place keys in hallway
         # Fixed Key Positions
@@ -843,7 +856,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                     # "mission": self.agents[agent.index].mission,
                 }
 
-        
         return observations
 
     def dtde_step(self, actions, obs, reward, terminated, truncated, info):
@@ -889,7 +901,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
 
     def _handle_steps(self, agent, agent_index, action, reward, terminated, info):
-        fwd_obj = self.grid.get(*agent.front_pos) 
+        fwd_obj = self.grid.get(*agent.front_pos)
 
         if action == Action.toggle:
             for other_agent in self.agents:
@@ -899,7 +911,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             # If fwd_obj is a door
             if fwd_obj == self.red_door or fwd_obj == self.blue_door:
                 if (self.red_door.is_open or self.blue_door.is_open) and (fwd_obj.color == agent.color):
-
                     # Set Done Conditions for winning team
                     for this_agent in self.agents:
                         if this_agent.color == agent.color and not this_agent.terminated:
@@ -921,7 +932,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 info[fwd_obj.color if self.training_scheme == "CTCE" else fwd_obj.name]["got_eliminated_done"] = True
                 self.grid.set(*fwd_obj.pos, None)
                 fwd_obj.pos = (
-                    (13, 2) if fwd_obj.color == "blue" else (2, 2) 
+                    (13, 2) if fwd_obj.color == "blue" else (2, 2)
                 )  # NOTE This is not scalabe and only works in 2v2 at most
                 reward[agent_index] += self.reward_schemes[agent.name]["eliminated_opponent_sparse_reward"]
                 reward[fwd_obj.index] -= 1  # NOTE - This opponent penalty is a fixed value for the game
@@ -940,7 +951,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                             info[this_agent.color if self.training_scheme == "CTCE" else this_agent.name][
                                 "eliminated_opponent_num"
                             ] += 1
-
 
         elif action == Action.pickup:
             if (
@@ -968,7 +978,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             ):
                 reward[agent_index] += (
                     self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
-                )  
+                )
                 agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                 if self.training_scheme == "DTDE" or "CTDE":
@@ -987,7 +997,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
             else:
                 # Invalid pickup action
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"] 
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]
 
     def step(self, actions):
         """
@@ -999,13 +1009,10 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
             return self.ctce_step(actions, obs, reward, terminated, truncated, info)
 
         elif self.training_scheme == "DTDE" or "CTDE":
-
             agent_id = list(actions.keys())[0]
-            next_obs, reward, done, truncate, info =self.dtde_step(actions, obs, reward, terminated, truncated, info)
+            next_obs, reward, done, truncate, info = self.dtde_step(actions, obs, reward, terminated, truncated, info)
 
             return next_obs, reward[agent_id], done[agent_id], truncate[agent_id], info[agent_id]
-
-
 
     def handle_agent_actions(self, agent, action, rewards):
         if agent.state.terminated:
@@ -1119,7 +1126,11 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
         Render a non-partial observation for visualization.
         """
         # Compute agent visibility masks
-        dict_obs_space = self.agents[0].original_observation_space if hasattr(self.agents[0], "original_observation_space" )  else self.agents[0].observation_space
+        dict_obs_space = (
+            self.agents[0].original_observation_space
+            if hasattr(self.agents[0], "original_observation_space")
+            else self.agents[0].observation_space
+        )
         obs_shape = dict_obs_space["image"].shape[:-1]
         vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
 

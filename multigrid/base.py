@@ -214,7 +214,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         else:
             raise ValueError(f"Invalid argument for agents: {agents}")
 
-
         # Action enumeration for this environment
         self.actions = Action
 
@@ -239,8 +238,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.joint_reward = joint_reward
         self.success_termination_mode = success_termination_mode
         self.failure_termination_mode = failure_termination_mode
-
-
 
     @cached_property
     def observation_space(self) -> spaces.Dict[AgentID, spaces.Space]:

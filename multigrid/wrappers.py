@@ -158,7 +158,6 @@ class SingleAgentWrapper(gym.Wrapper):
         self.observation_space = env.agents[0].observation_space
         self.action_space = env.agents[0].action_space
 
-
     def reset(self, *args, **kwargs):
         """
         :meta private:
@@ -213,15 +212,15 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         self.script_path = __file__
 
         # HW1 TODO 1:
-        # Instead of directly using the RGB 3 channels  partially observable agent view 
-        # In this wrapper, we are applying one-hot encoding of a partially observable agent view 
+        # Instead of directly using the RGB 3 channels  partially observable agent view
+        # In this wrapper, we are applying one-hot encoding of a partially observable agent view
         # using Type, Color, State and Direction
         self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent observation spaces
         dim = sum(self.dim_sizes)
         for agent in self.env.agents:
-            # Retrieve the shape of the original "image" observation_space 
+            # Retrieve the shape of the original "image" observation_space
             view_height, view_width, _ = agent.observation_space["image"].shape
             # Reassign the "image" observation_space for one-hot encoding observations
             agent.observation_space["image"] = spaces.Box(
@@ -250,9 +249,8 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
             else:
                 # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
                 agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
-        
-        return obs
 
+        return obs
 
     @staticmethod
     @nb.njit(cache=True)
@@ -316,6 +314,7 @@ class SingleAgentWrapperV2(gym.Wrapper):
         result = super().step({self.agents[0].name: action})
         return tuple(item for item in result)
 
+
 class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
     """
     Wrapper to get a one-hot encoding of a partially observable
@@ -362,9 +361,9 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
         self.dim_sizes = np.array([len(Type), len(Color), max(len(State), len(Direction))])
 
         # Update agent's observation spaces
-        dim = sum(self.dim_sizes) + 1 # +1 for adding the current direction 
+        dim = sum(self.dim_sizes) + 1  # +1 for adding the current direction
         for agent in self.env.agents:
-            # Retrieve the shape of the original "image" observation_space 
+            # Retrieve the shape of the original "image" observation_space
             view_height, view_width, _ = agent.observation_space["image"].shape
             # Reassign the "image" observation_space for one-hot encoding observations
             agent.observation_space["image"] = spaces.Box(
@@ -373,10 +372,8 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
 
         # HW2 NOTE 2:
         # This basic implementation of PPO in CleanRL only works with single agent
-        # That's why we are taking the single observation_space from the first agent 
-        self.observation_space = self.env.agents[0].observation_space["image"] 
-
-
+        # That's why we are taking the single observation_space from the first agent
+        self.observation_space = self.env.agents[0].observation_space["image"]
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         """
@@ -393,19 +390,22 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
             else:
                 # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
                 agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
-        
+
         # HW2 NOTE 3:
         # The obs we are receiveing from the unwrapped environment will not match the observation space that we defined for this wrapper
         # The original obs contain all raw observation features like "image" and "direction"
-        # Here we simply using concatenation to combine both "image" and "direction" 
+        # Here we simply using concatenation to combine both "image" and "direction"
         # which create an observation that match the observation space we defined for this wrapper
         obs[agent_id]["image"] = self.one_hot(obs[agent_id]["image"], self.dim_sizes)
-        obs[agent_id]["direction"] = np.full((obs[agent_id]["image"].shape[:2] + (1,)), obs[agent_id]["direction"]).astype('uint8')
-        obs = np.concatenate((obs[agent_id]["direction"] , obs[agent_id]["image"]), axis=2, )
+        obs[agent_id]["direction"] = np.full(
+            (obs[agent_id]["image"].shape[:2] + (1,)), obs[agent_id]["direction"]
+        ).astype("uint8")
+        obs = np.concatenate(
+            (obs[agent_id]["direction"], obs[agent_id]["image"]),
+            axis=2,
+        )
 
-    
-        return obs 
-
+        return obs
 
     @staticmethod
     @nb.njit(cache=True)

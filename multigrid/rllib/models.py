@@ -177,7 +177,7 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         The base neural network model.
     central_vf : nn.Module
         Neural network for the centralized value function.
-    
+
     Methods
     -------
     __init__(obs_space, action_space, num_outputs, model_config, name)
@@ -189,7 +189,6 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
     value_function()
         Get the value function from the base model (not used in this custom model).
     """
-
 
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):
         """

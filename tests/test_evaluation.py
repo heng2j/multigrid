@@ -12,7 +12,7 @@ import json
 
 # import cProfile
 # Set the working diretory to the repo root
-REPO_ROOT = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode('utf-8')
+REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
 os.chdir(REPO_ROOT)
 
 SUBMISSION_CONFIG_FILE = sorted(
@@ -34,17 +34,17 @@ def commit_and_push():
     # subprocess.run(['git', 'config', '--global', 'user.name', 'Your Name'])
 
     # Add all changed files
-    subprocess.run(['git', 'add', 'submission/evaluation_reports/from_github_actions/*'])
+    subprocess.run(["git", "add", "submission/evaluation_reports/from_github_actions/*"])
 
     # Commit changes
     try:
-        subprocess.run(['git', 'commit', '-m', 'Auto-commit evaluation reports'], check=True)
+        subprocess.run(["git", "commit", "-m", "Auto-commit evaluation reports"], check=True)
     except subprocess.CalledProcessError:
         print("Nothing to commit. Skipping git commit.")
         return
 
     # Push changes
-    subprocess.run(['git', 'push'])  
+    subprocess.run(["git", "push"])
 
 
 def test_evaluation():
@@ -64,7 +64,7 @@ def test_evaluation():
 
     for checkpoint_path in checkpoint_paths:
         # Define parameters for the test
-        env = str(checkpoint_path).split("/")[-2].split("_")[1] 
+        env = str(checkpoint_path).split("/")[-2].split("_")[1]
         scenario_name = env.split("-v3-")[1]
         gif = f"{scenario_name}_{SUBMITTER_NAME}"
 
@@ -93,5 +93,6 @@ def test_evaluation():
         assert os.path.exists(eval_report_path), f"Expected evaluation report {eval_report_path} doesn't exist!"
 
     commit_and_push()
+
 
 # cProfile.run('test_evaluation()', 'test_evaluation_output.prof')

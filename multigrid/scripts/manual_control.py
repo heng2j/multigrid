@@ -15,6 +15,7 @@ from multigrid.base import MultiGridEnv
 from multigrid.wrappers import SingleAgentWrapper  # ImgObsWrapper, RGBImgPartialObsWrapper
 from gymnasium.envs import registry as gym_envs_registry
 
+
 class ManualControl:
     def __init__(self, env: Env, seed=None, agents=2) -> None:
         self.env = env
@@ -38,9 +39,9 @@ class ManualControl:
 
     def step(self, action: Action):
         _, reward, terminated, truncated, _ = self.env.step(action)
-        reward = reward if isinstance(reward, numbers.Number)  else reward["red_0"]
-        terminated = terminated if isinstance(terminated,(np.bool_,bool))    else terminated["red_0"]
-        truncated = truncated if isinstance(truncated, bool)  else truncated["red_0"]
+        reward = reward if isinstance(reward, numbers.Number) else reward["red_0"]
+        terminated = terminated if isinstance(terminated, (np.bool_, bool)) else terminated["red_0"]
+        truncated = truncated if isinstance(truncated, bool) else truncated["red_0"]
 
         red_reward = reward
         self.total_episodic_rewards += red_reward
@@ -96,7 +97,7 @@ class ManualControl:
                     actions[i] = Action.done
                 self.step(actions)
         else:
-            print(f'Error - Unrecognized Key: {key}')
+            print(f"Error - Unrecognized Key: {key}")
 
 
 if __name__ == "__main__":
@@ -142,7 +143,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-
     env_config = gym_envs_registry[args.env_id].kwargs
     num_agents = sum(env_config["teams"].values())
     env: MultiGridEnv = gym.make(
@@ -152,11 +152,9 @@ if __name__ == "__main__":
         agents=num_agents,
         # agent_pov=args.agent_view,
         # agent_view_size=args.agent_view_size,
-
         screen_size=args.screen_size,
         disable_env_checker=True
         # **env_config
-
     )
 
     if args.single_agent:

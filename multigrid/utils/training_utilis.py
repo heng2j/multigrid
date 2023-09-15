@@ -77,8 +77,6 @@ def can_use_gpu() -> bool:
     return False
 
 
-
-
 def model_config(framework: str = "torch", lstm: bool = False, custom_model_config: dict = None):
     """
     Returns a model configuration dictionary for RLlib.
@@ -197,12 +195,11 @@ def algorithm_config(
     )
 
 
-
 class EvaluationCallbacks(DefaultCallbacks, Callback):
     """
     Custom Callback for Evaluation Metrics.
 
-    Custom callback class for collecting and processing evaluation metrics 
+    Custom callback class for collecting and processing evaluation metrics
     during the training of the agents.
     """
 
@@ -281,9 +278,10 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
     """
     Custom Callback for Restoring Weights.
 
-    Custom callback class for restoring policy weights from checkpoints during 
+    Custom callback class for restoring policy weights from checkpoints during
     the training of the agents.
     """
+
     def __init__(
         self,
         load_dir: str,
@@ -327,4 +325,6 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         """
         checkpoint_path = get_checkpoint_dir(self.load_dir)
         restored_policies = Policy.from_checkpoint(checkpoint_path)
-        self.restored_policy_weights = { policy_name: restored_policies[policy_name].get_weights() for policy_name in self.load_policy_names }
+        self.restored_policy_weights = {
+            policy_name: restored_policies[policy_name].get_weights() for policy_name in self.load_policy_names
+        }
