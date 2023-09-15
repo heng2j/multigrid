@@ -259,9 +259,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                 {f"{agent.color.value}_{agent.team_index}": agent.observation_space for agent in self.agents}
             )
 
-        # FIXME - for HW2
-        # return self.agents[0].observation_space
-
     @cached_property
     def action_space(self) -> spaces.Dict[AgentID, spaces.Space]:
         """

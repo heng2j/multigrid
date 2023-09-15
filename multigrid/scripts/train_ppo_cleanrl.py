@@ -513,16 +513,16 @@ if __name__ == "__main__":
                             writer.add_scalar("charts/episodic_length", item["episode"]["l"], global_step)
                             break
 
-            # Estimate the advantage using Generalized Advantage Estimation (GAE)
-            # HW2 TODO - Implementing GAE
+
+            # HW2 TODO 1 - Implement Generalized Advantage Estimation (GAE) to Estimate the Advantage 
             """
             NOTE:
-            This section calculates the advantages and returns, which are essential parts of the PPO algorithm. 
-            It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages. 
-            This method combines multiple n-step estimators into a single estimate, reducing variance 
+            This section calculates the advantages and returns, which are essential parts of the PPO algorithm.
+            It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages.
+            This method combines multiple n-step estimators into a single estimate, reducing variance
             and allowing for more stable and efficient training. This block also bootstraps value if not done.
 
-            GAE combines multiple n-step advantage estimators into a single weighted estimator:
+            GAE combines multiple n-step advantage estimators into a single weighted estimator as described in class:
                 A_t^GAE(γ,λ) = Σ(γλ)^i δ_(t+i)
 
             where:
@@ -546,107 +546,41 @@ if __name__ == "__main__":
                 # Looping through each timestep in reverse to calculate the GAE advantage using the recursive formula
                 for t in reversed(range(args.num_steps)):
                     if t == args.num_steps - 1:
-                        # Indicator for non-terminal states at the next step (1 if not terminal, 0 if terminal)
-                        nextnonterminal = 1.0 - next_done
+                        # HW2 TODO - 
+                        # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
+                        # 1 if not terminal, 0 if terminal
+                        nextnonterminal = ________
                         nextvalues = next_value
                     else:
-                        # Indicator for non-terminal states at t+1 (1 if not terminal, 0 if terminal)
-                        nextnonterminal = 1.0 - dones[t + 1]
+                        # HW2 TODO -
+                        # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
+                        # 1 if not terminal, 0 if terminal
+                        nextnonterminal = ________
                         nextvalues = values[t + 1]
 
                     # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
                     # HW2 TODO -
-                    delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
+                    # Complete the calculation for 'delta' using the formula provided above
+                    # Hint: Ensure to effectively nullify the future reward when the next state is terminal (the end of the episode
+                    delta = ________
 
-                    # Computing the GAE advantage at the current timestep using the recursive formula.
+                    # Computing the GAE advantage at the current timestep using this form of recursive formula.
                     # The GAE formula is:
                     #    A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
-                    # Where:
-                    #    δ_t = r_t + γV(s_(t+1)) - V(s_t)
-                    # Here:
-                    #    - δ_t is the TD-error at time t, which is the difference between the expected return and the current value estimate.
+                    # where:
+                    #    - δ_t TD erro is using the same definition as above as δ_t = r_t + γV(s_(t+1)) - V(s_t)
                     #    - A_(t+1)^GAE(γ,λ) is the advantage estimate of the next timestep (which is stored in `lastgaelam`).
                     #    - γ is the discount factor (args.gamma).
                     #    - λ is the hyperparameter that determines the trade-off between bias and variance in the advantage estimate (args.gae_lambda).
-                    advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+                    # HW2 TODO -
+                    # Fill in the blank to complete the computation for the GAE advantage at the current timestep
+                    # Hint: Ensure to effectively nullify the future reward when the next state is terminal (the end of the episode
+                    advantages[t] = lastgaelam = ________
 
                 # Compute returns for each state: return = value + advantage
-                returns = advantages + values
-
-            # # HW2 TODO 1 - Estimate the advantage using Generalized Advantage Estimation (GAE)
-            # """
-            # NOTE:
-            # This section calculates the advantages and returns, which are essential parts of the PPO algorithm.
-            # It uses the Generalized Advantage Estimation (GAE) method to calculate the advantages.
-            # This method combines multiple n-step estimators into a single estimate, reducing variance
-            # and allowing for more stable and efficient training. This block also bootstraps value if not done.
-
-            # GAE combines multiple n-step advantage estimators into a single weighted estimator:
-            #     A_t^GAE(γ,λ) = Σ(γλ)^i δ_(t+i)
-
-            # where:
-            # δ_t - The temporal difference error formally defined as δ_t = r_t + γV(s_(t+1)) - V(s_t)
-            # γ - Discount factor which determines the weight of future rewards
-            # λ - A hyperparameter in [0,1] balancing bias and variance in the advantage estimation
-
-            # References:
-            # High-Dimensional Continuous Control Using Generalized Advantage Estimation - John Schulman et al.
-            # """
-            # with torch.no_grad():
-            #     # Get the value function estimate for the next observation (V(s_(t+1)))
-            #     next_value = agent.get_value(next_obs).reshape(1, -1)
-
-            #     # Initializing a tensor to store the computed advantages at each timestep
-            #     advantages = torch.zeros_like(rewards).to(device)
-
-            #     # Initialize variable to recursively compute the GAE advantage. Represents Σ(γλ)^i δ_{t+i} for previous timestep
-            #     lastgaelam = 0
-            # with torch.no_grad():
-            #     # Get the value function estimate for the next observation (V(s_(t+1)))
-            #     next_value = agent.get_value(next_obs).reshape(1, -1)
-
-            #     # Initializing a tensor to store the computed advantages at each timestep
-            #     advantages = torch.zeros_like(rewards).to(device)
-
-            #     # Initialize variable to recursively compute the GAE advantage. Represents Σ(γλ)^i δ_{t+i} for previous timestep
-            #     lastgaelam = 0
-
-            #     # Looping through each timestep in reverse to calculate the GAE advantage using the recursive formula
-            #     for t in reversed(range(args.num_steps)):
-            #         if t == args.num_steps - 1:
-            #             # HW2 TODO -
-            #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
-            #             nextnonterminal = ________
-            #             nextvalues = next_value
-            #         else:
-            #             # HW2 TODO -
-            #             # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
-            #             nextnonterminal = ________
-            #             nextvalues = values[t + 1]
-
-            #         # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
-            #         # HW2 TODO -
-            #         # Complete the calculation for 'delta' using the formula provided above
-            #         delta = ________
-
-            #         # Computing the GAE advantage at the current timestep using the recursive formula.
-            #         # The GAE formula is:
-            #         #    A_t^GAE(γ,λ) = δ_t + γλ * A_(t+1)^GAE(γ,λ)
-            #         # Where:
-            #         #    δ_t = r_t + γV(s_(t+1)) - V(s_t)
-            #         # Here:
-            #         #    - δ_t is the TD-error at time t, which is the difference between the expected return and the current value estimate.
-            #         #    - A_(t+1)^GAE(γ,λ) is the advantage estimate of the next timestep (which is stored in `lastgaelam`).
-            #         #    - γ is the discount factor (args.gamma).
-            #         #    - λ is the hyperparameter that determines the trade-off between bias and variance in the advantage estimate (args.gae_lambda).
-            #         # HW2 TODO -
-            #         # Fill in the blank to complete the computation for the GAE advantage at the current timestep
-            #         advantages[t] = lastgaelam = ________
-
-            #     # Compute returns for each state: return = value + advantage
-            #     # HW2 TODO -
-            #     # Complete the calculation for 'returns' using the relationship between advantage and value
-            #     returns = ________
+                # HW2 TODO -
+                # Complete the calculation for 'returns' using the relationship between advantage and value
+                returns = ________
 
             # Flatten the batch to fit the neural network's input dimensions
             # NOTE: This part is reshaping the tensor structure for ease of processing

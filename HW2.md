@@ -59,6 +59,11 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 - Please change the `name` in [submission_config.json](submission/submission_config.json) to your name in CamelCase
 - Please tag your codebase with new release v2.1 
 
+  Git tagging command:
+  ```sheel
+  git tag -a v2.1 -m "Baseline 2.1"
+  ```
+
 ---
 ## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
 First, check out the CleanRL PPO implementation and its configuration in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py). You can do this by running the following command with the `--debug-mode True` flag.
