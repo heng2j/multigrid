@@ -9,7 +9,7 @@ import glob
 ALLOWED_FUNCTIONS_IN_CLASS = {
     "CompetativeRedBlueDoorEnvV3": ["ctce_step", "dtde_step", "_handle_steps"],
 }
-ALLOWED_CLASSES = ["CompetativeRedBlueDoorEnvV3",
+ALLOWED_CLASSES = ["CompetativeRedBlueDoorEnvV2",
 ]
 
 
@@ -63,12 +63,12 @@ def test_only_exception_files_modified():
     locked_files = all_files - EXCEPTION_FILES
 
 
-    # Check if the tag 'v1.1' exists
+    # Check if the tag 'v2.1' exists
     list_tags_result = subprocess.run(["git", "tag"], capture_output=True, text=True)
     tags = list_tags_result.stdout.splitlines()
     
-    if "v1.1" in tags:
-        base_commit = "v1.1"
+    if "v2.1" in tags:
+        base_commit = "v2.1"
     else:
         # If the tag doesn't exist, means it is in Github Classroom find the oldest (initial) commit hash
         oldest_commit_result = subprocess.run(

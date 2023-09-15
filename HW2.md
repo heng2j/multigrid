@@ -57,7 +57,7 @@ If you're debugging, you might want to use VSCode's debugger. If you're running 
 
 ## Task 0 - Own Your Assignment By Configuring Submission Settings
 - Please change the `name` in [submission_config.json](submission/submission_config.json) to your name in CamelCase
-- Please tag your codebase with new release v1.1 
+- Please tag your codebase with new release v2.1 
 
 ---
 ## Task 1 - Familiarize Yourself with the ClearnRL PPO Implementation and Training Parameters for Deep RL Learning Loop
@@ -119,7 +119,7 @@ In this task, you will delve into the specifics of the vectorized training archi
 
 - **Learning Phase**: In this phase, fundamentally, the agent learns from the data collected during the rollout phase. This data, with a length of NM, includes 'next_obs' and 'done'.
 
-Utilizing your baseline codebase tagged `v1.1`, please pinpoint the `Rollout Phase` and the `Learning Phase` within the codebase, indicating specific line numbers. 
+Utilizing your baseline codebase tagged `v2.1`, please pinpoint the `Rollout Phase` and the `Learning Phase` within the codebase, indicating specific line numbers. 
 
 * For instance, the lines [189-211 in CleanRL ppo.py](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L189-L211) represent the Rollout Phase in their PPO implementation.  
 
