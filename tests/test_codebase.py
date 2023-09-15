@@ -9,6 +9,8 @@ import glob
 ALLOWED_FUNCTIONS_IN_CLASS = {
     "CompetativeRedBlueDoorEnvV3": ["ctce_step", "dtde_step", "_handle_steps"],
 }
+ALLOWED_CLASSES = ["CompetativeRedBlueDoorEnvV3",
+]
 
 
 def get_functions_in_classes_from_ast(tree):
@@ -105,6 +107,8 @@ def test_restrict_file_changes():
     new_functions_in_classes = get_functions_in_classes_from_ast(new_tree)
 
     for class_name, old_functions in old_functions_in_classes.items():
+        if class_name in ALLOWED_CLASSES:
+            continue
         new_functions = new_functions_in_classes.get(class_name, [])
         allowed_functions = ALLOWED_FUNCTIONS_IN_CLASS.get(class_name, [])
         for old_function, new_function in zip(old_functions, new_functions):

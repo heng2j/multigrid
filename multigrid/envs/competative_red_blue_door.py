@@ -429,7 +429,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # FIXME - Mimic communiations
+                    # Mimic communiations
                     agent.mission = Mission("Go open the door with the key")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -441,21 +441,13 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-                ball_carrying_discount_factor = (
-                    self.reward_schemes.get(agent.name, {})
-                    .get("dense_reward_discount_factor", {})
-                    .get("ball_carrying_discount_factor", agent.carrying.discount_factor)
-                )
                 reward[agent_index] += (
-                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * ball_carrying_discount_factor
-                )  # 0.5 * agent.carrying.discount_factor
-                ball_carrying_discount_factor *= ball_carrying_discount_factor
-                self.reward_schemes[agent.name]["dense_reward_discount_factor"].setdefault(
-                    "ball_carrying_discount_factor", ball_carrying_discount_factor
-                )
+                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
+                )  
+                agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # FIXME - Mimic communiations
+                    # Mimic communiations
                     agent.mission = Mission("Go move away the ball")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -470,8 +462,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
 
             else:
                 # Invalid pickup action
-                # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]  # OG  0.2
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]  
 
     def step(self, actions):
         """
@@ -681,8 +672,8 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
     Registered Configurations
     *************************
 
-    * ``MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single``
-    * ``MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single-with-Obsticle``
+    * ``MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single``
+    * ``MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle``
 
     Please checkout __init__.py in multigrid.envs for more registerd environments
     """
@@ -963,7 +954,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # FIXME - Mimic communiations
+                    # Mimic communiations
                     agent.mission = Mission("Go open the door with the key")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -975,15 +966,13 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-
-
                 reward[agent_index] += (
                     self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
-                )  # 0.5 * agent.carrying.discount_factor
+                )  
                 agent.carrying.discount_factor *= agent.carrying.discount_factor
 
                 if self.training_scheme == "DTDE" or "CTDE":
-                    # FIXME - Mimic communiations
+                    # Mimic communiations
                     agent.mission = Mission("Go move away the ball")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -998,8 +987,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
             else:
                 # Invalid pickup action
-                # FIXME - Your agent can perform this bad action in every time step. You should reset this value in proportion to the total horizon and the ultimate goal oriented reward
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]  # OG  0.2
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"] 
 
     def step(self, actions):
         """
@@ -1184,56 +1172,6 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
 
         return img
 
-    # def get_full_render(self, highlight: bool, tile_size: int):
-    #     """
-    #     Render a non-partial observation for visualization.
-    #     """
-    #     # Compute agent visibility masks
-    #     obs_shape = self.agents[0].observation_space.shape[:-1]
-    #     vis_masks = np.zeros((self.num_agents, *obs_shape), dtype=bool)
-    #     agent_obs = self.gen_obs()
-    #     vis_masks[0] = agent_obs[0]["image"][..., 0] != Type.unseen.to_index()
-
-    #     # for i, agent_obs in self.gen_obs().items():
-
-    #     # Mask of which cells to highlight
-    #     highlight_mask = np.zeros((self.width, self.height), dtype=bool)
-
-    #     for agent in self.agents:
-    #         # Compute the world coordinates of the bottom-left corner
-    #         # of the agent's view area
-    #         f_vec = agent.state.dir.to_vec()
-    #         r_vec = np.array((-f_vec[1], f_vec[0]))
-    #         top_left = agent.state.pos + f_vec * (agent.view_size - 1) - r_vec * (agent.view_size // 2)
-
-    #         # For each cell in the visibility mask
-    #         for vis_j in range(0, agent.view_size):
-    #             for vis_i in range(0, agent.view_size):
-    #                 # If this cell is not visible, don't highlight it
-    #                 if not vis_masks[agent.index][vis_i, vis_j]:
-    #                     continue
-
-    #                 # Compute the world coordinates of this cell
-    #                 abs_i, abs_j = top_left - (f_vec * vis_j) + (r_vec * vis_i)
-
-    #                 if abs_i < 0 or abs_i >= self.width:
-    #                     continue
-    #                 if abs_j < 0 or abs_j >= self.height:
-    #                     continue
-
-    #                 # Mark this cell to be highlighted
-    #                 highlight_mask[abs_i, abs_j] = True
-
-    #     # Render the whole grid
-    #     img = self.grid.render(
-    #         tile_size,
-    #         agents=self.agents,
-    #         highlight_mask=highlight_mask if highlight else None,
-    #     )
-
-    #     return img
-
-
-
-    def reward_scheme(self):
+    def process_reward_schemes(self):
+        # NOTE future todo - For scaling reward_schemes
         ...

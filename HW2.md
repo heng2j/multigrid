@@ -219,7 +219,24 @@ Additionally, consider tweaking the following generic Deep RL hyperparameters:
 - As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/): 
   - The significance of Value Function Loss Clipping is debatable. Engstrom, Ilyas, et al., (2020) didn't find evidence supporting its performance boost. In contrast, Andrychowicz, et al. (2021) inferred it might even hurt overall performance.
   - For Early Stopping, consider setting the target kl to `0.01`, as demonstrated in [OpenAI's PPO PyTorch Implementation](https://spinningup.openai.com/en/latest/algorithms/ppo.html#documentation-pytorch-version). 
+  - `CompetativeRedBlueDoorEnvV2` is redundent on purpose so that you can modify it with the Deep RL knowledge you have learned so far to solve the `MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle` scenario. 
 
+
+---
+## Extra Challenge #1: Mastering a Scenario with Sparse Learning Signals and Lower Complexity
+
+Are you interested in challenging yourself further? Try to solve the scenario `MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single`. Intriguingly, the default agent configuration can solve the scenario with obstacle easily, but falters when there are none. 
+
+
+See if you can solve the `MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single`. Supprisingly, the default agent config can solve the scenario with obsticles, but not the scenario without. One possible explanation could be the close proximity of the obstacle to the door. Coupled with the annealing `ball_pickup_dense_reward`, these additional observations might act as additional learning signal, helping the agent overcome partial observability challenges and identify the sparse goal: opening the door using the key. But is this theory grounded in reality?
+
+We invite you to investigate this by addressing the same questions outlined in Task 3. Share your findings and discoveries from this challenge in your `HW2_Answer.md` file.
+
+
+**Tips**:
+- Be on the lookout for potential bugs lurking within the training code or the environment. Andy Jones' insightful piece, [Debugging RL, Without the Agonizing Pain](https://andyljones.com/posts/rl-debugging.html), can be a valuable resource in debugging the environment.
+- The `CompetitiveRedBlueDoorEnvV2` has been intentionally designed to be modifiable, and is not monitored by the CI/CD pipeline, providing you with the freedom to apply the deep RL concepts, you've learned so far to successfully navigate the `MultiGrid-CompetitiveRedBlueDoor-v2-DTDE-Red-Single` scenario.
+- Similarly, the `CompetitiveRedBlueDoorWrapperV2` was created to allow for customization, enabling you to alter the raw observations received from the unwrapped upstream environment. This grants you the flexibility to define your very own observation and action spaces.
 
 ---
 
@@ -338,7 +355,7 @@ python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-
 
 
 ---
-## Extra Credit: Exploring Different RLLib Algorithms
+## Extra Challenge #2: Exploring Different RLLib Algorithms
 Are you interested in challenging yourself further? See if you can solve the same scenario using alternative [Deep RL Algorithms](https://docs.ray.io/en/latest/rllib/rllib-algorithms.html#available-algorithms-overview) provided by RLLib.
 
 To experiment with different algorithms, adjust the `--algo` flag to specify an alternate RLlib-registered algorithm.
