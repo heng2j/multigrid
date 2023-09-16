@@ -22,8 +22,8 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install swig
-      run: pip install swig
+    - name: Install SWIG
+      run: sudo apt-get update && sudo apt-get install -y swig
 
     - name: Install current package
       run: pip install .
