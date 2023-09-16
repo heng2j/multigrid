@@ -81,6 +81,7 @@ def test_evaluation():
             "our_agent_ids": [0, 1],
             "render_mode": "rgb_array",
             "save_dir": SAVE_DIR,
+            "policies_to_eval": ['red_0']
         }
 
         args = argparse.Namespace(**params)
