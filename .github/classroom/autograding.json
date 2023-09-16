@@ -22,7 +22,7 @@
     },
     {
       "name": "Test HW2 Completion",
-      "setup": "sudo -H pip3 install -e . && sudo -H pip3 install swig && sudo -H pip3 install -r requirements_github_actions.txt",
+      "setup": "sudo -H pip3 install -e . && sudo -H pip3 install swig && sudo -H pip3 install -r requirements_colab.txt",
       "run": "pytest tests/test_for_completion_hw2.py",
       "input": "",
       "output": "",
