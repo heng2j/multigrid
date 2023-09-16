@@ -15,6 +15,7 @@ Note: This script is expected to have restricted changes.
 import argparse
 import subprocess
 import os
+import sys
 import random
 import time
 from distutils.util import strtobool
@@ -62,7 +63,7 @@ TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head
 CHECKPOINT_FREQUENCY = 50
 
 
-def parse_args():
+def parse_args(args=None):
     """
     Parses command-line arguments for the PPO training script.
 
@@ -129,7 +130,8 @@ def parse_args():
     parser.add_argument(
         "--debug-mode", type=bool, default=False, help="Boolean value to set to use debug mode for debugging"
     )
-    args = parser.parse_args()
+
+    args = parser.parse_args(args if args is not None else sys.argv[1:])
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
     # fmt: on
