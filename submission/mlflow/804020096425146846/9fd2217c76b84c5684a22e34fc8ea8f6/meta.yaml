@@ -1,0 +1,16 @@
+artifact_uri: /Users/zla0368/Documents/RL/RL_Class/code/test_hw/week-2-build-your-own-ppo-heng4str/submission/mlflow/804020096425146846/9fd2217c76b84c5684a22e34fc8ea8f6/artifacts
+deleted_time: 1694894113862
+end_time: null
+entry_point_name: ''
+experiment_id: '804020096425146846'
+lifecycle_stage: deleted
+run_id: 9fd2217c76b84c5684a22e34fc8ea8f6
+run_name: PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_819b8_00000
+run_uuid: 9fd2217c76b84c5684a22e34fc8ea8f6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1694891798056
+status: 1
+tags: []
+user_id: unknown

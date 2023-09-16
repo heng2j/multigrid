@@ -170,6 +170,30 @@ def algorithm_config(
 
     env_config = gym_envs_registry[env].kwargs
 
+
+    # ====== Extract PG and PPO specific configurations from kwargs ===== #
+    # PG-specific parameters used in RLlib:
+    # https://github.com/ray-project/ray/blob/master/rllib/algorithms/pg/pg.py#L66-L95
+    # e.g. 
+    # gamma=0.9,
+    pg_config = kwargs.get("algorithm_training_config", {}).get("PG_params", {})
+
+    # PPO-specific parameters used in RLlib:
+    # https://github.com/ray-project/ray/blob/master/rllib/algorithms/ppo/ppo.py#L60-L126
+    # e.g. 
+    # lambda_=1.0,
+    # kl_coeff=0.2,
+    # kl_target=0.01,
+    # clip_param=0.3,
+    # grad_clip=None,
+    # vf_clip_param = 10.0,
+    # vf_loss_coeff=0.5,            
+    # entropy_coeff=0.001,
+    # sgd_minibatch_size=128,
+    # num_sgd_iter=30,
+    ppo_config = kwargs.get("algorithm_training_config", {}).get("PPO_params", {})
+
+
     return (
         get_trainable_cls(algo)
         .get_default_config()
@@ -191,6 +215,8 @@ def algorithm_config(
                 custom_model_config={"teams": env_config["teams"], "training_scheme": env_config["training_scheme"]},
             ),
             lr=(lr or NotProvided),
+            **pg_config,
+            **ppo_config
         )
     )
 

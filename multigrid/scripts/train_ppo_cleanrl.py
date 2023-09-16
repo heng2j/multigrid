@@ -96,35 +96,35 @@ def parse_args():
         help="the id of the environment")
     parser.add_argument("--total-timesteps", type=int, default=10000000,
         help="total timesteps of the experiments")
-    parser.add_argument("--learning-rate", type=float, default=2.5e-4,
+    parser.add_argument("--learning-rate", type=float, default=3e-4,
         help="the learning rate of the optimizer")
-    parser.add_argument("--num-envs", type=int, default=4,
+    parser.add_argument("--num-envs", type=int, default=8,
         help="the number of parallel game environments")
     parser.add_argument("--num-steps", type=int, default=128,
         help="the number of steps to run in each environment per policy rollout")
     parser.add_argument("--anneal-lr", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggle learning rate annealing for policy and value networks")
-    parser.add_argument("--gamma", type=float, default=0.99,
+    parser.add_argument("--gamma", type=float, default=0.9,
         help="the discount factor gamma")
-    parser.add_argument("--gae-lambda", type=float, default=0.95,
+    parser.add_argument("--gae-lambda", type=float, default=1.0,
         help="the lambda for the general advantage estimation")
     parser.add_argument("--num-minibatches", type=int, default=4,
         help="the number of mini-batches")
-    parser.add_argument("--update-epochs", type=int, default=4,
+    parser.add_argument("--update-epochs", type=int, default=10,
         help="the K epochs to update the policy")
     parser.add_argument("--norm-adv", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggles advantages normalization")
-    parser.add_argument("--clip-coef", type=float, default=0.2,
+    parser.add_argument("--clip-coef", type=float, default=0.1,
         help="the surrogate clipping coefficient")
     parser.add_argument("--clip-vloss", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="Toggles whether or not to use a clipped loss for the value function, as per the paper.")
-    parser.add_argument("--ent-coef", type=float, default=0.01, 
+    parser.add_argument("--ent-coef", type=float, default=0.01, #0.01
         help="coefficient of the entropy")
     parser.add_argument("--vf-coef", type=float, default=0.5,
         help="coefficient of the value function")
     parser.add_argument("--max-grad-norm", type=float, default=0.5,
         help="the maximum norm for the gradient clipping")
-    parser.add_argument("--target-kl", type=float, default=None, 
+    parser.add_argument("--target-kl", type=float, default=0.015, # None
         help="the target KL divergence threshold")
     parser.add_argument(
         "--debug-mode", type=bool, default=False, help="Boolean value to set to use debug mode for debugging"
@@ -562,20 +562,20 @@ def main(args):
                         # HW2 TODO - 
                         # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
                         # 1 if not terminal, 0 if terminal
-                        nextnonterminal = ________
+                        nextnonterminal = 1.0 - next_done
                         nextvalues = next_value
                     else:
                         # HW2 TODO -
                         # Determine the value of 'nextnonterminal' and 'nextvalues' for this case
                         # 1 if not terminal, 0 if terminal
-                        nextnonterminal = ________
+                        nextnonterminal = 1.0 - dones[t + 1]
                         nextvalues = values[t + 1]
 
                     # Compute the TD error: δ_t = r_t + γ V(s_{t+1}) - V(s_t)
                     # HW2 TODO -
                     # Complete the calculation for 'delta' using the formula provided above
                     # Hint: Ensure to effectively nullify the future reward when the next state is terminal (the end of the episode
-                    delta = ________
+                    delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
 
                     # Computing the GAE advantage at the current timestep using this form of recursive formula.
                     # The GAE formula is:
@@ -588,12 +588,12 @@ def main(args):
                     # HW2 TODO -
                     # Fill in the blank to complete the computation for the GAE advantage at the current timestep
                     # Hint: Ensure to effectively nullify the future reward when the next state is terminal (the end of the episode
-                    advantages[t] = lastgaelam = ________
+                    advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
 
                 # Compute returns for each state: return = value + advantage
                 # HW2 TODO -
                 # Complete the calculation for 'returns' using the relationship between advantage and value
-                returns = ________
+                returns = advantages + values
 
             # Flatten the batch to fit the neural network's input dimensions
             # NOTE: This part is reshaping the tensor structure for ease of processing

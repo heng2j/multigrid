@@ -260,7 +260,7 @@ python multigrid/scripts/manual_control.py --env-id MultiGrid-CompetativeRedBlue
 In this death match scenario, your 'Red' agent will play against a pre-trained 'Blue' agent. The objective can be achieved in two ways:
 
   1. Grab the Red key and then unlock the Red door.
-  2. Confront the Blue agent and use the [`toggle`](multigrid/core/actions.py) action, effectively trapping the Blue agent in their locked Blue room.
+  2. Eliminating the Blue agent and use the [`toggle`](multigrid/core/actions.py) action, effectively trapping the Blue agent in their locked Blue room.
 
 > **Note**: The `manual_control.py` script might crash when trying to navigate the scenario manually. This is due to the multi-agent nature of the `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` scenario. Current support doesn't extend to controlling multiple agents with diverse actions.
 
@@ -315,6 +315,7 @@ Here are the PPO-specific parameters in RLLib:
 - **vf_loss_coeff**
 - **entropy_coeff**
 
+> **Note**: [submission/configs/algorithm_training_config.json](submission/configs/algorithm_training_config.json) is where the training script calling the algorithm specific parameters from. Default values of PG and PPO specific parameters are stored in there as baselines for you.
 
 
 **RLlib Agent Training Baseline Thresholds for Your Reference**:
@@ -382,7 +383,7 @@ To experiment with different algorithms, adjust the `--algo` flag to specify an 
     - For videos, save them to [submission/cleanRL/videos](submission/cleanRL/videos). Please be mindful regarding video size and retain only the most representative ones. Rename the videos as needed for clarity.
 
 2. **RLlib Agents**: 
-    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results).
+    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results). And also your customized [submission/configs](submission/configs).
 
 3. **RLlib Agents Evaluation Reports**: 
     - Commit and push relevant RLlib agent evaluation results: `<my_experiment>_eval_summary.csv`, `<my_experiment>_episodes_data.csv`, and `<my_experiment>.gif` to [submission/evaluation_reports](submission/evaluation_reports).

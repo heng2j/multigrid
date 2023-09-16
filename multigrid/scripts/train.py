@@ -53,6 +53,15 @@ SUBMITTER_NAME = submission_config["name"]
 
 TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head.commit}
 
+ALGORITHM_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/configs/algorithm_training_config.json"), key=os.path.getmtime
+)[-1]
+
+with open(ALGORITHM_CONFIG_FILE, "r") as file:
+   algorithm_training_config_data = file.read()
+
+algorithm_training_config = json.loads(algorithm_training_config_data)
+
 
 # Initialize the CLI reporter for Ray
 reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
@@ -178,11 +187,19 @@ if __name__ == "__main__":
         default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')",
     )
+    # Future todo - have an more user friendly implementation of config, perhaps using ymal files
+    parser.add_argument(
+        "--algorithm-training-config",
+        type=json.loads,
+        default=algorithm_training_config, 
+        help="Deep RL Algorithm Specific config dict, given as a JSON string (e.g. '{\"PG_params\": { \"lr\" : 0.001},  \"PPO_params\": { \"entropy_coeff\" : 0.001}}')",
+
+    )
     parser.add_argument(
         "--seed", type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible"
     )
-    parser.add_argument("--num-workers", type=int, default=60, help="Number of rollout workers.")
-    parser.add_argument("--num-gpus", type=int, default=1, help="Number of GPUs to train on.")
+    parser.add_argument("--num-workers", type=int, default=10, help="Number of rollout workers.")
+    parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
