@@ -1,7 +1,7 @@
 
 
 ---
-# Assignment 2: Build Your Own PPO
+# Assignment 2: Implement, Tune and Evaluate your Policy Gradient and Actor-Critic Algorithms
 
 ## Due Date
 - **Due Date:** Thursday, September 21, 6:00 PM
@@ -22,14 +22,14 @@ This assignment provides a hands-on introduction to the core components of Polic
 - Experiment with various PG and AC algorithms within RLLib in a 1v1, 🤖 🆚 🤖 scenario.
   - Compare how different algorithms and their configurations perform against a pretrained agent.
 
-The starter code for this assignment can be found [here](https://classroom.github.com/classrooms/123430433-rl2rl-deeprl/assignments/week-1-intro-to-deep-rl-and-agent-training-environments).
+The starter code for this assignment can be found [here](https://classroom.github.com/a/flIqv1Tb).
 
 
 ## Setup Instructions
 Choose to run the code on either Google Colab or your local machine:
 - **Local Setup**: For local execution, install the necessary Python packages by following the [INSTALLATION.md](INSTALLATION.md) guidelines.
 - **Google Colab**: To run on Colab, the notebook will handle dependency installations. Try it by clicking below:  
-  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](____________)
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stresearch/STR_DeepRL/blob/hw2/notebooks/homework2.ipynb)
 
 ## Recommended Steps to Get Familiar with the new Code
 We recommend reading the files in the following order. For some files, you will need to fill in the sections labeled `HW2 TODO` or `HW2 FIXME`.
@@ -260,7 +260,7 @@ python multigrid/scripts/manual_control.py --env-id MultiGrid-CompetativeRedBlue
 In this death match scenario, your 'Red' agent will play against a pre-trained 'Blue' agent. The objective can be achieved in two ways:
 
   1. Grab the Red key and then unlock the Red door.
-  2. Confront the Blue agent and use the [`toggle`](multigrid/core/actions.py) action, effectively trapping the Blue agent in their locked Blue room.
+  2. Eliminating the Blue agent and use the [`toggle`](multigrid/core/actions.py) action, effectively trapping the Blue agent in their locked Blue room.
 
 > **Note**: The `manual_control.py` script might crash when trying to navigate the scenario manually. This is due to the multi-agent nature of the `MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1` scenario. Current support doesn't extend to controlling multiple agents with diverse actions.
 
@@ -315,6 +315,7 @@ Here are the PPO-specific parameters in RLLib:
 - **vf_loss_coeff**
 - **entropy_coeff**
 
+> **Note**: [submission/configs/algorithm_training_config.json](submission/configs/algorithm_training_config.json) is where the training script calling the algorithm specific parameters from. Default values of PG and PPO specific parameters are stored in there as baselines for you.
 
 
 **RLlib Agent Training Baseline Thresholds for Your Reference**:
@@ -382,7 +383,7 @@ To experiment with different algorithms, adjust the `--algo` flag to specify an 
     - For videos, save them to [submission/cleanRL/videos](submission/cleanRL/videos). Please be mindful regarding video size and retain only the most representative ones. Rename the videos as needed for clarity.
 
 2. **RLlib Agents**: 
-    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results).
+    - Commit and push your best-performing RLlib agents and checkpoints, ensuring they satisfy the minimum thresholds described in the Task, to [submission/ray_results](submission/ray_results). And also your customized [submission/configs](submission/configs).
 
 3. **RLlib Agents Evaluation Reports**: 
     - Commit and push relevant RLlib agent evaluation results: `<my_experiment>_eval_summary.csv`, `<my_experiment>_episodes_data.csv`, and `<my_experiment>.gif` to [submission/evaluation_reports](submission/evaluation_reports).
@@ -403,7 +404,7 @@ To experiment with different algorithms, adjust the `--algo` flag to specify an 
     
 - Executing [tests/test_evaluation.py](tests/test_evaluation.py) with `pytest` should generate and push the necessary results to [submission/evaluation_reports](submission/evaluation_reports).
 
-- For an exemplar submission that fulfills all the requirements and successfully passing the Autograding Github Actions, please checkout [Example Submission](https://github.com/STRDeepRL/week-1-intro-to-deep-rl-and-agent-training-environments-heng4str).
+- For an exemplar submission that fulfills all the requirements and successfully passing the Autograding Github Actions, please checkout [Example Submission](https://github.com/STRDeepRL/week-2-build-your-own-ppo-heng4str).
 
 - Always place your submissions within the `submission/` directory. If opting for the notebook approach, please maintain your edited `homework2.ipynb` and related documents under `notebooks/`.
 
