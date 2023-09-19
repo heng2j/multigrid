@@ -39,6 +39,7 @@ from ..base import MultiGridEnv
 from ..envs import CONFIGURATIONS
 from ..wrappers import (
     CompetativeRedBlueDoorWrapper,
+    MARLCompetativeRedBlueDoorWrapper,
     FullyObsWrapper,
 )  # OneHotObsWrapper,
 
@@ -107,4 +108,4 @@ def to_rllib_env(env_cls: type[MultiGridEnv], *wrappers: gym.Wrapper, default_co
 
 # Register environments with RLlib
 for name, (env_cls, config) in CONFIGURATIONS.items():
-    register_env(name, to_rllib_env(env_cls, CompetativeRedBlueDoorWrapper, default_config=config))
+    register_env(name, to_rllib_env(env_cls, MARLCompetativeRedBlueDoorWrapper, default_config=config))

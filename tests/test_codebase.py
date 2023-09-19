@@ -40,9 +40,10 @@ def test_only_exception_files_modified():
         "multigrid/utils/training_utilis.py",
         "multigrid/wrappers.py",
         "multigrid/rllib/__init__.py",
+
     ]
 
-    EXCEPTION_FOLDERS = ["submission/**", "notebooks/**"]
+    EXCEPTION_FOLDERS = ["submission/**", "notebooks/**", "multigrid/agents_pool/**",]
 
     for folder in EXCEPTION_FOLDERS:
         globbed_files = glob.glob(folder, recursive=True)

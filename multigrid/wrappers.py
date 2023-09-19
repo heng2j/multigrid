@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-
+import copy
 import numba as nb
 import numpy as np
 from numpy.typing import NDArray as ndarray
@@ -173,6 +173,8 @@ class SingleAgentWrapper(gym.Wrapper):
         return tuple(item for item in result)
 
 
+      
+
 class CompetativeRedBlueDoorWrapper(ObservationWrapper):
     """
     Wrapper to get a one-hot encoding of a partially observable
@@ -220,6 +222,12 @@ class CompetativeRedBlueDoorWrapper(ObservationWrapper):
         # Update agent observation spaces
         dim = sum(self.dim_sizes)
         for agent in self.env.agents:
+
+            # HW3 NOTE: 
+            # Make a deep copy of agent's raw observation_space & action_spcae
+            agent.raw_observation_space = copy.deepcopy(agent.observation_space)
+            agent.raw_action_space = copy.deepcopy(agent.action_space)
+
             # Retrieve the shape of the original "image" observation_space
             view_height, view_width, _ = agent.observation_space["image"].shape
             # Reassign the "image" observation_space for one-hot encoding observations
@@ -440,3 +448,27 @@ class CompetativeRedBlueDoorWrapperV2(ObservationWrapper):
             dim_offset += dim_sizes[d]
 
         return out
+
+
+
+
+class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
+
+    def __init__(self, env: MultiGridEnv):
+        """ """
+        super().__init__(env)
+        self.script_path = __file__
+
+        # HW3 TODO - update obs space & action space from Custom Policy
+        self.reward_schemes
+
+
+        self.agents
+        self.observation_space
+        self.action_space
+        self.training_scheme
+
+
+
+    # def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
+    #     return obs

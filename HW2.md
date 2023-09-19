@@ -179,7 +179,7 @@ python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedB
 
 - **episodic_length**
 - **episodic_return**
-- **policy_updates**
+- **Policy_updates**
 - **entropy**
 - **explained_variance**
 - **value_loss**
@@ -220,7 +220,11 @@ Additionally, consider tweaking the following generic Deep RL hyperparameters:
   ```shell
   tensorboard --logdir submission/cleanRL/runs
   ```
-- Please refer Week2 lecture slide for the definition of the PPO-specific parameters
+- You can filter the plots using the following filters:
+  ```
+  episodic_length|episodic_return|Policy_updates|entropy|explained_variance|value_loss|policy_loss|approx_kl
+  ```
+- Please refer the [Appendix](#appendix) for the definition of the PPO-specific parameters
 - As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/): 
   - The significance of Value Function Loss Clipping is debatable. Engstrom, Ilyas, et al., (2020) didn't find evidence supporting its performance boost. In contrast, Andrychowicz, et al. (2021) inferred it might even hurt overall performance.
   - For Early Stopping, consider setting the target kl to `0.01`, as demonstrated in [OpenAI's PPO PyTorch Implementation](https://spinningup.openai.com/en/latest/algorithms/ppo.html#documentation-pytorch-version). 
@@ -431,7 +435,7 @@ Here are definition of the Training Metrics in CleanRL:
   - **Definition**: The cumulative reward obtained by the agent over a complete episode. It's a discounted sum of rewards received at each time step during an episode.
   - **Relevance**: Higher episodic returns indicate better policy performance, with the agent effectively maximizing its cumulative reward.
 
-- **policy_updates**: 
+- **Policy_updates**: 
   - **Definition**: The number of times the agent's policy has been updated during training. This is usually incremented each time backpropagation is performed to update the policy's parameters.
   - **Relevance**: Keeping track of policy updates can help in analyzing the agent's convergence rate and the effect of each update on overall performance.
 

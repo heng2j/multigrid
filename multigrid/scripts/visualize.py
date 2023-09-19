@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import List, Dict
 from ray.rllib.algorithms import Algorithm
 from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
+from multigrid.agents_pool import SubmissionPolicies
 
 
 def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str) -> None:
@@ -150,13 +151,24 @@ def main_evaluation(args):
         Parsed command line arguments.
     """
     args.env_config.update(render_mode=args.render_mode)
+
+
+    # HW3 TODO - Load Policies
+    eval_policies = []
+    for policy_id in args.policies_to_eval:
+        eval_policy = SubmissionPolicies[policy_id](policy_id)
+        eval_policies.append(eval_policy)
+
     config = algorithm_config(
         **vars(args),
         num_workers=0,
         num_gpus=0,
+        evaluating_policies = eval_policies
     )
     config.explore = False
     config.environment(disable_env_checking=True)
+    # config.rl_module( _enable_rl_module_api=False)
+    # config.training(_enable_learner_api=False)
     algorithm = config.build()
     checkpoint = get_checkpoint_dir(args.load_dir)
 

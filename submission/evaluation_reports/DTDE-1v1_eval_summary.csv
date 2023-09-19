@@ -1,2 +1,2 @@
-red_0,blue_0,door_open_done,eliminated_opponents_done,got_eliminated_done,eliminated_opponent_num,Episode Length,Solved Ratio
-1.0678,0.5877,0.6,0.1,0.1,0.1,42.3,0.9
+blue_0,red_0,door_open_done,eliminated_opponents_done,got_eliminated_done,eliminated_opponent_num,Episode Length,Solved Ratio
+-0.5022,1.4485,0.5,0.5,0.0,0.5,17.0,1.0

@@ -168,7 +168,21 @@ def algorithm_config(
 
     """
 
+    # HW3 TODO - Set up individual env_config and algorithm_training_config
     env_config = gym_envs_registry[env].kwargs
+
+
+    # HW3 TODO - Update Reward Scheme 
+    if policies_to_train:
+        ...
+    elif "eval_policies" in kwargs:
+        for eval_policy in kwargs["eval_policies"]:
+            env_config["reward_schemes"][eval_policy.policy_id] = eval_policy.reward_schemes[eval_policy.policy_id]
+
+
+
+
+
 
 
     # ====== Extract PG and PPO specific configurations from kwargs ===== #
