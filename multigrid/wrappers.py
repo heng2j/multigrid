@@ -470,7 +470,19 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         
         for agent_id in obs:
-            obs[agent_id] = self.policies[agent_id].custom_observations(obs=obs,agent_id=agent_id,wrapper=self)
+            if agent_id in self.policies:
+                obs[agent_id] = self.policies[agent_id].custom_observations(obs=obs,agent_id=agent_id,wrapper=self)
+            else:
+                agent_observations = obs[agent_id]
+                if isinstance(agent_observations, list):
+                    # If it is stacked observations from multiple agents
+                    for observation in agent_observations:
+                        # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
+                        observation["image"] = self.one_hot(observation["image"], self.dim_sizes)
+                else:
+                    # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
+                    agent_observations["image"] = self.one_hot(agent_observations["image"], self.dim_sizes)
+
         return obs
 
 

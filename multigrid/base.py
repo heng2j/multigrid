@@ -186,7 +186,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
-                        policy_name=self.policies[f"{team_name}_{team_idx}"].policy_name,
+                        policy_name=self.policies[f"{team_name}_{team_idx}"].policy_name if  f"{team_name}_{team_idx}" in self.policies else None,
                         mission_space=self.mission_space,
                         view_size=agent_view_size,
                         see_through_walls=see_through_walls,

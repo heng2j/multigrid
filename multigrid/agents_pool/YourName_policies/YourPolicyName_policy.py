@@ -67,7 +67,7 @@ class YourPolicyName_Policy(Policy):
         return agent_observations
 
 
-    # HW3 NOTE - This will be share across all agents in the scene
+    # HW3 NOTE -
     @staticmethod
     def custom_handle_steps( agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, police):
 
