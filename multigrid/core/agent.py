@@ -63,6 +63,7 @@ class Agent:
         team_index: int = 0,
         team_number: int = 0,
         training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
+        policy_name: str = None,
     ):
         """
         Parameters
@@ -78,6 +79,7 @@ class Agent:
         """
         self.index: int = index
         self.name: str = name
+        self.policy_name: str = policy_name
         self.state: AgentState = AgentState()
         self.mission: Mission = None
         self.training_scheme: str = training_scheme

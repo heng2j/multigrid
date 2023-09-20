@@ -18,6 +18,39 @@ from typing import List, Dict
 from ray.rllib.algorithms import Algorithm
 from multigrid.utils.training_utilis import algorithm_config, get_checkpoint_dir
 from multigrid.agents_pool import SubmissionPolicies
+import subprocess
+import git
+import os
+
+# Set the working diretory to the repo root
+REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
+os.chdir(REPO_ROOT)
+
+# Constants
+SUBMISSION_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/submission_config.json"), key=os.path.getmtime
+)[-1]
+
+with open(SUBMISSION_CONFIG_FILE, "r") as file:
+    submission_config_data = file.read()
+
+submission_config = json.loads(submission_config_data)
+
+SUBMITTER_NAME = submission_config["name"]
+
+TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head.commit}
+
+
+EVALUATION_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/configs/evaluation_config.json"), key=os.path.getmtime
+)[-1]
+
+with open(EVALUATION_CONFIG_FILE, "r") as file:
+   evaluation_config_data = file.read()
+
+evaluation_config = json.loads(evaluation_config_data)
+
+
 
 
 def save_frames_to_gif(frames: List[np.ndarray], save_path: Path, filename: str) -> None:
@@ -151,19 +184,21 @@ def main_evaluation(args):
         Parsed command line arguments.
     """
     args.env_config.update(render_mode=args.render_mode)
-
+    team_policies_mapping = args.eval_config["team_policies_mapping"]
 
     # HW3 TODO - Load Policies
-    eval_policies = []
+    evaluating_policies = {}
     for policy_id in args.policies_to_eval:
-        eval_policy = SubmissionPolicies[policy_id](policy_id)
-        eval_policies.append(eval_policy)
+        policy_name = team_policies_mapping[policy_id]
+        eval_policy = SubmissionPolicies[policy_name](policy_id=policy_id, policy_name=policy_name)
+        evaluating_policies[policy_id] = eval_policy
 
     config = algorithm_config(
         **vars(args),
         num_workers=0,
         num_gpus=0,
-        evaluating_policies = eval_policies
+        evaluating_policies = evaluating_policies,
+        team_policies_mapping = team_policies_mapping,
     )
     config.explore = False
     config.environment(disable_env_checking=True)
@@ -218,6 +253,12 @@ if __name__ == "__main__":
         type=json.loads,
         default={},
         help="Environment config dict, given as a JSON string (e.g. '{\"size\": 8}')",
+    )
+    parser.add_argument(
+        "--eval-config",
+        type=json.loads,
+        default=evaluation_config,
+        help="Evaluation config dict, given as a JSON string (e.g. '{\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" }}')",
     )
     parser.add_argument("--num-episodes", type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument("--load-dir", type=str, help="Checkpoint directory for loading pre-trained policies.")

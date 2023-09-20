@@ -1,6 +1,6 @@
-from multigrid.agents_pool.YourName_policies.YourPolicyName_policy import YourNamePolicy
+from multigrid.agents_pool.YourName_policies.YourPolicyName_policy import YourPolicyName_Policy
 
 SubmissionPolicies = {
-    "red_0": YourNamePolicy,
+    "your_policy_name": YourPolicyName_Policy,
 }
 

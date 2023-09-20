@@ -25,10 +25,18 @@ import ray.rllib.algorithms.callbacks as callbacks
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.tune.callback import Callback
 from ray.rllib import BaseEnv, Policy, RolloutWorker
+from ray.rllib.policy.policy import PolicySpec
+from ray.rllib.algorithms.ppo import PPOConfig
 from typing import Dict, Optional, Union
 from ray.rllib.evaluation.episode import Episode
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.rllib.utils.typing import AgentID, EnvType, PolicyID
+
+
+# The new RLModule / Learner API
+from ray.rllib.core.rl_module.rl_module import SingleAgentRLModuleSpec
+from ray.rllib.core.rl_module.marl_module import MultiAgentRLModuleSpec
+from ray.rllib.examples.rl_module.random_rl_module import RandomRLModule
 
 
 def get_checkpoint_dir(search_dir: Path | str | None) -> Path | None:
@@ -170,42 +178,55 @@ def algorithm_config(
 
     # HW3 TODO - Set up individual env_config and algorithm_training_config
     env_config = gym_envs_registry[env].kwargs
-
+    algorithm_training_config = {}
 
     # HW3 TODO - Update Reward Scheme 
     if policies_to_train:
         ...
-    elif "eval_policies" in kwargs:
-        for eval_policy in kwargs["eval_policies"]:
-            env_config["reward_schemes"][eval_policy.policy_id] = eval_policy.reward_schemes[eval_policy.policy_id]
+    elif "evaluating_policies" in kwargs:
+        for policy_id, eval_policy in kwargs["evaluating_policies"].items():
+            env_config["reward_schemes"][policy_id] = eval_policy.reward_schemes[policy_id]
+            algorithm_training_config[policy_id] = eval_policy.algorithm_training_config[policy_id]
 
+    # # HW2 NOTE:
+    # # ====== Extract PG and PPO specific configurations from kwargs ===== #
+    # # PG-specific parameters used in RLlib:
+    # # https://github.com/ray-project/ray/blob/master/rllib/algorithms/pg/pg.py#L66-L95
+    # # e.g. 
+    # # gamma=0.9,
+    # pg_config = kwargs.get("algorithm_training_config", {}).get("PG_params", {})
 
+    # # PPO-specific parameters used in RLlib:
+    # # https://github.com/ray-project/ray/blob/master/rllib/algorithms/ppo/ppo.py#L60-L126
+    # # e.g. 
+    # # lambda_=1.0,
+    # # kl_coeff=0.2,
+    # # kl_target=0.01,
+    # # clip_param=0.3,
+    # # grad_clip=None,
+    # # vf_clip_param = 10.0,
+    # # vf_loss_coeff=0.5,            
+    # # entropy_coeff=0.001,
+    # # sgd_minibatch_size=128,
+    # # num_sgd_iter=30,
+    # ppo_config = kwargs.get("algorithm_training_config", {}).get("PPO_params", {})
 
-
-
-
-
-    # ====== Extract PG and PPO specific configurations from kwargs ===== #
-    # PG-specific parameters used in RLlib:
-    # https://github.com/ray-project/ray/blob/master/rllib/algorithms/pg/pg.py#L66-L95
-    # e.g. 
-    # gamma=0.9,
-    pg_config = kwargs.get("algorithm_training_config", {}).get("PG_params", {})
-
-    # PPO-specific parameters used in RLlib:
-    # https://github.com/ray-project/ray/blob/master/rllib/algorithms/ppo/ppo.py#L60-L126
-    # e.g. 
-    # lambda_=1.0,
-    # kl_coeff=0.2,
-    # kl_target=0.01,
-    # clip_param=0.3,
-    # grad_clip=None,
-    # vf_clip_param = 10.0,
-    # vf_loss_coeff=0.5,            
-    # entropy_coeff=0.001,
-    # sgd_minibatch_size=128,
-    # num_sgd_iter=30,
-    ppo_config = kwargs.get("algorithm_training_config", {}).get("PPO_params", {})
+    # HW3 NOTE: 
+    policies = {}
+    for team_name, team_num in env_config["teams"].items():
+        if env_config["training_scheme"] == "CTCE":
+                policies=[team_name] = PolicySpec() # FIXME
+        else:
+            for i in range(team_num):
+                if f"{team_name}_{i}" in list(algorithm_training_config.keys()):
+                    policies[f"{team_name}_{i}"] =  PolicySpec(
+                                        # policy_class=get_trainable_cls(algorithm_training_config[f"{team_name}_{i}"]["algo"]),
+                                        config=algorithm_training_config[f"{team_name}_{i}"]["algo_config_class"].overrides(**algorithm_training_config[f"{team_name}_{i}"]["algo_config"]),
+                                        # observation_space=...,
+                                        # action_space=...,
+                                    )
+                else:
+                    policies[f"{team_name}_{i}"] = PolicySpec()
 
 
     return (
@@ -216,9 +237,7 @@ def algorithm_config(
         .rollouts(num_rollout_workers=num_workers)
         .resources(num_gpus=num_gpus)
         .multi_agent(
-            policies={team_name for team_name in list(env_config["teams"].keys())}
-            if env_config["training_scheme"] == "CTCE"
-            else {f"{team_name}_{i}" for team_name, team_num in env_config["teams"].items() for i in range(team_num)},
+            policies=policies,
             policy_mapping_fn=lambda agent_id, *args, **kwargs: agent_id,
             policies_to_train=policies_to_train,
         )
@@ -229,8 +248,6 @@ def algorithm_config(
                 custom_model_config={"teams": env_config["teams"], "training_scheme": env_config["training_scheme"]},
             ),
             lr=(lr or NotProvided),
-            **pg_config,
-            **ppo_config
         )
     )
 
