@@ -1,9 +1,10 @@
 import numpy as np
 from multigrid.utils.policy import Policy
+from multigrid.base import MultiGridEnv, AgentID, ObsType
 from multigrid.envs import CONFIGURATIONS
 from ray.rllib.utils.from_config import NotProvided
 from ray.rllib.algorithms.ppo import PPOConfig
-
+from gymnasium.core import ObservationWrapper
 
 class YourPolicyName_Policy(Policy):
     """ 
@@ -48,6 +49,21 @@ class YourPolicyName_Policy(Policy):
                     }
             }
         }
+
+    @staticmethod
+    def custom_observations(obs: dict[AgentID, ObsType], agent_id: str, wrapper: ObservationWrapper):
+
+        agent_observations = obs[agent_id]
+        if isinstance(agent_observations, list):
+            # If it is stacked observations from multiple agents
+            for observation in agent_observations:
+                # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
+                observation["image"] = wrapper.one_hot(observation["image"], wrapper.dim_sizes)
+        else:
+            # update the given ["image"] observation with self.one_hot() with the updated self.dim_sizes
+            agent_observations["image"] = wrapper.one_hot(agent_observations["image"], wrapper.dim_sizes)
+
+        return agent_observations
 
         
 

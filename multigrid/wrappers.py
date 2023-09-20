@@ -461,15 +461,16 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
 
         # HW3 TODO - update obs space & action space from Custom Policy
         self.reward_schemes
-
-
         self.agents
         self.observation_space
         self.action_space
         self.training_scheme
         self.policies
 
+    def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
+        
+        for agent_id in obs:
+            obs[agent_id] = self.policies[agent_id].custom_observations(obs=obs,agent_id=agent_id,wrapper=self)
+        return obs
 
 
-    # def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
-    #     return obs
