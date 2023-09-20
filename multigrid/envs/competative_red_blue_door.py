@@ -5,10 +5,11 @@ from __future__ import annotations
 from typing import Any, SupportsFloat
 from multigrid.base import MultiGridEnv
 from multigrid.core import Action, Grid, MissionSpace, Type
-from multigrid.core.constants import Color
-from multigrid.core.world_object import Door, Key, Ball
+from multigrid.core.constants import Color, Direction
+from multigrid.core.world_object import Door, Key, Ball, Wall
 from multigrid.core.agent import Agent, Mission
 from multigrid.utils.obs import gen_obs_grid_encoding
+
 
 import numpy as np
 from functools import cached_property
@@ -235,6 +236,38 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 key_position = key_positions[key_color]
                 self.place_obj(Key(color=key_color), top=key_position, size=(1, 1))
 
+    def _get_all_objects_in_view(self, agent):
+        """
+        Get all objects in the agent's field of view.
+        """
+        x, y = agent.pos
+        view_size = agent.view_size
+        observed_objects = {}
+
+        if agent.dir == Direction.right:
+            topX, topY, botX, botY = x, y - view_size // 2, x + view_size - 1, y + view_size // 2
+
+        elif agent.dir == Direction.down:
+            topX, topY, botX, botY = x - view_size // 2, y, x + view_size // 2, y + view_size - 1
+
+        elif agent.dir == Direction.left:
+            topX, topY, botX, botY = x - view_size + 1, y - view_size // 2, x, y + view_size // 2
+
+        elif agent.dir == Direction.up:
+            topX, topY, botX, botY = x - view_size // 2, y - view_size + 1, x + view_size // 2, y
+
+        for i in range(topX, botX + 1):
+            for j in range(topY, botY + 1):
+                # Ensure the indices are within grid bounds
+                if i >= 0 and i < self.grid.width and j >= 0 and j < self.grid.height:
+                    obj = self.grid.get(i, j)
+                    if obj is not None and not isinstance(obj, Wall):
+                        observed_objects[(i,j)] = obj
+
+        return observed_objects
+
+
+
     def gen_obs(self) -> dict[AgentID, ObsType]:
         """
         Generate observations for each agent (partially observable, low-res encoding).
@@ -293,11 +326,15 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             for idx, action in enumerate(agent_actions):
                 agent_index = self.team_index_dict[team][idx]
                 agent = self.agents[agent_index]
+                # Run the default self._handle_steps first
+                self._handle_steps(agent, agent_index, action, reward, terminated, info)
                 # HW3 NOTE - Using custom_handle_steps in attached policies
-                if agent.name in self.policies:
-                    self.policies[agent.name].custom_handle_steps(agent, agent_index, action, reward, terminated, info, self)
-                else:
-                    self._handle_steps(agent, agent_index, action, reward, terminated, info)
+                if (agent.name in self.policies) and not agent.terminated:
+                    agent_observed_objects = self._get_all_objects_in_view(agent=agent)
+                    agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
+                    agent_reward, agent_terminated, agent_info = self.policies[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies[agent.name])
+                    reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
+
 
         # Reformat reward, terminated, truncated and info
         team_rewards = {}
@@ -349,11 +386,15 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             agent_index = self.team_index_dict[team_name][int(agent_team_idx)]
             agent = self.agents[agent_index]
 
+            # Run the default self._handle_steps first
+            self._handle_steps(agent, agent_index, action, reward, terminated, info)
             # HW3 NOTE - Using custom_handle_steps in attached policies
-            if agent.name in self.policies:
-                self.policies[agent.name].custom_handle_steps(agent, agent_index, action, reward, terminated, info, self)
-            else:
-                self._handle_steps(agent, agent_index, action, reward, terminated, info)
+            if (agent.name in self.policies) and not agent.terminated:
+                agent_observed_objects = self._get_all_objects_in_view(agent=agent)
+                agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
+                agent_reward, agent_terminated, agent_info = self.policies[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies[agent.name])
+                reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
+
 
         # Reformat reward, terminated, truncated and info
         reformated_reward = {}
@@ -395,8 +436,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                                 "door_open_done"
                             ] = True
 
-                    # self.info["episode_done"].get("l", self.step_count)
-
             # If fwd_obj is an agent
             elif isinstance(fwd_obj, Agent) and self.death_match:
                 # Terminate the other agent and set it's position inside the room
@@ -432,12 +471,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.carrying.is_available)
                 and (agent.color == agent.carrying.color)
             ):
-                agent.carrying.is_available = False
-                agent.carrying.is_pickedup = True
-                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
-
                 if self.training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
+                    # Future todo - this should be done via observations
                     agent.mission = Mission("Go open the door with the key")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -449,13 +485,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-                reward[agent_index] += (
-                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
-                )
-                agent.carrying.discount_factor *= agent.carrying.discount_factor
-
                 if self.training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
+                    # Future todo - this should be done via observations
                     agent.mission = Mission("Go move away the ball")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -467,10 +499,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                                 this_agent.mission = Mission("Go open the door with the key")
                             else:
                                 this_agent.mission = Mission("Go pick up the key")
-
-            else:
-                # Invalid pickup action
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]
 
     def step(self, actions):
         """
