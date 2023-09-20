@@ -257,7 +257,7 @@ if __name__ == "__main__":
         "--eval-config",
         type=json.loads,
         default=evaluation_config,
-        help="Evaluation config dict, given as a JSON string (e.g. '{\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" }}')",
+        help="Evaluation config dict, given as a JSON string (e.g. '{\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" , \"blued_0\" : \"your_policy_name\" }}')",
     )
     parser.add_argument("--num-episodes", type=int, default=10, help="Number of episodes to visualize.")
     parser.add_argument("--load-dir", type=str, help="Checkpoint directory for loading pre-trained policies.")

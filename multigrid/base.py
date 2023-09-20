@@ -22,6 +22,7 @@ from .core.mission import MissionSpace
 from .core.world_object import WorldObj
 from .utils.obs import gen_obs_grid_encoding
 from .utils.random import RandomMixin
+from .utils.policy import Policy
 
 
 ### Typing
@@ -107,6 +108,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         reward_schemes: dict[str, int] = {
             "red": 1
         },  # NOTE - Currently reward_schemes is not being used in the base env level
+        policies: Policy = None,
     ):
         """
         Parameters
@@ -164,6 +166,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Initialize agents
         self.training_scheme = training_scheme
         self.team_index_dict = defaultdict(dict)
+        self.policies = policies
 
         if (isinstance(agents, int) and (agents is not None)) or teams:
             if agents == 1:
@@ -183,6 +186,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
+                        policy_name=self.policies[f"{team_name}_{team_idx}"].policy_name,
                         mission_space=self.mission_space,
                         view_size=agent_view_size,
                         see_through_walls=see_through_walls,

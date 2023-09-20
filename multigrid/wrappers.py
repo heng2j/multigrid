@@ -467,6 +467,7 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
         self.observation_space
         self.action_space
         self.training_scheme
+        self.policies
 
 
 

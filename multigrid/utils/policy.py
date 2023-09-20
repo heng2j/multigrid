@@ -25,6 +25,10 @@ class Policy(Generic[State], metaclass=abc.ABCMeta):
 
   Must not possess any mutable state not in `initial_state`.
   """
+  def __init__(self, policy_id:str , policy_name:str):
+      # You can implement any init operations here or in setup()
+      self.policy_id = policy_id # TODO - Should this be multiple or indiviaul, current is not individual
+      self.policy_name = policy_name # TODO - Should this be multiple or indiviaul, current is not individual
 
 
   def __enter__(self):
