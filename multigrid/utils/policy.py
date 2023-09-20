@@ -3,7 +3,6 @@
 import abc
 from typing import Generic, Tuple, TypeVar
 from gymnasium.core import ObservationWrapper
-from multigrid.base import AgentID, ObsType
 
 State = TypeVar('State')
 
@@ -20,13 +19,13 @@ class Policy(Generic[State], metaclass=abc.ABCMeta):
       self.algorithm_training_config = {self.policy_id: {}}
 
 
-  @abc.abstractmethod
   @staticmethod
-  def custom_observations(obs: dict[AgentID, ObsType], agent_id: str, wrapper: ObservationWrapper):
+  @abc.abstractmethod
+  def custom_observations(obs: dict[any], agent_id: str, wrapper: ObservationWrapper):
     raise NotImplementedError()
 
-  @abc.abstractmethod
   @staticmethod
+  @abc.abstractmethod
   def custom_handle_steps( agent, agent_index, action, reward, terminated, info, env):
     raise NotImplementedError()
 
