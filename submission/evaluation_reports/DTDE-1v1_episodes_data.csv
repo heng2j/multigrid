@@ -1,11 +1,11 @@
 red_0,blue_0,door_open_done,eliminated_opponents_done,got_eliminated_done,eliminated_opponent_num,Episode Length,Solved
-1.4369999999999998,0.499,True,False,False,0,20,True
+1.4489999999999998,-0.002,True,False,False,0,17,True
+1.46,-1.003,False,True,False,1,13,True
+1.424,-1.004,False,True,False,1,25,True
+1.458,-0.001,True,False,False,0,14,True
+1.4609999999999999,-0.001,True,False,False,0,13,True
+1.426,-1.003,False,True,False,1,24,True
+1.434,-1.002,False,True,False,1,22,True
+1.458,-1.0,False,True,False,1,14,True
+1.45,-1.003,False,True,False,1,16,True
 1.4569999999999999,-0.002,True,False,False,0,14,True
-1.4609999999999999,-1.0,False,True,False,1,13,True
-1.413,-1.003,False,True,False,1,29,True
-1.452,-1.002,False,True,False,1,16,True
-1.439,-0.001,True,False,False,0,20,True
-1.4449999999999998,-1.0059999999999998,False,True,False,1,18,True
-1.4609999999999999,-1.001,False,True,False,1,13,True
-1.443,-0.001,True,False,False,0,19,True
-1.4609999999999999,-1.001,False,True,False,1,13,True
