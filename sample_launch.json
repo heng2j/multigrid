@@ -26,6 +26,9 @@
             "type": "python",
             "request": "launch",
             "program": "multigrid/scripts/train.py",
+            "args": ["--env", "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1",
+                // "--lstm"
+            ],
             "justMyCode": false
         },
         {
@@ -33,10 +36,12 @@
             "type": "python",
             "request": "launch",
             "program": "multigrid/scripts/visualize.py",
-            "args": ["--env", "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single", "--num-episodes", "10",
-                    "--load-dir", "submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_XXXX/checkpoint_YYY/checkpoint-YYY",
+            "args": ["--env", "MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red", "--num-episodes", "10",
+                "--load-dir", "submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single_XXXX/checkpoint_YYY/checkpoint-YYY",
                     "--render-mode", "rgb_array",
-                    "--gif", "DTDE-Red-Single"
+                    "--gif", "CTDE-red-testing",
+                    "--policies-to-eval", "red_0", "red_1",
+                    "--eval-config", "{\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" , \"red_1\" : \"your_policy_name\" }}"
             ],
             "justMyCode": false
         },
