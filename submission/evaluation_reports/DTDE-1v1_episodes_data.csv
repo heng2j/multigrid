@@ -1,11 +1,11 @@
-blue_0,red_0,door_open_done,eliminated_opponents_done,got_eliminated_done,eliminated_opponent_num,Episode Length,Solved
--1.004,1.464,False,False,True,0,12,True
--1.001,1.47,False,False,True,0,10,True
-0.963,-0.5,False,True,False,1,12,True
-0.498,1.4609999999999999,False,False,False,0,13,True
--1.003,1.4609999999999999,False,False,True,0,13,True
--1.001,1.458,False,False,True,0,14,True
--1.015,1.176,False,False,True,0,104,True
--1.0,1.4609999999999999,False,False,True,0,13,True
--0.001,1.447,False,False,False,0,17,True
--1.003,1.451,False,False,True,0,15,True
+red_0,blue_0,door_open_done,eliminated_opponents_done,got_eliminated_done,eliminated_opponent_num,Episode Length,Solved
+1.455,-0.001,False,False,False,0,15,True
+1.47,-1.0,False,False,True,0,10,True
+1.446,-0.002,False,False,False,0,18,True
+1.4609999999999999,-0.002,False,False,False,0,13,True
+1.47,-1.0,False,False,True,0,10,True
+1.464,-1.004,False,False,True,0,12,True
+1.4729999999999999,-1.0,False,False,True,0,9,True
+-0.5,0.973,False,True,False,1,9,True
+1.452,-0.006,False,False,False,0,16,True
+1.446,-1.003,False,False,True,0,18,True

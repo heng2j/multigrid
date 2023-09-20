@@ -1,6 +1,6 @@
 import numpy as np
 from multigrid.utils.policy import Policy
-from multigrid.base import MultiGridEnv, AgentID, ObsType
+from multigrid.base import AgentID, ObsType
 from multigrid.core.agent import Agent, Mission
 from multigrid.core import Action
 from ray.rllib.utils.from_config import NotProvided
@@ -69,7 +69,7 @@ class YourPolicyName_Policy(Policy):
         
     @staticmethod
     def custom_handle_steps( agent, agent_index, action, reward, terminated, info, env):
-        
+
         fwd_obj = env.grid.get(*agent.front_pos)
 
         if action == Action.toggle:

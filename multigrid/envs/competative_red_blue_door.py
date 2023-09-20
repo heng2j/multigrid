@@ -293,7 +293,11 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             for idx, action in enumerate(agent_actions):
                 agent_index = self.team_index_dict[team][idx]
                 agent = self.agents[agent_index]
-                self._handle_steps(agent, agent_index, action, reward, terminated, info)
+                # HW3 NOTE - Using custom_handle_steps in attached policies
+                if agent.name in self.policies:
+                    self.policies[agent.name].custom_handle_steps(agent, agent_index, action, reward, terminated, info, self)
+                else:
+                    self._handle_steps(agent, agent_index, action, reward, terminated, info)
 
         # Reformat reward, terminated, truncated and info
         team_rewards = {}
