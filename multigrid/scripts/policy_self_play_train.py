@@ -232,15 +232,18 @@ if __name__ == "__main__":
         "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0", "blue_0"], help="List of agent ids to train"
+        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
     )
     parser.add_argument(
-        "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"
+        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
     )
     parser.add_argument(
-        "--restore-all-policies-from-checkpoint", ntype=bool, default=False, help="If we want to continue training from last checkpoint"
+        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
+    parser.add_argument(
+        "--using-SelfPlay", type=bool, default=True, help="If we want to train with Policy Self-Play"
+    )
 
     args = parser.parse_args()
     args.multiagent = {}

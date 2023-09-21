@@ -26,7 +26,7 @@ class YourPolicyName_Policy(Policy):
                                         "key_pickup_sparse_reward": 0.5,
                                         "ball_pickup_dense_reward": 0.5,
                                         "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
-                                        "invalid_pickup_dense_penalty": 0.0015,
+                                        "invalid_pickup_dense_penalty": 0.001,
                                         }
                                 }
 
