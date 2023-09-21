@@ -134,6 +134,15 @@ def model_config(framework: str = "torch", lstm: bool = False, custom_model_conf
     }
 
 
+def self_play_policy_mapping_fn(agent_id, episode, worker, **kwargs):
+
+    # agent_id = [0|1] -> policy depends on episode ID
+    # This way, we make sure that both policies sometimes play agent0
+    # (start player) and sometimes agent1 (player to move 2nd).
+    return "red_0" if not episode or (episode.episode_id % 2 == agent_id) else "blue_0"
+
+
+
 def algorithm_config(
     algo: str = "PPO",
     env: str = "MultiGrid-Empty-8x8-v0",
@@ -146,7 +155,7 @@ def algorithm_config(
     policies_to_train: list[int] | None = None,
     policies_map: dict = {},
     team_policies_mapping: dict = {},
-
+    using_self_play: bool = False,
     **kwargs,
 ) -> AlgorithmConfig:
     """
@@ -251,7 +260,7 @@ def algorithm_config(
         .resources(num_gpus=num_gpus)
         .multi_agent(
             policies=policies,
-            policy_mapping_fn=lambda agent_id, *args, **kwargs: agent_id,
+            policy_mapping_fn=  self_play_policy_mapping_fn if using_self_play else lambda agent_id, episode, worker, **kwargs: agent_id,
             policies_to_train=policies_to_train,
         )
         .training(
@@ -427,7 +436,7 @@ class SelfPlayCallback(DefaultCallbacks):
         # policy.
         if win_rate > args.win_rate_threshold:
             self.current_opponent += 1
-            new_pol_id = f"main_v{self.current_opponent}"
+            new_pol_id = f"red_0_v{self.current_opponent}"
             print(f"adding new opponent to the mix ({new_pol_id}).")
 
             # Re-define the mapping function, such that "main" is forced
@@ -438,23 +447,23 @@ class SelfPlayCallback(DefaultCallbacks):
                 # This way, we make sure that both policies sometimes play
                 # (start player) and sometimes agent1 (player to move 2nd).
                 return (
-                    "main"
+                    "red_0"
                     if episode.episode_id % 2 == agent_id
-                    else "main_v{}".format(
+                    else "red_0_v{}".format(
                         np.random.choice(list(range(1, self.current_opponent + 1)))
                     )
                 )
 
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
-                policy_cls=type(algorithm.get_policy("main")),
+                policy_cls=type(algorithm.get_policy("red_0")),
                 policy_mapping_fn=policy_mapping_fn,
             )
 
             # Set the weights of the new policy to the main policy.
             # We'll keep training the main policy, whereas `new_pol_id` will
             # remain fixed.
-            main_state = algorithm.get_policy("main").get_state()
+            main_state = algorithm.get_policy("red_0").get_state()
             new_policy.set_state(main_state)
             # We need to sync the just copied local weights (from main policy)
             # to all the remote workers as well.

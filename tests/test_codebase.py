@@ -45,10 +45,20 @@ def test_only_exception_files_modified():
 
     EXCEPTION_FOLDERS = ["submission/**", "notebooks/**", "multigrid/agents_pool/**",]
 
+
     for folder in EXCEPTION_FOLDERS:
         globbed_files = glob.glob(folder, recursive=True)
         # print(f"Adding files from folder {folder}: {globbed_files}")  # Debugging line
         EXCEPTION_FILES.extend(globbed_files)
+        globbed_files = glob.glob(os.path.join(folder, '.*'), recursive=True)
+        EXCEPTION_FILES.extend(globbed_files)
+
+        # EXCEPTION_FILES.extend(
+        #                     file
+        #                     for folder in EXCEPTION_FOLDERS
+        #                     for pattern in [folder, os.path.join(folder, '.*')]
+        #                     for file in glob.glob(pattern, recursive=True)
+        #                 )
 
     EXCEPTION_FILES = set(EXCEPTION_FILES)  # Converting to set for faster look-up
 

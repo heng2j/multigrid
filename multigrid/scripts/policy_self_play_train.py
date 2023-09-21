@@ -242,7 +242,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
     parser.add_argument(
-        "--using-SelfPlay", type=bool, default=True, help="If we want to train with Policy Self-Play"
+        "--using-self-play", type=bool, default=True, help="If we want to train with Policy Self-Play"
     )
 
     args = parser.parse_args()

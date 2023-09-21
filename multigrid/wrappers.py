@@ -459,13 +459,20 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
         super().__init__(env)
         self.script_path = __file__
 
-        # HW3 TODO - update obs space & action space from Custom Policy
+        # HW3 NOTE - Use your favor debugger to take a look what you can do with self.policies_map
+        self.policies_map
+        # HW3 NOTE - You probably can change any of the following with self.policies_map
         self.reward_schemes
         self.agents
         self.observation_space
         self.action_space
         self.training_scheme
-        self.policies_map
+
+        # HW3 NOTE - You can can customize your observation_space, action_space and probably more here
+        for agent in self.env.agents:
+            agent.raw_observation_space
+            agent.raw_action_space
+
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         

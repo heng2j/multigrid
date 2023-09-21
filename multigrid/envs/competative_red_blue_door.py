@@ -9,7 +9,7 @@ from multigrid.core.constants import Color, Direction
 from multigrid.core.world_object import Door, Key, Ball, Wall
 from multigrid.core.agent import Agent, Mission
 from multigrid.utils.obs import gen_obs_grid_encoding
-
+from ray.rllib.env import MultiAgentEnv
 
 import numpy as np
 from functools import cached_property
@@ -21,7 +21,7 @@ AgentID = int
 ObsType = dict[str, Any]
 
 
-class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
+class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
     """
     .. image:: https://i.imgur.com/usbavAh.gif
         :width: 400
