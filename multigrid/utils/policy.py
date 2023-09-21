@@ -21,7 +21,7 @@ class Policy(Generic[State], metaclass=abc.ABCMeta):
 
   @staticmethod
   @abc.abstractmethod
-  def custom_observations(obs: dict[any], agent_id: str, wrapper: ObservationWrapper):
+  def custom_observations(obs: dict[any], policy_id: str, wrapper: ObservationWrapper):
     raise NotImplementedError()
 
   @staticmethod

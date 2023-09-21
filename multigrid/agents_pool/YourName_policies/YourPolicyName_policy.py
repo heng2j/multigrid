@@ -26,7 +26,7 @@ class YourPolicyName_Policy(Policy):
                                         "key_pickup_sparse_reward": 0.5,
                                         "ball_pickup_dense_reward": 0.5,
                                         "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
-                                        "invalid_pickup_dense_penalty": 0.001,
+                                        "invalid_pickup_dense_penalty": 0.0015,
                                         }
                                 }
 
@@ -52,9 +52,9 @@ class YourPolicyName_Policy(Policy):
         }
 
     @staticmethod
-    def custom_observations(obs: dict[AgentID, ObsType], agent_id: str, wrapper: ObservationWrapper):
+    def custom_observations(obs: dict[AgentID, ObsType], policy_id: str, wrapper: ObservationWrapper):
 
-        agent_observations = obs[agent_id]
+        agent_observations = obs[policy_id]
         if isinstance(agent_observations, list):
             # If it is stacked observations from multiple agents
             for observation in agent_observations:

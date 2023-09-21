@@ -17,8 +17,9 @@ import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.algorithms import AlgorithmConfig
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel, TorchCentralizedCriticModel
+from multigrid.envs import CONFIGURATIONS
 from ray.rllib.utils.from_config import NotProvided
-from ray.tune.registry import get_trainable_cls
+from ray.tune.registry import get_trainable_cls, registry_get_input
 from gymnasium.envs import registry as gym_envs_registry
 from gymnasium import spaces
 import ray.rllib.algorithms.callbacks as callbacks
@@ -143,6 +144,9 @@ def algorithm_config(
     num_gpus: int = 0,
     lr: float | None = None,
     policies_to_train: list[int] | None = None,
+    policies_map: dict = {},
+    team_policies_mapping: dict = {},
+
     **kwargs,
 ) -> AlgorithmConfig:
     """
@@ -179,18 +183,23 @@ def algorithm_config(
     """
 
     # HW3 TODO - Set up individual env_config and algorithm_training_config
-    env_config = gym_envs_registry[env].kwargs
-    env_config["policies"] = {}
+    # from ray.tune.registry import _global_registry, ENV_CREATOR
+    # env_creator = _global_registry.get(ENV_CREATOR, env)
+    # env_config = registry_get_input(name=env)
+    # env_config = gym_envs_registry[env].kwargs
+    _, env_config = CONFIGURATIONS[env]
+
+    env_config["policies_map"] = {}
+    env_config["team_policies_mapping"] = team_policies_mapping
     algorithm_training_config = {}
 
     # HW3 TODO - Update Reward Scheme 
-    if policies_to_train:
-        ...
-    elif "evaluating_policies" in kwargs:
-        for policy_id, eval_policy in kwargs["evaluating_policies"].items():
-            env_config["reward_schemes"][policy_id] = eval_policy.reward_schemes[policy_id]
-            env_config["policies"][policy_id] = eval_policy
-            algorithm_training_config[policy_id] = eval_policy.algorithm_training_config[policy_id]
+
+    if policies_map:
+        for policy_id, this_policy in policies_map.items():
+            env_config["reward_schemes"][policy_id] = this_policy.reward_schemes[policy_id]
+            env_config["policies_map"][policy_id] = this_policy
+            algorithm_training_config[policy_id] = this_policy.algorithm_training_config[policy_id]
 
     # # HW2 NOTE:
     # # ====== Extract PG and PPO specific configurations from kwargs ===== #

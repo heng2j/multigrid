@@ -106,7 +106,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
     *************************
 
     * ``MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single``
-    * ``MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single-with-Obsticle``
+    * ``MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single-with-Obstacle``
 
     Please checkout __init__.py in multigrid.envs for more registerd environments
     """
@@ -124,6 +124,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         death_match: bool = False,
         randomization: bool = False,
         reward_schemes: dict[str, int] = {"red": 1},
+        policies_map: dict = None,
+        team_policies_mapping: dict = None,
         **kwargs,
     ):
         """
@@ -151,6 +153,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
         self.death_match = death_match
         self.size = size
         self.randomization = randomization
+        self.team_policies_mapping = team_policies_mapping
         # mission_space = MissionSpace.from_string("Open the door that match your agents' color")
         mission_space = MissionSpace(
             mission_func=lambda subtask: f"{subtask}",
@@ -174,6 +177,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             failure_termination_mode=failure_termination_mode,
             teams=self.teams,
             training_scheme=self.training_scheme,
+            policies_map=policies_map,
+            team_policies_mapping = self.team_policies_mapping,
             **kwargs,
         )
 
@@ -329,10 +334,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
                 # Run the default self._handle_steps first
                 self._handle_steps(agent, agent_index, action, reward, terminated, info)
                 # HW3 NOTE - Using custom_handle_steps in attached policies
-                if (agent.name in self.policies) and not agent.terminated:
+                if (agent.name in self.policies_map) and not agent.terminated:
                     agent_observed_objects = self._get_all_objects_in_view(agent=agent)
                     agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-                    agent_reward, agent_terminated, agent_info = self.policies[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies[agent.name])
+                    agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
                     reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 
@@ -389,10 +394,10 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv):
             # Run the default self._handle_steps first
             self._handle_steps(agent, agent_index, action, reward, terminated, info)
             # HW3 NOTE - Using custom_handle_steps in attached policies
-            if (agent.name in self.policies) and not agent.terminated:
+            if (agent.name in self.policies_map) and not agent.terminated:
                 agent_observed_objects = self._get_all_objects_in_view(agent=agent)
                 agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-                agent_reward, agent_terminated, agent_info = self.policies[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies[agent.name])
+                agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
                 reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 
@@ -709,7 +714,7 @@ class CompetativeRedBlueDoorEnvV2(MultiGridEnv):
     *************************
 
     * ``MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single``
-    * ``MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle``
+    * ``MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle``
 
     Please checkout __init__.py in multigrid.envs for more registerd environments
     """

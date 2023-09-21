@@ -186,7 +186,7 @@ def main_evaluation(args):
     args.env_config.update(render_mode=args.render_mode)
     team_policies_mapping = args.eval_config["team_policies_mapping"]
 
-    # HW3 TODO - Load Policies
+    # HW3 TODO - Setup Policies
     evaluating_policies = {}
     for policy_id in args.policies_to_eval:
         policy_name = team_policies_mapping[policy_id]
@@ -197,7 +197,7 @@ def main_evaluation(args):
         **vars(args),
         num_workers=0,
         num_gpus=0,
-        evaluating_policies = evaluating_policies,
+        policies_map = evaluating_policies,
     )
     config.explore = False
     config.environment(disable_env_checking=True)

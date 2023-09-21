@@ -105,10 +105,11 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         agent_pov: bool = True,
         teams: dict[str, int] = {"red": 1},
         training_scheme: str = "CTCE",  # Can be either "CTCE", "DTDE" or "CTDE"
-        reward_schemes: dict[str, int] = {
-            "red": 1
-        },  # NOTE - Currently reward_schemes is not being used in the base env level
-        policies: Policy = None,
+        # reward_schemes: dict[str, int] = {
+        #     "red": 1
+        # },  # NOTE - Currently reward_schemes is not being used in the base env level
+        policies_map: Policy = None,
+        team_policies_mapping: dict = None,
     ):
         """
         Parameters
@@ -166,7 +167,11 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         # Initialize agents
         self.training_scheme = training_scheme
         self.team_index_dict = defaultdict(dict)
-        self.policies = policies
+        self.policies_map = policies_map
+
+        if self.policies_map is None:
+            breakpoint()
+            print("here")
 
         if (isinstance(agents, int) and (agents is not None)) or teams:
             if agents == 1:
@@ -186,7 +191,7 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
                     agent = Agent(
                         index=tmp_agent_idx,
                         name=f"{team_name}_{team_idx}",
-                        policy_name=self.policies[f"{team_name}_{team_idx}"].policy_name if  f"{team_name}_{team_idx}" in self.policies else None,
+                        policy_name=self.policies_map[f"{team_name}_{team_idx}"].policy_name if  f"{team_name}_{team_idx}" in self.policies_map else None,
                         mission_space=self.mission_space,
                         view_size=agent_view_size,
                         see_through_walls=see_through_walls,

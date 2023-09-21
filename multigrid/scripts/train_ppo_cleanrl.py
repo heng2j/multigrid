@@ -93,7 +93,7 @@ def parse_args(args=None):
         help="whether to capture videos of the agent performances (check out `videos` folder)")
 
     # Algorithm specific arguments
-    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle",  #"MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single"
+    parser.add_argument("--env-id", type=str, default="MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle",  #"MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single"
         help="the id of the environment")
     parser.add_argument("--total-timesteps", type=int, default=10000000,
         help="total timesteps of the experiments")

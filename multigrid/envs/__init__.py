@@ -65,7 +65,7 @@ CONFIGURATIONS = {
             "max_steps": 1000,
         },
     ),
-    "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle": (
+    "MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle": (
         CompetativeRedBlueDoorEnvV2,
         {
             "size": 8,
@@ -107,7 +107,7 @@ CONFIGURATIONS = {
             },
         },
     ),
-    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single-with-Obsticle": (
+    "MultiGrid-CompetativeRedBlueDoor-v3-DTDE-Red-Single-with-Obstacle": (
         CompetativeRedBlueDoorEnvV3,
         {
             "size": 8,
@@ -623,6 +623,9 @@ CONFIGURATIONS = {
 
 # Register environments with gymnasium
 from gymnasium.envs.registration import register
+from ray.tune.registry import register_env
 
 for name, (env_cls, config) in CONFIGURATIONS.items():
-    register(id=name, entry_point=env_cls, kwargs=config)
+    register_env(name, lambda config: env_cls(config))
+
+    # register(id=name, entry_point=env_cls, kwargs=config)

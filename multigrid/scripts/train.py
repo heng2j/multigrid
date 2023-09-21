@@ -34,6 +34,7 @@ from multigrid.utils.training_utilis import (
     RestoreWeightsCallback,
 )
 from multigrid.rllib.ctde_torch_policy import CentralizedCritic
+from multigrid.agents_pool import SubmissionPolicies
 
 # Set the working diretory to the repo root
 REPO_ROOT = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).strip().decode("utf-8")
@@ -53,14 +54,14 @@ SUBMITTER_NAME = submission_config["name"]
 
 TAGS = {"user_name": SUBMITTER_NAME, "git_commit_hash": git.Repo(REPO_ROOT).head.commit}
 
-ALGORITHM_CONFIG_FILE = sorted(
-    Path("submission").expanduser().glob("**/configs/algorithm_training_config.json"), key=os.path.getmtime
+TRAINING_CONFIG_FILE = sorted(
+    Path("submission").expanduser().glob("**/configs/training_config.json"), key=os.path.getmtime
 )[-1]
 
-with open(ALGORITHM_CONFIG_FILE, "r") as file:
-   algorithm_training_config_data = file.read()
+with open(TRAINING_CONFIG_FILE, "r") as file:
+   training_config_data = file.read()
 
-algorithm_training_config = json.loads(algorithm_training_config_data)
+training_config = json.loads(training_config_data)
 
 
 # Initialize the CLI reporter for Ray
@@ -81,7 +82,15 @@ def configure_algorithm(args):
     AlgorithmConfig
         The constructed algorithm configuration object.
     """
-    config = algorithm_config(**vars(args))
+    # HW3 TODO - Setup Policies
+    team_policies_mapping = args.training_config["team_policies_mapping"]
+    training_policies = {}
+    for policy_id in args.policies_to_train:
+        policy_name = team_policies_mapping[policy_id]
+        training_policy = SubmissionPolicies[policy_name](policy_id=policy_id, policy_name=policy_name)
+        training_policies[policy_id] = training_policy
+
+    config = algorithm_config(**vars(args), policies_map = training_policies, team_policies_mapping=team_policies_mapping)
     config.seed = args.seed
     config.callbacks(EvaluationCallbacks)
     config.environment(disable_env_checking=False)
@@ -191,16 +200,16 @@ if __name__ == "__main__":
     )
     # Future todo - have an more user friendly implementation of config, perhaps using ymal files
     parser.add_argument(
-        "--algorithm-training-config",
+        "--training-config",
         type=json.loads,
-        default=algorithm_training_config, 
-        help="Deep RL Algorithm Specific config dict, given as a JSON string (e.g. '{\"PG_params\": { \"lr\" : 0.001},  \"PPO_params\": { \"entropy_coeff\" : 0.001}}')",
+        default=training_config, 
+        help="Deep RL Algorithm Specific config dict, given as a JSON string (e.g. '{\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" , \"blued_0\" : \"your_policy_name\" }}')",
 
     )
     parser.add_argument(
         "--seed", type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible"
     )
-    parser.add_argument("--num-workers", type=int, default=10, help="Number of rollout workers.")
+    parser.add_argument("--num-workers", type=int, default=1, help="Number of rollout workers.")
     parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
     parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
@@ -220,10 +229,10 @@ if __name__ == "__main__":
         "--name", type=str, default="<my_experinemnt>", help="Distinct name to track your experinemnt in save-dir"
     )
     parser.add_argument(
-        "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
+        "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
+        "--policies-to-train", nargs="+", type=str, default=["red_0", "blue_0"], help="List of agent ids to train"
     )
     parser.add_argument(
         "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"
@@ -241,6 +250,8 @@ if __name__ == "__main__":
     print("\n", "-" * 64, "\n", "Training with following configuration:", "\n", "-" * 64)
     print()
     pprint(config.to_dict())
+
+
     train(
         algo=args.algo,
         config=config,

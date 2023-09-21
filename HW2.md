@@ -156,7 +156,7 @@ If you run the following training command to train an agent, you are expected to
 
 Command for Task 2:
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
+python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
 #### Tips:
@@ -171,7 +171,7 @@ python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedB
 Having implemented GAE in Task 2, re-run the training command provided below to start agent training. You're encouraged to adjust or introduce additional parameters as required.
 
 ```shell
-python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
+python multigrid/scripts/train_ppo_cleanrl.py --env-id MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle --num-envs 8 --num-steps 128 --learning-rate 3e-4 --total-timesteps 10000000 --exp-name baseline
 ```
 
 ### Deepening Your Understanding to Interpret Your Results
@@ -228,7 +228,7 @@ Additionally, consider tweaking the following generic Deep RL hyperparameters:
 - As mentioned in [The 37 Implementation Details of Proximal Policy Optimization](https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/): 
   - The significance of Value Function Loss Clipping is debatable. Engstrom, Ilyas, et al., (2020) didn't find evidence supporting its performance boost. In contrast, Andrychowicz, et al. (2021) inferred it might even hurt overall performance.
   - For Early Stopping, consider setting the target kl to `0.01`, as demonstrated in [OpenAI's PPO PyTorch Implementation](https://spinningup.openai.com/en/latest/algorithms/ppo.html#documentation-pytorch-version). 
-  - `CompetativeRedBlueDoorEnvV2` is redundent on purpose so that you can modify it with the Deep RL knowledge you have learned so far to solve the `MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obsticle` scenario. 
+  - `CompetativeRedBlueDoorEnvV2` is redundent on purpose so that you can modify it with the Deep RL knowledge you have learned so far to solve the `MultiGrid-CompetativeRedBlueDoor-v2-DTDE-Red-Single-with-Obstacle` scenario. 
 
 
 ---
