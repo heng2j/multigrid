@@ -302,7 +302,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": False,
             "death_match": True,
-            "teams": {"red": 1, "blue": 1},
+            "teams": {"blue": 1, "red": 1},
             "agents": 2,
             "training_scheme": "DTDE",
             "reward_schemes": {
@@ -332,7 +332,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": False,
             "death_match": True,
-            "teams": {"red": 1, "blue": 1},
+            "teams": {"blue": 1, "red": 1},
             "agents": 2,
             "training_scheme": "CTCE",
             "reward_schemes": {
@@ -362,7 +362,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": True,
             "death_match": True,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "CTCE",
             "reward_schemes": {
@@ -404,7 +404,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": True,
             "death_match": True,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "DTDE",
             "reward_schemes": {
@@ -446,7 +446,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": True,
             "death_match": False,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "CTDE",
             "reward_schemes": {
@@ -488,7 +488,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": False,
             "death_match": True,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "CTDE",
             "reward_schemes": {
@@ -530,7 +530,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": False,
             "death_match": True,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "CTCE",
             "reward_schemes": {
@@ -572,7 +572,7 @@ CONFIGURATIONS = {
             "allow_agent_overlap": False,
             "has_obsticle": False,
             "death_match": True,
-            "teams": {"red": 2, "blue": 2},
+            "teams": {"blue": 2, "red": 2},
             "agents": 4,
             "training_scheme": "DTDE",
             "reward_schemes": {

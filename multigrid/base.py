@@ -169,10 +169,6 @@ class MultiGridEnv(gym.Env, RandomMixin, ABC):
         self.team_index_dict = defaultdict(dict)
         self.policies_map = policies_map
 
-        if self.policies_map is None:
-            breakpoint()
-            print("here")
-
         if (isinstance(agents, int) and (agents is not None)) or teams:
             if agents == 1:
                 self.num_agents = agents

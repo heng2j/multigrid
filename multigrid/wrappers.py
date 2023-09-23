@@ -470,9 +470,13 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
 
         # HW3 NOTE - You can can customize your observation_space, action_space and probably more here
         for agent in self.env.agents:
-            agent.raw_observation_space
-            agent.raw_action_space
-
+            if agent.name in self.policies_map:
+                new_observation_space, new_action_space = self.policies_map[agent.name].custom_observation_space(raw_observation_space=agent.raw_observation_space,raw_action_space=agent.raw_action_space)
+                if new_observation_space:
+                    self.observation_space[agent.name] = new_observation_space
+                if new_action_space:
+                    self.action_space[agent.name] = new_action_space
+                     
 
     def observation(self, obs: dict[AgentID, ObsType]) -> dict[AgentID, ObsType]:
         
@@ -480,6 +484,8 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
             if agent_id in self.policies_map:
                 obs[agent_id] = self.policies_map[agent_id].custom_observations(obs=obs,policy_id=agent_id,wrapper=self)
             else:
+                # HW3 NOTE - we still need to keep default observation conversion logic here
+                # Future todo - Set up a default observation function 
                 agent_observations = obs[agent_id]
                 if isinstance(agent_observations, list):
                     # If it is stacked observations from multiple agents

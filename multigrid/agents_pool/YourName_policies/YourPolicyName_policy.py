@@ -51,6 +51,14 @@ class YourPolicyName_Policy(Policy):
             }
         }
 
+        self.observation_spaces = {}
+
+    @staticmethod
+    def custom_observation_space(raw_observation_space,raw_action_space):
+        new_observation_space = None
+        new_action_space = None
+        return new_observation_space, new_action_space
+
     @staticmethod
     def custom_observations(obs: dict[AgentID, ObsType], policy_id: str, wrapper: ObservationWrapper):
 
@@ -67,9 +75,12 @@ class YourPolicyName_Policy(Policy):
         return agent_observations
 
 
-    # HW3 NOTE -
+
+
+    # HW3 NOTE - custom_handle_steps is a place for reward shaping
     @staticmethod
     def custom_handle_steps( agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, police):
+
 
         if action == Action.pickup:
             if (

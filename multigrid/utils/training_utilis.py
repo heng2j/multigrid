@@ -139,8 +139,11 @@ def self_play_policy_mapping_fn(agent_id, episode, worker, **kwargs):
     # agent_id = [0|1] -> policy depends on episode ID
     # This way, we make sure that both policies sometimes play agent0
     # (start player) and sometimes agent1 (player to move 2nd).
-    return "red_0" if not episode or (episode.episode_id % 2 == agent_id) else "blue_0"
 
+    if not episode:
+        return agent_id
+    else:
+        return "red_0" if  episode.episode_id % 2 == agent_id else "blue_0"
 
 
 def algorithm_config(
@@ -235,6 +238,8 @@ def algorithm_config(
 
     # HW3 NOTE: 
     policies = {}
+    # Ensure to sort teams alphabetically since the rest of the operatation are impliclty ordered
+    env_config["teams"] =  dict(sorted(env_config["teams"].items()))
     for team_name, team_num in env_config["teams"].items():
         if env_config["training_scheme"] == "CTCE":
                 policies=[team_name] = PolicySpec() # FIXME
@@ -409,19 +414,36 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
         }
 
 
-class SelfPlayCallback(DefaultCallbacks):
-    def __init__(self):
+class SelfPlayCallback(DefaultCallbacks, Callback):
+    def __init__(self,
+        win_rate_threshold:float = 0.8):
         super().__init__()
         # 0=RandomPolicy, 1=1st main policy snapshot,
         # 2=2nd main policy snapshot, etc..
         self.current_opponent = 0
+        self.win_rate_threshold = win_rate_threshold
+
+
+    def setup(self, *args, **kwargs):
+        """
+        Setup callback, called once at the beginning of the training.
+
+        Parameters
+        ----------
+        args : tuple
+            Additional positional arguments.
+        kwargs : dict
+            Additional keyword arguments.
+        """
+        self.win_rate_threshold
 
     def on_train_result(self, *, algorithm, result, **kwargs):
         # Get the win rate for the train batch.
         # Note that normally, one should set up a proper evaluation config,
         # such that evaluation always happens on the already updated policy,
         # instead of on the already used train_batch.
-        main_rew = result["hist_stats"].pop("policy_main_reward")
+        print("here inside on_train_result")
+        main_rew = result["hist_stats"].pop("policy_red_0_reward")
         opponent_rew = list(result["hist_stats"].values())[0]
         assert len(main_rew) == len(opponent_rew)
         won = 0
@@ -434,9 +456,9 @@ class SelfPlayCallback(DefaultCallbacks):
         # If win rate is good -> Snapshot current policy and play against
         # it next, keeping the snapshot fixed and only improving the "main"
         # policy.
-        if win_rate > args.win_rate_threshold:
+        if win_rate > self.win_rate_threshold:
             self.current_opponent += 1
-            new_pol_id = f"red_0_v{self.current_opponent}"
+            new_pol_id = f"main_v{self.current_opponent}"
             print(f"adding new opponent to the mix ({new_pol_id}).")
 
             # Re-define the mapping function, such that "main" is forced
@@ -447,23 +469,23 @@ class SelfPlayCallback(DefaultCallbacks):
                 # This way, we make sure that both policies sometimes play
                 # (start player) and sometimes agent1 (player to move 2nd).
                 return (
-                    "red_0"
+                    "main"
                     if episode.episode_id % 2 == agent_id
-                    else "red_0_v{}".format(
+                    else "main_v{}".format(
                         np.random.choice(list(range(1, self.current_opponent + 1)))
                     )
                 )
 
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
-                policy_cls=type(algorithm.get_policy("red_0")),
+                policy_cls=type(algorithm.get_policy("main")),
                 policy_mapping_fn=policy_mapping_fn,
             )
 
             # Set the weights of the new policy to the main policy.
             # We'll keep training the main policy, whereas `new_pol_id` will
             # remain fixed.
-            main_state = algorithm.get_policy("red_0").get_state()
+            main_state = algorithm.get_policy("main").get_state()
             new_policy.set_state(main_state)
             # We need to sync the just copied local weights (from main policy)
             # to all the remote workers as well.

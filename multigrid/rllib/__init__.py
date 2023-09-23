@@ -58,9 +58,13 @@ class RLlibWrapper(gym.Wrapper, MultiAgentEnv):
 
     def get_agent_ids(self):
         if self.training_scheme == "CTCE":
-            return {team for team in list(self.teams.keys())}
+            return  set(sorted({team for team in list(self.teams.keys())}))
         elif self.training_scheme == "DTDE" or "CTDE":
-            return {f"{agent.color.value}_{agent.team_index}" for agent in self.agents}
+            # Ensure to sort teams alphabetically since the rest of the operatation are impliclty ordered
+            agent_ids = {}
+            agent_ids_list = list(sorted({f"{agent.color.value}_{agent.team_index}" for agent in self.agents}))
+            
+            return {agent_id for agent_id in agent_ids_list}
         else:
             return {agent.index for agent in self.agents}
 
