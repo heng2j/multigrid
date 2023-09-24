@@ -212,9 +212,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
 
         # Place agents in the top-left corner
         # NOTE - future todo - update to encapsulate muti-agent positioning
-        for idx, agent in enumerate(self.agents):
+        for idx, agent in enumerate(sorted(self.agents, key=lambda agent: (agent.color == 'blue', agent.color))):  
             if agent.color == "red":
-                self.place_agent(agent, top=(red_door_x + 1, red_door_y), size=(4, 4))
+                self.place_agent(agent, top=(red_door_x + 2, red_door_y), size=(4, 4))
                 # self.place_agent(agent, top=(blue_door_x - 1, blue_door_y), size=room_size)
                 agent.state.pos = (blue_door_x - (idx + 2), blue_door_y)
                 agent.state.dir = 2
