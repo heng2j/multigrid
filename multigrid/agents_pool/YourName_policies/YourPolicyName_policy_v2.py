@@ -7,7 +7,7 @@ from ray.rllib.utils.from_config import NotProvided
 from ray.rllib.algorithms.ppo import PPOConfig
 from gymnasium.core import ObservationWrapper
 
-class YourPolicyName_Policy(Policy):
+class YourPolicyNameV2_Policy(Policy):
     """ 
         Policy class for Meltingpot competition 
         About Populations:
@@ -17,15 +17,15 @@ class YourPolicyName_Policy(Policy):
     """
     def __init__(self, policy_id:str , policy_name:str):
         # You can implement any init operations here or in setup()
-        self.policy_id = policy_id # TODO - Should this be multiple or indiviaul, current is not individual
-        self.policy_name = policy_name # TODO - Should this be multiple or indiviaul, current is not individual
+        self.policy_id = policy_id # Future todo - Should this be multiple or indiviaul, current is not individual
+        self.policy_name = policy_name # Future todo - Should this be multiple or indiviaul, current is not individual
         self.reward_schemes =    {
                                     self.policy_id: {
-                                        "eliminated_opponent_sparse_reward": 0.5,
+                                        "eliminated_opponent_sparse_reward": 0.0, # HW3 NOTE - No incentive to kill the other agents
                                         "key_pickup_sparse_reward": 0.5,
                                         "ball_pickup_dense_reward": 0.5,
                                         "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
-                                        "invalid_pickup_dense_penalty": 0.001,
+                                        "invalid_pickup_dense_penalty": 0.0015,
                                         }
                                 }
 

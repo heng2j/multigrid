@@ -203,6 +203,9 @@ def train(
         ).fit()
 
     else:
+        policy_reward_means = { f"policy_reward_mean/{policy_to_train}" : f"{policy_to_train}_reward_mean"  for policy_to_train in config.policies_to_train}
+        reporter._metric_columns = reporter._metric_columns | policy_reward_means
+
         # Run the training loop using Ray's `tune` API
         tune.run(
             CentralizedCritic if training_scheme == "CTDE" else algo,
@@ -233,7 +236,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--lstm", action="store_true", help="Use LSTM model.")
     parser.add_argument(
-        "--env", type=str, default="MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1", help="MultiGrid environment to use."
+        "--env", type=str, default="MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red", help="MultiGrid environment to use." #  MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1
     )
     parser.add_argument(
         "--env-config",
@@ -280,9 +283,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
-    parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE', for both ")
+    parser.add_argument("--training-scheme", type=str, default="CTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE', for both ")
     parser.add_argument(
-        "--using-self-play", type=bool, default=True, help="If we want to train with Policy Self-Play"
+        "--using-self-play", type=bool, default=False, help="If we want to train with Policy Self-Play"
     )
     parser.add_argument(
         "--win-rate-threshold",
