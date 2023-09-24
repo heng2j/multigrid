@@ -22,7 +22,7 @@ from pathlib import Path
 import os
 import subprocess
 import ray
-from ray import tune
+from ray import tune, air
 from ray.rllib.algorithms import AlgorithmConfig
 from ray.tune import CLIReporter
 from ray.air.integrations.mlflow import MLflowLoggerCallback
@@ -32,6 +32,7 @@ from multigrid.utils.training_utilis import (
     get_checkpoint_dir,
     EvaluationCallbacks,
     RestoreWeightsCallback,
+    SelfPlayCallback
 )
 from multigrid.rllib.ctde_torch_policy import CentralizedCritic
 from multigrid.agents_pool import SubmissionPolicies
@@ -65,7 +66,7 @@ training_config = json.loads(training_config_data)
 
 
 # Initialize the CLI reporter for Ray
-reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30)
+reporter = CLIReporter(max_progress_rows=10, max_report_frequency=30, sort_by_metric=True)
 
 
 def configure_algorithm(args):
@@ -85,6 +86,7 @@ def configure_algorithm(args):
     # HW3 TODO - Setup Policies
     team_policies_mapping = args.training_config["team_policies_mapping"]
     training_policies = {}
+
     for policy_id in args.policies_to_train:
         policy_name = team_policies_mapping[policy_id]
         training_policy = SubmissionPolicies[policy_name](policy_id=policy_id, policy_name=policy_name)
@@ -109,6 +111,8 @@ def train(
     training_scheme: str = "CTCE",
     policies_to_load: list[str] | None = None,
     restore_all_policies_from_checkpoint: bool = False,
+    using_self_play: bool = False,
+    win_rate_threshold: float = 0.85,
 ):
     """Main training loop for RLlib algorithms.
 
@@ -151,32 +155,69 @@ def train(
         ),
     ]
 
-
-
     # Add a callback to restore specific policy weights if policies are specified
     if policies_to_load:
         callbacks.append(RestoreWeightsCallback(load_dir=load_dir, load_policy_names=policies_to_load))
 
+    # Add a callback to run Policy Self-Play if it is being set
+    if using_self_play:
+        callbacks.append(SelfPlayCallback(policy_to_train=config.policies_to_train[0], opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0]))
+        policy_reward_means = { f"policy_reward_mean/{policy_to_train}" : f"{policy_to_train}_reward_mean"  for policy_to_train in config.policies_to_train}
+        self_play_metric_columns={
+                        "episodes_this_iter": "train_episodes",
+                        **policy_reward_means,
+                        "win_rate": "win_rate",
+                        "league_size": "league_size",
+                    }
+
+        reporter._metric_columns = reporter._metric_columns | self_play_metric_columns
+
     # Initialize Ray
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
 
-    # Run the training loop using Ray's `tune` API
-    tune.run(
-        CentralizedCritic if training_scheme == "CTDE" else algo,
-        stop=stop_conditions,
-        config=config,
-        local_dir=save_dir,
-        verbose=1,
-        # If `restore_all_policies_from_checkpoint` is True, restore all policies from checkpoint
-        # This is helpful for continue to train your agent from last checkpoint
-        # But ensure to update the stop_conditions to allow you train beyond the original conditions
-        restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None,
-        checkpoint_freq=10,
-        checkpoint_at_end=True,
-        progress_reporter=reporter,
-        callbacks=callbacks,
-        name=experiment_name,
-    )
+    # Run the training loop using Ray's `tune` Tunner API # Future todo - figure out why on_train_result() in SelfPlayCallback can only be called using this method to train
+    if using_self_play:
+        # config.callbacks(SelfPlayCallback(policy_to_train=config.policies_to_train[0], opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0]))
+        
+        config.callbacks(lambda: SelfPlayCallback(
+                    policy_to_train=config.policies_to_train[0],
+                    opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0]
+                )
+                        )
+                    
+        results = tune.Tuner(
+            "PPO",
+            param_space=config,
+            run_config=air.RunConfig(
+                stop=stop_conditions,
+                verbose=2,
+                progress_reporter=reporter,
+                checkpoint_config=air.CheckpointConfig(
+                    checkpoint_at_end=True,
+                    checkpoint_frequency=10,
+                ),
+            ),
+        ).fit()
+
+    else:
+        # Run the training loop using Ray's `tune` API
+        tune.run(
+            CentralizedCritic if training_scheme == "CTDE" else algo,
+            stop=stop_conditions,
+            config=config,
+            local_dir=save_dir,
+            verbose=1,
+            # If `restore_all_policies_from_checkpoint` is True, restore all policies from checkpoint
+            # This is helpful for continue to train your agent from last checkpoint
+            # But ensure to update the stop_conditions to allow you train beyond the original conditions
+            restore=get_checkpoint_dir(load_dir) if restore_all_policies_from_checkpoint else None,
+            checkpoint_freq=10,
+            checkpoint_at_end=True,
+            progress_reporter=reporter,
+            callbacks=callbacks,
+            name=experiment_name,
+        )
+
 
     # Shutdown Ray once training is completed
     ray.shutdown()
@@ -211,7 +252,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--num-workers", type=int, default=1, help="Number of rollout workers.")
     parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
-    parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
+    parser.add_argument("--num-timesteps", type=int, default=16000, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
@@ -232,15 +273,26 @@ if __name__ == "__main__":
         "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
     )
     parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0", "blue_0"], help="List of agent ids to train"
+        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
     )
     parser.add_argument(
-        "--policies-to-load", nargs="+", type=str, default=["blue_0"], help="List of agent ids to train"
+        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
     )
     parser.add_argument(
-        "--restore-all-policies-from-checkpoint", ntype=bool, default=False, help="If we want to continue training from last checkpoint"
+        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
     )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
+    parser.add_argument(
+        "--using-self-play", type=bool, default=True, help="If we want to train with Policy Self-Play"
+    )
+    parser.add_argument(
+        "--win-rate-threshold",
+        type=float,
+        default=0.85,
+        help="Win-rate at which we setup another opponent by freezing the "
+        "current main policy and playing against a uniform distribution "
+        "of previously frozen 'main's from here on.",
+    )
 
     args = parser.parse_args()
     args.multiagent = {}
@@ -266,4 +318,6 @@ if __name__ == "__main__":
         training_scheme=args.training_scheme,
         policies_to_load=args.policies_to_load,
         restore_all_policies_from_checkpoint=args.restore_all_policies_from_checkpoint,
+        using_self_play=args.using_self_play,
+        win_rate_threshold=args.win_rate_threshold
     )

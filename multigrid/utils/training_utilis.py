@@ -253,7 +253,7 @@ def algorithm_config(
                                         # action_space=...,
                                     )
                 else:
-                    policies[f"{team_name}_{i}"] = PolicySpec()
+                    policies[f"{team_name}_{i}"] = PolicySpec(policy_class=RandomPolicy)
 
 
     return (
@@ -265,7 +265,7 @@ def algorithm_config(
         .resources(num_gpus=num_gpus)
         .multi_agent(
             policies=policies,
-            policy_mapping_fn=  self_play_policy_mapping_fn if using_self_play else lambda agent_id, episode, worker, **kwargs: agent_id,
+            policy_mapping_fn= lambda agent_id, episode, worker, **kwargs: agent_id,
             policies_to_train=policies_to_train,
         )
         .training(
@@ -415,35 +415,22 @@ class RestoreWeightsCallback(DefaultCallbacks, Callback):
 
 
 class SelfPlayCallback(DefaultCallbacks, Callback):
-    def __init__(self,
-        win_rate_threshold:float = 0.8):
+    def __init__(self, policy_to_train:str = "red_0", opponent_policy:str = "blue_0", win_rate_threshold: float = 0.6):
         super().__init__()
         # 0=RandomPolicy, 1=1st main policy snapshot,
         # 2=2nd main policy snapshot, etc..
         self.current_opponent = 0
+        self.policy_to_train = policy_to_train
+        self.opponent_policy = opponent_policy
         self.win_rate_threshold = win_rate_threshold
-
-
-    def setup(self, *args, **kwargs):
-        """
-        Setup callback, called once at the beginning of the training.
-
-        Parameters
-        ----------
-        args : tuple
-            Additional positional arguments.
-        kwargs : dict
-            Additional keyword arguments.
-        """
-        self.win_rate_threshold
 
     def on_train_result(self, *, algorithm, result, **kwargs):
         # Get the win rate for the train batch.
         # Note that normally, one should set up a proper evaluation config,
         # such that evaluation always happens on the already updated policy,
         # instead of on the already used train_batch.
-        print("here inside on_train_result")
-        main_rew = result["hist_stats"].pop("policy_red_0_reward")
+        main_rew = result["hist_stats"].pop(f"policy_{self.policy_to_train}_reward")
+        # opponent_rew = result["hist_stats"]["policy_blue_0_reward"]
         opponent_rew = list(result["hist_stats"].values())[0]
         assert len(main_rew) == len(opponent_rew)
         won = 0
@@ -458,7 +445,7 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
         # policy.
         if win_rate > self.win_rate_threshold:
             self.current_opponent += 1
-            new_pol_id = f"main_v{self.current_opponent}"
+            new_pol_id = f"{self.policy_to_train}_v{self.current_opponent}"
             print(f"adding new opponent to the mix ({new_pol_id}).")
 
             # Re-define the mapping function, such that "main" is forced
@@ -468,24 +455,30 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
                 # agent_id = [0|1] -> policy depends on episode ID
                 # This way, we make sure that both policies sometimes play
                 # (start player) and sometimes agent1 (player to move 2nd).
-                return (
-                    "main"
-                    if episode.episode_id % 2 == agent_id
-                    else "main_v{}".format(
-                        np.random.choice(list(range(1, self.current_opponent + 1)))
-                    )
-                )
+                if agent_id == self.policy_to_train:
+                    return self.policy_to_train
+                else:
+                    return (
+                            self.opponent_policy
+                            if episode.episode_id % 2 == int(agent_id.split("_")[1])
+                            else "{}_v{}".format(self.policy_to_train,
+                                np.random.choice(list(range(1, self.current_opponent + 1)))
+                            )
+                        )
 
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
-                policy_cls=type(algorithm.get_policy("main")),
+                policy_cls=type(algorithm.get_policy(self.policy_to_train)),
                 policy_mapping_fn=policy_mapping_fn,
+                config=algorithm.get_policy(self.policy_to_train).config,
+                observation_space=algorithm.get_policy(self.policy_to_train).observation_space,
+                action_space=algorithm.get_policy(self.policy_to_train).action_space,
             )
 
             # Set the weights of the new policy to the main policy.
             # We'll keep training the main policy, whereas `new_pol_id` will
             # remain fixed.
-            main_state = algorithm.get_policy("main").get_state()
+            main_state = algorithm.get_policy(self.policy_to_train).get_state()
             new_policy.set_state(main_state)
             # We need to sync the just copied local weights (from main policy)
             # to all the remote workers as well.
@@ -493,5 +486,5 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
         else:
             print("not good enough; will keep learning ...")
 
-        # +2 = main + random
+        # +2 = red_0 + blue_0
         result["league_size"] = self.current_opponent + 2

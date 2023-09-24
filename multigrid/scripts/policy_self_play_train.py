@@ -173,20 +173,21 @@ def ask_user_for_action(time_step):
 
 
 class SelfPlayCallback(DefaultCallbacks):
-    def __init__(self):
+    def __init__(self, policy_to_train:str = "red_0", opponent_policy:str = "blue_0"):
         super().__init__()
         # 0=RandomPolicy, 1=1st main policy snapshot,
         # 2=2nd main policy snapshot, etc..
         self.current_opponent = 0
+        self.policy_to_train = policy_to_train
+        self.opponent_policy = opponent_policy
 
     def on_train_result(self, *, algorithm, result, **kwargs):
         # Get the win rate for the train batch.
         # Note that normally, one should set up a proper evaluation config,
         # such that evaluation always happens on the already updated policy,
         # instead of on the already used train_batch.
-        print("I got here")
-        main_rew = result["hist_stats"].pop("policy_red_0_reward")
-        # opponent_rew = result["hist_stats"].pop("policy_blue_0_reward")
+        main_rew = result["hist_stats"].pop(f"policy_{self.policy_to_train}_reward")
+        # opponent_rew = result["hist_stats"]["policy_blue_0_reward"]
         opponent_rew = list(result["hist_stats"].values())[0]
         assert len(main_rew) == len(opponent_rew)
         won = 0
@@ -201,7 +202,7 @@ class SelfPlayCallback(DefaultCallbacks):
         # policy.
         if win_rate > args.win_rate_threshold:
             self.current_opponent += 1
-            new_pol_id = f"red_0_v{self.current_opponent}"
+            new_pol_id = f"{self.policy_to_train}_v{self.current_opponent}"
             print(f"adding new opponent to the mix ({new_pol_id}).")
 
             # Re-define the mapping function, such that "main" is forced
@@ -211,30 +212,30 @@ class SelfPlayCallback(DefaultCallbacks):
                 # agent_id = [0|1] -> policy depends on episode ID
                 # This way, we make sure that both policies sometimes play
                 # (start player) and sometimes agent1 (player to move 2nd).
-                if agent_id == "red_0":
-                    return "red_0"
+                if agent_id == self.policy_to_train:
+                    return self.policy_to_train
                 else:
                     return (
-                            "blue_0"
+                            self.opponent_policy
                             if episode.episode_id % 2 == int(agent_id.split("_")[1])
-                            else "red_0_v{}".format(
+                            else "{}_v{}".format(self.policy_to_train,
                                 np.random.choice(list(range(1, self.current_opponent + 1)))
                             )
                         )
 
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
-                policy_cls=type(algorithm.get_policy("red_0")),
+                policy_cls=type(algorithm.get_policy(self.policy_to_train)),
                 policy_mapping_fn=policy_mapping_fn,
-                config=algorithm.get_policy("red_0").config,
-                observation_space=algorithm.get_policy("red_0").observation_space,
-                action_space=algorithm.get_policy("red_0").action_space,
+                config=algorithm.get_policy(self.policy_to_train).config,
+                observation_space=algorithm.get_policy(self.policy_to_train).observation_space,
+                action_space=algorithm.get_policy(self.policy_to_train).action_space,
             )
 
             # Set the weights of the new policy to the main policy.
             # We'll keep training the main policy, whereas `new_pol_id` will
             # remain fixed.
-            main_state = algorithm.get_policy("red_0").get_state()
+            main_state = algorithm.get_policy(self.policy_to_train).get_state()
             new_policy.set_state(main_state)
             # We need to sync the just copied local weights (from main policy)
             # to all the remote workers as well.
@@ -252,24 +253,6 @@ if __name__ == "__main__":
     ray.init(num_cpus=args.num_cpus or None, include_dashboard=True, local_mode=True)
 
     register_env("open_spiel_env", lambda _: OpenSpielEnv(pyspiel.load_game("connect_four")))
-
-    def policy_mapping_fn(agent_id, episode, worker, **kwargs):
-        # agent_id = [0|1] -> policy depends on episode ID
-        # This way, we make sure that both policies sometimes play agent0
-        # (start player) and sometimes agent1 (player to move 2nd).
-        return "red_0" if episode.episode_id % 2 == agent_id else "blue_0"
-
-
-    def self_play_policy_mapping_fn(agent_id, episode, worker, **kwargs):
-
-        # agent_id = [0|1] -> policy depends on episode ID
-        # This way, we make sure that both policies sometimes play agent0
-        # (start player) and sometimes agent1 (player to move 2nd).
-
-        if not episode:
-            return agent_id
-        else:
-            return "red_0" if  episode.episode_id % 2 == int(agent_id.split("_")[1]) else "blue_0"
 
     from multigrid.agents_pool import SubmissionPolicies
     from multigrid.utils.training_utilis import algorithm_config, EvaluationCallbacks
@@ -308,7 +291,6 @@ if __name__ == "__main__":
     args.multiagent["policies_to_train"] = ["red_0"]
     my_config = configure_algorithm(args)
     my_config.callbacks(SelfPlayCallback)
-    my_config.env_config["policies_map"]
 
 
 
@@ -354,38 +336,6 @@ if __name__ == "__main__":
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
     )
 
-
-
-    # config = (
-    #     PPOConfig()
-    #     .environment("open_spiel_env")
-    #     .framework(args.framework)
-    #     .callbacks(SelfPlayCallback)
-    #     .rollouts(num_envs_per_worker=5, num_rollout_workers=args.num_workers)
-    #     .training(num_sgd_iter=20, model={"fcnet_hiddens": [512, 512]})
-    #     .multi_agent(
-    #         # Initial policy map: Random and PPO. This will be expanded
-    #         # to more policy snapshots taken from "main" against which "main"
-    #         # will then play (instead of "random"). This is done in the
-    #         # custom callback defined above (`SelfPlayCallback`).
-    #         policies={
-    #             # Our main policy, we'd like to optimize.
-    #             "red_0": PolicySpec(),
-    #             # An initial random opponent to play against.
-    #             "blue_0": PolicySpec(policy_class=RandomPolicy),
-    #         },
-    #         # Assign agent 0 and 1 randomly to the "main" policy or
-    #         # to the opponent ("random" at first). Make sure (via episode_id)
-    #         # that "main" always plays against "random" (and not against
-    #         # another "main").
-    #         policy_mapping_fn=policy_mapping_fn,
-    #         # Always just train the "main" policy.
-    #         policies_to_train=["red_0"],
-    #     )
-    #     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-    #     .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
-    # )
-
     stop = {
         "timesteps_total": args.stop_timesteps,
         "training_iteration": args.stop_iters,
@@ -396,7 +346,7 @@ if __name__ == "__main__":
     if not args.from_checkpoint:
         results = tune.Tuner(
             "PPO",
-            param_space=config,
+            param_space=my_config,
             run_config=air.RunConfig(
                 stop=stop,
                 verbose=2,

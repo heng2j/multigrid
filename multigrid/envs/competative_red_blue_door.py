@@ -333,12 +333,12 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 agent = self.agents[agent_index]
                 # Run the default self._handle_steps first
                 self._handle_steps(agent, agent_index, action, reward, terminated, info)
-                # # HW3 NOTE - Using custom_handle_steps in attached policies
-                # if (agent.name in self.policies_map) and not agent.terminated:
-                #     agent_observed_objects = self._get_all_objects_in_view(agent=agent)
-                #     agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-                #     agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
-                #     reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
+                # HW3 NOTE - Using custom_handle_steps in attached policies
+                if (agent.name in self.policies_map) and not agent.terminated:
+                    agent_observed_objects = self._get_all_objects_in_view(agent=agent)
+                    agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
+                    agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
+                    reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 
         # Reformat reward, terminated, truncated and info
@@ -393,12 +393,12 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
 
             # Run the default self._handle_steps first
             self._handle_steps(agent, agent_index, action, reward, terminated, info)
-            # # HW3 NOTE - Using custom_handle_steps in attached policies
-            # if (agent.name in self.policies_map) and not agent.terminated:
-            #     agent_observed_objects = self._get_all_objects_in_view(agent=agent)
-            #     agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-            #     agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
-            #     reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
+            # HW3 NOTE - Using custom_handle_steps in attached policies
+            if (agent.name in self.policies_map) and not agent.terminated:
+                agent_observed_objects = self._get_all_objects_in_view(agent=agent)
+                agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
+                agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
+                reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 
         # Reformat reward, terminated, truncated and info
@@ -441,8 +441,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                                 "door_open_done"
                             ] = True
 
-                    # self.info["episode_done"].get("l", self.step_count)
-
             # If fwd_obj is an agent
             elif isinstance(fwd_obj, Agent) and self.death_match:
                 # Terminate the other agent and set it's position inside the room
@@ -478,12 +476,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 and (agent.carrying.is_available)
                 and (agent.color == agent.carrying.color)
             ):
-                agent.carrying.is_available = False
-                agent.carrying.is_pickedup = True
-                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
-
                 if self.training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
+                    # Future todo - this should be done via observations
                     agent.mission = Mission("Go open the door with the key")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -495,13 +490,9 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 and (agent.front_pos == agent.carrying.init_pos)
                 and (agent.color != agent.carrying.color)
             ):
-                reward[agent_index] += (
-                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
-                )
-                agent.carrying.discount_factor *= agent.carrying.discount_factor
-
                 if self.training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
+                    # Future todo - this should be done via observations
                     agent.mission = Mission("Go move away the ball")
                     for this_agent in self.agents:
                         if (this_agent.color == agent.color) and (this_agent != agent):
@@ -513,10 +504,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                                 this_agent.mission = Mission("Go open the door with the key")
                             else:
                                 this_agent.mission = Mission("Go pick up the key")
-
-            else:
-                # Invalid pickup action
-                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]
 
     def step(self, actions):
         """
