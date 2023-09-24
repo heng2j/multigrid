@@ -244,7 +244,7 @@ def algorithm_config(
     for team_name, team_num in env_config["teams"].items():
         if env_config["training_scheme"] == "CTCE":
             if team_name in list(algorithm_training_config.keys()):
-                policies=[team_name] = PolicySpec(
+                policies[team_name] = PolicySpec(
                                         # policy_class=get_trainable_cls(algorithm_training_config[team_name]["algo"]), # Future investigation - Do we need a different trainer for using different algo?
                                         config=algorithm_training_config[team_name]["algo_config_class"].overrides(**algorithm_training_config[team_name]["algo_config"]),
                                         # observation_space=...,
@@ -467,6 +467,8 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
                 if agent_id == self.policy_to_train:
                     return self.policy_to_train
                 else:
+
+                    
                     return (
                             self.opponent_policy
                             if episode.episode_id % 2 == int(agent_id.split("_")[1])
@@ -476,6 +478,7 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
                         )
             new_config = copy.deepcopy(algorithm.get_policy(self.policy_to_train).config)
             new_config.pop("worker_index")
+            new_config.pop("__policy_id")
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
                 policy_cls=type(algorithm.get_policy(self.policy_to_train)),
