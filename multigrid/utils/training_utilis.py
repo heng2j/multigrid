@@ -242,18 +242,26 @@ def algorithm_config(
     env_config["teams"] =  dict(sorted(env_config["teams"].items()))
     for team_name, team_num in env_config["teams"].items():
         if env_config["training_scheme"] == "CTCE":
-                policies=[team_name] = PolicySpec() # FIXME
+            if team_name in list(algorithm_training_config.keys()):
+                policies=[team_name] = PolicySpec(
+                                        # policy_class=get_trainable_cls(algorithm_training_config[team_name]["algo"]), # Future investigation - Do we need a different trainer for using different algo?
+                                        config=algorithm_training_config[team_name]["algo_config_class"].overrides(**algorithm_training_config[team_name]["algo_config"]),
+                                        # observation_space=...,
+                                        # action_space=...,
+                                    )
+            else:
+                policies[team_name] = PolicySpec()
         else:
             for i in range(team_num):
                 if f"{team_name}_{i}" in list(algorithm_training_config.keys()):
                     policies[f"{team_name}_{i}"] =  PolicySpec(
-                                        # policy_class=get_trainable_cls(algorithm_training_config[f"{team_name}_{i}"]["algo"]),
+                                        # policy_class=get_trainable_cls(algorithm_training_config[f"{team_name}_{i}"]["algo"]), # Future investigation - Do we need a different trainer for using different algo?
                                         config=algorithm_training_config[f"{team_name}_{i}"]["algo_config_class"].overrides(**algorithm_training_config[f"{team_name}_{i}"]["algo_config"]),
                                         # observation_space=...,
                                         # action_space=...,
                                     )
                 else:
-                    policies[f"{team_name}_{i}"] = PolicySpec(policy_class=RandomPolicy)
+                    policies[f"{team_name}_{i}"] = PolicySpec()
 
 
     return (

@@ -337,7 +337,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 if (agent.name in self.policies_map) and not agent.terminated:
                     agent_observed_objects = self._get_all_objects_in_view(agent=agent)
                     agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-                    agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
+                    agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.reward_schemes[agent.name], self.training_scheme)
                     reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 
@@ -397,7 +397,7 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
             if (agent.name in self.policies_map) and not agent.terminated:
                 agent_observed_objects = self._get_all_objects_in_view(agent=agent)
                 agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
-                agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.policies_map[agent.name])
+                agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.reward_schemes[agent.name], self.training_scheme)
                 reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
 
 

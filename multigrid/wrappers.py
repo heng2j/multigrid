@@ -471,7 +471,7 @@ class MARLCompetativeRedBlueDoorWrapper(CompetativeRedBlueDoorWrapper):
         # HW3 NOTE - You can can customize your observation_space, action_space and probably more here
         for agent in self.env.agents:
             if agent.name in self.policies_map:
-                new_observation_space, new_action_space = self.policies_map[agent.name].custom_observation_space(raw_observation_space=agent.raw_observation_space,raw_action_space=agent.raw_action_space)
+                new_observation_space, new_action_space = self.policies_map[agent.name].custom_observation_space(policy_id=agent.name, raw_observation_space=agent.raw_observation_space,raw_action_space=agent.raw_action_space)
                 if new_observation_space:
                     self.observation_space[agent.name] = new_observation_space
                 if new_action_space:

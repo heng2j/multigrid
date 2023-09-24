@@ -83,7 +83,7 @@ def configure_algorithm(args):
     AlgorithmConfig
         The constructed algorithm configuration object.
     """
-    # HW3 TODO - Setup Policies
+    # HW3 NOTE - Setup Policies mapping with user customized Policy Class
     team_policies_mapping = args.training_config["team_policies_mapping"]
     training_policies = {}
 
@@ -175,13 +175,13 @@ def train(
     # Initialize Ray
     ray.init(num_cpus=(config.num_rollout_workers + 1), local_mode=local_mode)
 
-    # Run the training loop using Ray's `tune` Tunner API # Future todo - figure out why on_train_result() in SelfPlayCallback can only be called using this method to train
+    # Run the training loop using Ray's `tune` Tunner API # Future todo - figure out why on_train_result() in SelfPlayCallback can only be called using this method to train and can't use callbacks=callbacks
     if using_self_play:
-        # config.callbacks(SelfPlayCallback(policy_to_train=config.policies_to_train[0], opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0]))
-        
+
         config.callbacks(lambda: SelfPlayCallback(
                     policy_to_train=config.policies_to_train[0],
-                    opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0]
+                    opponent_policy=[policy for policy in config.policies if policy != config.policies_to_train[0]][0],
+                    win_rate_threshold=win_rate_threshold,
                 )
                         )
                     
@@ -190,12 +190,15 @@ def train(
             param_space=config,
             run_config=air.RunConfig(
                 stop=stop_conditions,
-                verbose=2,
+                verbose=1,
                 progress_reporter=reporter,
                 checkpoint_config=air.CheckpointConfig(
                     checkpoint_at_end=True,
                     checkpoint_frequency=10,
                 ),
+                storage_path=save_dir,
+                # callbacks=callbacks, # future fix 
+                name=experiment_name,
             ),
         ).fit()
 
@@ -217,7 +220,6 @@ def train(
             callbacks=callbacks,
             name=experiment_name,
         )
-
 
     # Shutdown Ray once training is completed
     ray.shutdown()
@@ -252,13 +254,19 @@ if __name__ == "__main__":
     )
     parser.add_argument("--num-workers", type=int, default=1, help="Number of rollout workers.")
     parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
-    parser.add_argument("--num-timesteps", type=int, default=16000, help="Total number of timesteps to train.")
+    parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
         "--load-dir",
         type=str,
         default="submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250",
         help="Checkpoint directory for loading pre-trained policies.",
+    )
+    parser.add_argument(
+        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
+    )
+    parser.add_argument(
+        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
     )
     parser.add_argument(
         "--save-dir",
@@ -272,16 +280,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
     )
-    parser.add_argument(
-        "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
-    )
-    parser.add_argument(
-        "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
-    )
-    parser.add_argument(
-        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
-    )
-    parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE'")
+    # parser.add_argument(
+    #     "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
+    # )
+    parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE', for both ")
     parser.add_argument(
         "--using-self-play", type=bool, default=True, help="If we want to train with Policy Self-Play"
     )
@@ -295,6 +297,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    args.policies_to_train = list(training_config["team_policies_mapping"].keys())
     args.multiagent = {}
     args.multiagent["policies_to_train"] = args.policies_to_train
     config = configure_algorithm(args)
