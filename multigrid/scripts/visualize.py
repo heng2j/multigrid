@@ -173,6 +173,14 @@ def evaluation(
     return frames, episodes_data
 
 
+# Custom sorting policy_ids function
+def sort_policy_id(policy_id):
+    # Split policy_id to extract version number
+    parts = policy_id.split('_v')
+    # If version number is present, convert to int, otherwise use -1
+    version = int(parts[1]) if len(parts) > 1 else -1
+    return version
+
 def main_evaluation(args):
     """
     Main function for evaluation. Sets up the environment, restores the trained algorithm,
@@ -218,14 +226,22 @@ def main_evaluation(args):
         print(f"Loading checkpoint from {checkpoint}")
         algorithm.restore(checkpoint)
 
+        opponent_policies=[policy for policy in algorithm.config.policies if policy not in args.policies_to_eval]
+
         scenario_name = str(checkpoint).split("/")[-2].split("_")[1].split("-v3-")[1]
 
         # NOTE - future fixme update checkpoint loading method
-        # # New way
-        # restored_policy_0 = Policy.from_checkpoint(checkpoint)
-        # restored_policy_0_weights = restored_policy_0[policy_name].get_weights()
-        # algorithm.set_weights({policy_name: restored_policy_0_weights})
+        # New way
+        restored_policies = Policy.from_checkpoint(checkpoint)
+        sorted_keys = sorted(restored_policies.keys(), key=sort_policy_id, reverse=True)
 
+        for idx, agent_id in enumerate(opponent_policies):
+            best_opponent_policy_id = sorted_keys[:len(opponent_policies)][idx]
+            restored_policy_weights = restored_policies[best_opponent_policy_id].get_weights()
+            algorithm.set_weights({agent_id: restored_policy_weights})
+
+
+ 
     frames, episodes_data = evaluation(
         algorithm, num_episodes=args.num_episodes, policies_to_eval=args.policies_to_eval
     )
