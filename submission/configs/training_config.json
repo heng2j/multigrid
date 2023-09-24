@@ -1,0 +1,10 @@
+{
+
+    "_comment" : "for team_policies_mapping, both DTDE & CTDE agents \\ will have to use a numerical suffix to define the agent_id. For CTCE, since we are play as a team, we can just use `red`",
+    "team_policies_mapping": {
+
+        "red_0": "your_policy_name"
+        
+    }
+}
+
