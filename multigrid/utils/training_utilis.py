@@ -14,6 +14,7 @@ Note: This script is expected to have restricted changes.
 import os
 from pathlib import Path
 import numpy as np
+import copy
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.algorithms import AlgorithmConfig
 from multigrid.rllib.models import TFModel, TorchModel, TorchLSTMModel, TorchCentralizedCriticModel
@@ -473,12 +474,13 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
                                 np.random.choice(list(range(1, self.current_opponent + 1)))
                             )
                         )
-
+            new_config = copy.deepcopy(algorithm.get_policy(self.policy_to_train).config)
+            new_config.pop("worker_index")
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
                 policy_cls=type(algorithm.get_policy(self.policy_to_train)),
                 policy_mapping_fn=policy_mapping_fn,
-                config=algorithm.get_policy(self.policy_to_train).config,
+                config=new_config,
                 observation_space=algorithm.get_policy(self.policy_to_train).observation_space,
                 action_space=algorithm.get_policy(self.policy_to_train).action_space,
             )

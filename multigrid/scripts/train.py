@@ -290,7 +290,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--win-rate-threshold",
         type=float,
-        default=0.85,
+        default=0.25,
         help="Win-rate at which we setup another opponent by freezing the "
         "current main policy and playing against a uniform distribution "
         "of previously frozen 'main's from here on.",
