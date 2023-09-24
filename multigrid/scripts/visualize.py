@@ -222,17 +222,17 @@ def main_evaluation(args):
 
     if checkpoint:
         from ray.rllib.policy.policy import Policy
-
         print(f"Loading checkpoint from {checkpoint}")
         algorithm.restore(checkpoint)
-
         opponent_policies=[policy for policy in algorithm.config.policies if policy not in args.policies_to_eval]
 
-        scenario_name = str(checkpoint).split("/")[-2].split("_")[1].split("-v3-")[1]
-
-        # NOTE - future fixme update checkpoint loading method
-        # New way
-        restored_policies = Policy.from_checkpoint(checkpoint)
+        if "default_DTDE_1v1_opponent_checkpoint" in args.eval_config and "DTDE_1v1" in args.env:
+            restored_policies = Policy.from_checkpoint(args.eval_config["default_DTDE_1v1_opponent_checkpoint"])
+        elif "default_CTCE_2v2_opponent_checkpoint" in args.eval_config and "CTCE_2v2" in args.env:
+            restored_policies = Policy.from_checkpoint(args.eval_config["default_CTCE_2v2_opponent_checkpoint"])
+        else:
+            restored_policies = Policy.from_checkpoint(checkpoint)
+        
         sorted_keys = sorted(restored_policies.keys(), key=sort_policy_id, reverse=True)
 
         for idx, agent_id in enumerate(opponent_policies):
@@ -240,12 +240,11 @@ def main_evaluation(args):
             restored_policy_weights = restored_policies[best_opponent_policy_id].get_weights()
             algorithm.set_weights({agent_id: restored_policy_weights})
 
-
- 
     frames, episodes_data = evaluation(
         algorithm, num_episodes=args.num_episodes, policies_to_eval=args.policies_to_eval
     )
 
+    scenario_name = args.env.split("-v3-")[1] #str(checkpoint).split("/")[-2].split("_")[1].split("-v3-")[1]
     save_evaluation_metrics(episodes_data=episodes_data, save_path=save_path, scenario_name=scenario_name)
 
     if args.gif:
