@@ -252,8 +252,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--seed", type=int, default=0, help="Set the random seed of each worker. This makes experiments reproducible"
     )
-    parser.add_argument("--num-workers", type=int, default=1, help="Number of rollout workers.")
-    parser.add_argument("--num-gpus", type=int, default=0, help="Number of GPUs to train on.")
+    parser.add_argument("--num-workers", type=int, default=40, help="Number of rollout workers.")
+    parser.add_argument("--num-gpus", type=int, default=1, help="Number of GPUs to train on.")
     parser.add_argument("--num-timesteps", type=int, default=1e6, help="Total number of timesteps to train.")
     parser.add_argument("--lr", type=float, help="Learning rate for training.")
     parser.add_argument(
@@ -275,14 +275,11 @@ if __name__ == "__main__":
         help="Directory for saving checkpoints, results, and trained policies.",
     )
     parser.add_argument(
-        "--name", type=str, default="<my_experinemnt>", help="Distinct name to track your experinemnt in save-dir"
+        "--name", type=str, default="Self_Play_Testing", help="Distinct name to track your experinemnt in save-dir" # <my_experinemnt>
     )
     parser.add_argument(
-        "--local-mode", type=bool, default=True, help="Boolean value to set to use local mode for debugging"
+        "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
     )
-    # parser.add_argument(
-    #     "--policies-to-train", nargs="+", type=str, default=["red_0"], help="List of agent ids to train"
-    # )
     parser.add_argument("--training-scheme", type=str, default="DTDE", help="Can be either 'CTCE', 'DTDE' or 'CTDE', for both ")
     parser.add_argument(
         "--using-self-play", type=bool, default=True, help="If we want to train with Policy Self-Play"

@@ -25,7 +25,7 @@ class YourPolicyName_Policy(Policy):
                                         "key_pickup_sparse_reward": 0.5,
                                         "ball_pickup_dense_reward": 0.5,
                                         "dense_reward_discount_factor": {"ball_carrying_discount_factor": 0.9},
-                                        "invalid_pickup_dense_penalty": 0.0015,
+                                        "invalid_pickup_dense_penalty": 0.001,
                                         }
                                 }
 
@@ -34,7 +34,7 @@ class YourPolicyName_Policy(Policy):
                     "algo": "PPO",
                     "algo_config_class" : PPOConfig,
                     "algo_config": {
-                    "lr" : 0.0015, #NotProvided,
+                    "lr" : NotProvided,
                     "gamma": 0.99,
                     "lambda_" : 0.99,
                     "kl_coeff" : 0.2,
