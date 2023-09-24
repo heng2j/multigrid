@@ -339,7 +339,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                     agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
                     agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.reward_schemes[agent.name], self.training_scheme)
                     reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
-
+                else:
+                    self._default_extra_action_handle_steps(agent, agent_index, action, reward, terminated, info)
 
         # Reformat reward, terminated, truncated and info
         team_rewards = {}
@@ -399,6 +400,8 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 agent_reward, agent_terminated, agent_info = reward[agent_index], terminated[agent_index] , info[agent.name]
                 agent_reward, agent_terminated, agent_info = self.policies_map[agent.name].custom_handle_steps(agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, self.reward_schemes[agent.name], self.training_scheme)
                 reward[agent_index], terminated[agent_index] , info[agent.name] = agent_reward, agent_terminated, agent_info
+            else:
+                self._default_extra_action_handle_steps(agent, agent_index, action, reward, terminated, info)
 
 
         # Reformat reward, terminated, truncated and info
@@ -418,6 +421,56 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                 reformated_truncated[f"{team_name}_{team_index}"] = value
 
         return obs, reformated_reward, reformated_terminated, reformated_truncated, info
+
+    def _default_extra_action_handle_steps(self, agent, agent_index, action, reward, terminated, info):
+        
+        if action == Action.pickup:
+            if (
+                agent.carrying
+                and (agent.carrying.type == "key")
+                and (agent.carrying.is_available)
+                and (agent.color == agent.carrying.color)
+            ):
+                agent.carrying.is_available = False
+                agent.carrying.is_pickedup = True
+                reward[agent_index] += self.reward_schemes[agent.name]["key_pickup_sparse_reward"]
+
+                if self.training_scheme == "DTDE" or "CTDE":
+                    # Mimic communiations
+                    agent.mission = Mission("Go open the door with the key")
+                    for this_agent in self.agents:
+                        if (this_agent.color == agent.color) and (this_agent != agent):
+                            this_agent.mission = Mission("Go move away the ball")
+
+            elif (
+                agent.carrying
+                and (agent.carrying.type == "ball")
+                and (agent.front_pos == agent.carrying.init_pos)
+                and (agent.color != agent.carrying.color)
+            ):
+                reward[agent_index] += (
+                    self.reward_schemes[agent.name]["ball_pickup_dense_reward"] * agent.carrying.discount_factor
+                )
+                agent.carrying.discount_factor *= agent.carrying.discount_factor
+
+                if self.training_scheme == "DTDE" or "CTDE":
+                    # Mimic communiations
+                    agent.mission = Mission("Go move away the ball")
+                    for this_agent in self.agents:
+                        if (this_agent.color == agent.color) and (this_agent != agent):
+                            if (
+                                this_agent.carrying
+                                and this_agent.carrying.type == "key"
+                                and this_agent.carrying.color == this_agent.color
+                            ):
+                                this_agent.mission = Mission("Go open the door with the key")
+                            else:
+                                this_agent.mission = Mission("Go pick up the key")
+
+            else:
+                # Invalid pickup action
+                reward[agent_index] -= self.reward_schemes[agent.name]["invalid_pickup_dense_penalty"]
+
 
     def _handle_steps(self, agent, agent_index, action, reward, terminated, info):
         fwd_obj = self.grid.get(*agent.front_pos)
@@ -469,41 +522,6 @@ class CompetativeRedBlueDoorEnvV3(MultiGridEnv, MultiAgentEnv):
                                 "eliminated_opponent_num"
                             ] += 1
 
-        elif action == Action.pickup:
-            if (
-                agent.carrying
-                and (agent.carrying.type == "key")
-                and (agent.carrying.is_available)
-                and (agent.color == agent.carrying.color)
-            ):
-                if self.training_scheme == "DTDE" or "CTDE":
-                    # Mimic communiations
-                    # Future todo - this should be done via observations
-                    agent.mission = Mission("Go open the door with the key")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            this_agent.mission = Mission("Go move away the ball")
-
-            elif (
-                agent.carrying
-                and (agent.carrying.type == "ball")
-                and (agent.front_pos == agent.carrying.init_pos)
-                and (agent.color != agent.carrying.color)
-            ):
-                if self.training_scheme == "DTDE" or "CTDE":
-                    # Mimic communiations
-                    # Future todo - this should be done via observations
-                    agent.mission = Mission("Go move away the ball")
-                    for this_agent in self.agents:
-                        if (this_agent.color == agent.color) and (this_agent != agent):
-                            if (
-                                this_agent.carrying
-                                and this_agent.carrying.type == "key"
-                                and this_agent.carrying.color == this_agent.color
-                            ):
-                                this_agent.mission = Mission("Go open the door with the key")
-                            else:
-                                this_agent.mission = Mission("Go pick up the key")
 
     def step(self, actions):
         """

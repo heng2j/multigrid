@@ -95,6 +95,9 @@ class YourPolicyName_Policy(Policy):
                 if training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
                     agent.mission = Mission("Go open the door with the key")
+                    for obj in agent_observed_objects: # Mimic within range communication
+                        if isinstance(obj, Agent) and obj.color == agent.color:
+                             obj.mission = Mission("Go move away the ball")
 
 
             elif (
@@ -111,6 +114,16 @@ class YourPolicyName_Policy(Policy):
                 if training_scheme == "DTDE" or "CTDE":
                     # Mimic communiations
                     agent.mission = Mission("Go move away the ball")
+                    for obj in agent_observed_objects: # Mimic within range communication
+                        if isinstance(obj, Agent) and obj.color == agent.color:
+                            if (
+                                obj.carrying
+                                and obj.carrying.type == "key"
+                                and obj.carrying.color == obj.color
+                            ):
+                                obj.mission = Mission("Go open the door with the key")
+                            else:
+                                obj.mission = Mission("Go pick up the key")
 
             else:
                 # Invalid pickup action
