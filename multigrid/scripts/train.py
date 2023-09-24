@@ -262,14 +262,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--load-dir",
         type=str,
-        default="submission/pretrained_checkpoints/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_154ab_00000_0_2023-09-12_16-08-06/checkpoint_000250",
+        default="submission/ray_results/HW3/CTDE_Testing copy 2/CentralizedCritic_MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red_0b5c9_00000_0_2023-09-24_09-27-01/checkpoint_000080",
         help="Checkpoint directory for loading pre-trained policies.",
     )
     parser.add_argument(
         "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
     )
     parser.add_argument(
-        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
+        "--restore-all-policies-from-checkpoint", type=bool, default=True, help="If we want to continue training from last checkpoint"
     )
     parser.add_argument(
         "--save-dir",
@@ -278,7 +278,7 @@ if __name__ == "__main__":
         help="Directory for saving checkpoints, results, and trained policies.",
     )
     parser.add_argument(
-        "--name", type=str, default="Self_Play_Testing", help="Distinct name to track your experinemnt in save-dir" # <my_experinemnt>
+        "--name", type=str, default="CTDE_Testing", help="Distinct name to track your experinemnt in save-dir" # <my_experinemnt>
     )
     parser.add_argument(
         "--local-mode", type=bool, default=False, help="Boolean value to set to use local mode for debugging"
