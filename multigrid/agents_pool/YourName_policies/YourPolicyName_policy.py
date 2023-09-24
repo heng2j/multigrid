@@ -34,7 +34,7 @@ class YourPolicyName_Policy(Policy):
                     "algo": "PPO",
                     "algo_config_class" : PPOConfig,
                     "algo_config": {
-                    "lr" : 0.0015, #NotProvided,
+                    "lr" : 5e-5,
                     "gamma": 0.99,
                     "lambda_" : 0.99,
                     "kl_coeff" : 0.2,
