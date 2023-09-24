@@ -467,11 +467,9 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
                 if agent_id == self.policy_to_train:
                     return self.policy_to_train
                 else:
-
-                    
                     return (
                             self.opponent_policy
-                            if episode.episode_id % 2 == int(agent_id.split("_")[1])
+                            if episode.episode_id % 2 == hash(agent_id) % 2 #int(agent_id.split("_")[1]) 
                             else "{}_v{}".format(self.policy_to_train,
                                 np.random.choice(list(range(1, self.current_opponent + 1)))
                             )
@@ -479,6 +477,7 @@ class SelfPlayCallback(DefaultCallbacks, Callback):
             new_config = copy.deepcopy(algorithm.get_policy(self.policy_to_train).config)
             new_config.pop("worker_index")
             new_config.pop("__policy_id")
+            new_config.pop("__stdout_file__")
             new_policy = algorithm.add_policy(
                 policy_id=new_pol_id,
                 policy_cls=type(algorithm.get_policy(self.policy_to_train)),
