@@ -60,7 +60,7 @@ Depending on your chosen setup, refer to [scripts/train.py](multigrid/scripts/tr
 
 If you're debugging, you might want to use VSCode's debugger. If you're running on Colab, adjust the `#@params` in the `Args` class as per the command-line arguments when running locally.
 
-If you need more compute Resource, please let me know. I can enable Github CodeSpace for limited users see Appendix for more info.
+If you need more compute resource for the competition, please contact the instructor.
 
 ---
 # Assignment Task Breakdown

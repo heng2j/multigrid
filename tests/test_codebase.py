@@ -53,13 +53,6 @@ def test_only_exception_files_modified():
         globbed_files = glob.glob(os.path.join(folder, '.*'), recursive=True)
         EXCEPTION_FILES.extend(globbed_files)
 
-        # EXCEPTION_FILES.extend(
-        #                     file
-        #                     for folder in EXCEPTION_FOLDERS
-        #                     for pattern in [folder, os.path.join(folder, '.*')]
-        #                     for file in glob.glob(pattern, recursive=True)
-        #                 )
-
     EXCEPTION_FILES = set(EXCEPTION_FILES)  # Converting to set for faster look-up
 
     # Get list of all files in the repository.

@@ -68,6 +68,12 @@ def test_evaluation():
         scenario_name = env.split("-v3-")[1]
         gif = f"{scenario_name}_{SUBMITTER_NAME}"
 
+        policies_to_eval = ['red_0'] 
+        if "2v2" in scenario_name:
+            policies_to_eval = ['red']
+        elif "CTDE-Red" in scenario_name:
+            policies_to_eval = ['red_0', "red_1"]
+
         # Set argument
         params = {
             "algo": "PPO",
@@ -81,7 +87,7 @@ def test_evaluation():
             "our_agent_ids": [0, 1],
             "render_mode": "rgb_array",
             "save_dir": SAVE_DIR,
-            "policies_to_eval": ['red_0']
+            "policies_to_eval": policies_to_eval
         }
 
         args = argparse.Namespace(**params)
