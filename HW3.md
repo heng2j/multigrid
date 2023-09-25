@@ -191,14 +191,180 @@ You can, but it will take a much longer time for the agents to start converging 
 
 
 
-**CTDE Agent Training Baseline Thresholds:**
+**DTDE Agent Training Baseline Thresholds:**
+  | Metric                        | Expected Value   | Duration          |
+  | ----------------------------- | ---------------- | ----------------- |
+  | `episode_len_mean`            | under 40 time steps    | Last 100k steps   |
+  | `policy_reward_mean/red_*`    | 1.3+ returns     | Last 100k steps   |
+  | `red_*/learner_stats/vf_explained_var`    | Above 0.9        | Last 100k steps   |
+  | `red_*/learner_stats/entropy` | Below 0.4       | Last 100k steps   |
+
+
+**Commands to Visualize Your CTDE Agents:**
+
+```shell
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red --num-episodes 10 --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-CTDE-Red_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode rgb_array --gif CTDE-Red-testing --policies-to-eval red_0 red_1 --eval-config {\"team_policies_mapping\": {\"red_0\" : \"your_policy_name\" , \"red_1\" : \"your_policy_name_v2\" }}
+```
+
+`--eval-config` is also New✨ and it serves as the similar function as `--training-config` 
+
+---
+
+## Task 3 - Solving the Decentralized Partially-Observable Zero-Sum Stochastic Games (1v1) for STR MARL Competition
+In this task, you will solve a 1v1 Competitive Task, the same one as in HW2, but this time with a learning opponent, which turned the game from an MDP to a Stochastic Game.
+ 
+### Understanding Policy Self-Play:
+
+To set up the match, we will use Policy Self-Play. In this approach, an agent competes against past versions of itself, iteratively learning and adapting. This technique allows the legacy versions of the agent to be exploited, and let the main agent to explore a diverse range of strategies and learn to counteract them, enhancing its overall performance.
+
+In Policy Self-Play:
+
+- The agent plays against versions of itself from previous iterations.
+- After each iteration, the newly trained agent is added to the pool of opponents.
+- This process continues, allowing the agent to face increasingly sophisticated opponents as it learns and evolves.
+
+### Reference for Policy Self-Play:
+
+For an in-depth understanding of Policy Self-Play, and its application in [AlphaGo Zero](https://www.deepmind.com/blog/alphazero-shedding-new-light-on-chess-shogi-and-go), explore this [A Simple Alpha(Go) Zero Tutorial](https://web.stanford.edu/~surag/posts/alphazero.html) by Surag Nair from Stanford. 
+
+
+<figure style="text-align: center;">
+    <img src="images/HW_images/HW3/self_play.webp" alt="Local GIF" style="width:800px;"/>
+    <figcaption style="text-align: center;">Sample Self Play Diagram 
+ </figcaption>
+</figure>
+
+We will utilize the modified [Ray RLlib Policy Self-Play Callback](https://github.com/ray-project/ray/blob/ray-2.5.1/rllib/examples/self_play_with_open_spiel.py) function to enable Self-Play.
+ 
+
+### Steps for Training and Monitoring Policy Self-Play Agent:
+
+1. **Update `team_policies_mapping`**: In [training_config.json](submission/configs/training_config.json), remove the line for `red_1`, mapping `red_0` to your customized policy:
+
+   ```json
+   "team_policies_mapping": {
+       "red_0": "your_policy_name"
+   }
+   ```
+
+2. **Execute the Training Command**: After finalizing your agent’s configuration, run the below command to train your DTDE agent with Policy Self-Play:
+
+   ```shell
+   python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-workers 10 --num-gpus 0 --name Policy_Self_Play_baseline --training-scheme DTDE  --training-config '{"team_policies_mapping": {"red_0" : "your_policy_name" }}' --restore-all-policies-from-checkpoint False --using-self-play --win-rate-threshold 0.85
+   ```
+
+3. **Monitor Training Progress**: Look for the Ray Tune Commandline reporter status, now including metrics such as `win_rate` and `league_size` (Player Pool).
+
+      ```shell
+      Number of trials: 1/1 (1 RUNNING)
+      +--------------------------------------------------------------+----------+--------------------+--------+------------------+------+-----------+------------------+---------------------+------------+---------------+----------------------+----------------------+--------------------+
+      | Trial name                                                   | status   | loc                |   iter |   total time (s) |   ts |    reward |   train_episodes |   red_0_reward_mean |   win_rate |   league_size |   episode_reward_max |   episode_reward_min |   episode_len_mean |
+      |--------------------------------------------------------------+----------+--------------------+--------+------------------+------+-----------+------------------+---------------------+------------+---------------+----------------------+----------------------+--------------------|
+      | PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_88d3f_00000 | RUNNING  | 10.1.60.66:1173951 |      1 |          60.5731 | 4000 | 0.0908667 |               15 |              0.2188 |        0.6 |             2 |                0.427 |               -0.527 |              201.8 |
+      +--------------------------------------------------------------+----------+--------------------+--------+------------------+------+-----------+------------------+---------------------+------------+---------------+----------------------+----------------------+--------------------+
+
+
+      ```
+4. Monitoring Tensorboard regex for this task:
+
+    ```
+    eliminated_opponents_done_mean|episode_len_mean|num_agent_steps_trained|num_agent_steps_sampled|num_env_steps_sampled|num_env_steps_trained|episodes_total|red_0/learner_stats/cur_kl_coeff|red_0/learner_stats/entropy|red_0/learner_stats/grad_gnorm|red_0/learner_stats/kl|red_0/learner_stats/policy_loss|red_0/learner_stats/total_loss|red_0/learner_stats/vf_explained_var|red_0/learner_stats/vf_loss|red_0/num_grad_updates_lifetime|ray/tune/policy_reward_mean/red_0|ray/tune/policy_reward_mean/blue_0
+    ```
+
+
+**DTDE Agent Training Baseline Thresholds:**
+  | Metric                        | Expected Value   | Duration          |
+  | ----------------------------- | ---------------- | ----------------- |
+  | `episode_len_mean`            | under 30 time steps    | Last 100k steps   |
+  | `policy_reward_mean/red_0`    | 1.3+ returns     | Last 100k steps   |
+  | `red_0/learner_stats/vf_explained_var`    | Above 0.5        | Last 100k steps   |
+  | `red_0/learner_stats/entropy` | Below 0.4       | Last 100k steps   |
+
+
+**Commands to Visualize Your DTDE Agent:**
+
+```shell
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1 --num-episodes 10 --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-DTDE-1v1_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode rgb_array --gif DTDE_1v1-testing --policies-to-eval red_0 
+```
+
+**Note**: The `--eval-config` option is by default mapped to [evaluation_config.json](submission/configs/evaluation_config.json), so there's no need to specify it if `team_policies_mapping` is already modified.
+
+
+> **Heads Up!**: Be aware of a potential discrepancy in the observation to observations space in the Multigrid Mission Space. This issue may surface in the later stages of training (600k+ timesteps) with Policy Self-Play and cause trianing to stopped with ValueErrors. If your training stopped, you can resume with the techniques we learned in Task 2.1.
+
+
+> **Also! This is the agent that you will submitt for the MARL Competition! Good luck and happy training!**
+
+---
+
+
+## Task 3 (Optional) - Decentralized Partially-Observable Stochastic General-Sum Games (2v2)
+In this task, you will solve a 2v2 Competitive Task with mixed strategy. Noticed that the decentalized version of 2v2 can be a NEXPTIME-hard problem, since the population of players are small in our game, so this time we are going to train our agent in centalized method.
+ 
+
+### Steps for Training and Monitoring CTCE Agent:
+
+1. **Update `team_policies_mapping`**: In [training_config.json](submission/configs/training_config.json), Change the line for `red_0` to `red`, and map `red` to your customized policy:
+
+   ```json
+   "team_policies_mapping": {
+       "red": "your_policy_name"
+   }
+   ```
+
+2. **Execute the Training Command**: After finalizing your agent’s configuration, run the below command to train your CTCE agent with Policy Self-Play:
+
+   ```shell
+   python multigrid/scripts/train.py --local-mode False --env MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2 --num-workers 10 --num-gpus 0 --name Policy_Self_Play_baseline --training-scheme CTCE  --training-config '{"team_policies_mapping": {"red" : "your_policy_name" }}' --restore-all-policies-from-checkpoint False --using-self-play --win-rate-threshold 0.65
+   ```
+
+3. **Monitor Training Progress**: Look for the Ray Tune Commandline reporter status, now including metrics such as `win_rate` and `league_size` (Player Pool).
+
+
+    ```shell
+
+    Number of trials: 1/1 (1 RUNNING)
+    +--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------+
+    | Trial name                                                   | status   | loc               |   iter |   total time (s) |   ts |    reward |   train_episodes |   red_reward_mean |   win_rate |   league_size |   episode_reward_max |   episode_reward_min |   episode_len_mean |
+    |--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------|
+    | PPO_MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2_f8268_00000 | RUNNING  | 10.1.60.66:794634 |      1 |          127.513 | 4000 | -0.707352 |                4 |         0.0496484 |       0.75 |             3 |                 0.14 |             -1.73656 |              848.5 |
+    +--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------+
+
+
+    ```
+
+
+
+4. Monitoring Tensorboard regex for this task:
+
+    ```
+    eliminated_opponents_done_mean|episode_len_mean|num_agent_steps_trained|num_agent_steps_sampled|num_env_steps_sampled|num_env_steps_trained|episodes_total|red/learner_stats/cur_kl_coeff|red/learner_stats/entropy|red/learner_stats/grad_gnorm|red/learner_stats/kl|red/learner_stats/policy_loss|red/learner_stats/total_loss|red/learner_stats/vf_explained_var|red/learner_stats/vf_loss|red/num_grad_updates_lifetime|ray/tune/policy_reward_mean/red|ray/tune/policy_reward_mean/blue
+    ```
+
+
+**CTCE Agent Training Baseline Thresholds:**
  
   | Metric                        | Expected Value   | Duration          |
   | ----------------------------- | ---------------- | ----------------- |
-  | `episode_len_mean`            | 40 time steps    | Last 100k steps   |
-  | `policy_reward_mean/red_*`    | 1.3+ returns     | Last 100k steps   |
-  | `red_*/explained_variance`    | Above 0.9        | Last 100k steps   |
-  | `red_*/learner_stats/entropy` | Below 0.4        | Last 100k steps   |
+  | `episode_len_mean`            | under 100 time steps    | Last 100k steps   |
+  | `policy_reward_mean/red`    | 3.0+ returns     | Last 100k steps   |
+  | `red/learner_stats/vf_explained_var`    | Above 0.8        | Last 100k steps   |
+  | `red/learner_stats/entropy` | Below 1.5        | Last 100k steps   |
+
+
+**Commands to Visualize Your CTCE Agent:**
+
+```shell
+python multigrid/scripts/visualize.py --env MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2 --num-episodes 10 --load-dir submission/ray_results/PPO/PPO_MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2_XXXX/checkpoint_YYY/checkpoint-YYY --render-mode rgb_array --gif CTCE_2v2-testing --policies-to-eval red
+```
+
+**Note**: The `--eval-config` option is by default mapped to [evaluation_config.json](submission/configs/evaluation_config.json), so there's no need to specify it if `team_policies_mapping` is already modified.
+
+
+> **Heads Up!**: Be aware of a potential discrepancy in the observation to observations space in the Multigrid Mission Space. This issue may surface in the later stages of training (600k+ timesteps) with Policy Self-Play and cause trianing to stopped with ValueErrors. If your training stopped, you can resume with the techniques we learned in Task 2.1.
+
+
+
 
 ---
 
@@ -207,18 +373,14 @@ You can, but it will take a much longer time for the agents to start converging 
 
 
 
-```shell
-
-Number of trials: 1/1 (1 RUNNING)
-+--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------+
-| Trial name                                                   | status   | loc               |   iter |   total time (s) |   ts |    reward |   train_episodes |   red_reward_mean |   win_rate |   league_size |   episode_reward_max |   episode_reward_min |   episode_len_mean |
-|--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------|
-| PPO_MultiGrid-CompetativeRedBlueDoor-v3-CTCE-2v2_f8268_00000 | RUNNING  | 10.1.60.66:794634 |      1 |          127.513 | 4000 | -0.707352 |                4 |         0.0496484 |       0.75 |             3 |                 0.14 |             -1.73656 |              848.5 |
-+--------------------------------------------------------------+----------+-------------------+--------+------------------+------+-----------+------------------+-------------------+------------+---------------+----------------------+----------------------+--------------------+
 
 
-```
 
+
+
+
+
+---
 
 
 First, check out the CleanRL PPO implementation and its configuration in [`multigrid/scripts/train_ppo_cleanrl.py`](multigrid/scripts/train_ppo_cleanrl.py). You can do this by running the following command with the `--debug-mode True` flag.
