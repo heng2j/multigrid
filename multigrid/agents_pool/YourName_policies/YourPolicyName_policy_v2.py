@@ -50,8 +50,6 @@ class YourPolicyNameV2_Policy(Policy):
             }
         }
 
-        self.observation_spaces = {}
-
     @staticmethod
     def custom_observation_space(policy_id, raw_observation_space,raw_action_space):
         policy_id = policy_id
@@ -74,10 +72,7 @@ class YourPolicyNameV2_Policy(Policy):
 
         return agent_observations
 
-
-
-
-    # HW3 NOTE - custom_handle_steps is a place for reward shaping
+    # HW3 NOTE - custom_handle_steps is a place for reward shaping. This will execute after the default actions being executed in the step() of the environemnt
     @staticmethod
     def custom_handle_steps( agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, reward_schemes, training_scheme):
 

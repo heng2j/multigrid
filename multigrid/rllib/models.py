@@ -289,4 +289,4 @@ class TorchCentralizedCriticModel(TorchModelV2, nn.Module):
         tensor
             Value function predictions.
         """
-        return self.model.value_function()  # not used
+        return self.model.value_function()  # not used fo CTDE

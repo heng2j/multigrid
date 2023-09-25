@@ -9,16 +9,14 @@ from gymnasium.core import ObservationWrapper
 
 class YourPolicyName_Policy(Policy):
     """ 
-        Policy class for Meltingpot competition 
+        Policy class for STR MARL competition 
         About Populations:
             We will make multiple instances of this class for every focal agent
-            If you want to sample different agents for every population/episode
-            add the required required randomization in the "initial_state" function
     """
     def __init__(self, policy_id:str , policy_name:str):
         # You can implement any init operations here or in setup()
-        self.policy_id = policy_id # TODO - Should this be multiple or indiviaul, current is not individual
-        self.policy_name = policy_name # TODO - Should this be multiple or indiviaul, current is not individual
+        self.policy_id = policy_id # future todo - Should this be multiple or indiviaul, current is not individual
+        self.policy_name = policy_name # future todo  - Should this be multiple or indiviaul, current is not individual
         self.reward_schemes =    {
                                     self.policy_id: {
                                         "eliminated_opponent_sparse_reward": 0.5,
@@ -50,8 +48,6 @@ class YourPolicyName_Policy(Policy):
             }
         }
 
-        self.observation_spaces = {}
-
     @staticmethod
     def custom_observation_space(policy_id, raw_observation_space,raw_action_space):
         policy_id = policy_id
@@ -75,9 +71,7 @@ class YourPolicyName_Policy(Policy):
         return agent_observations
 
 
-
-
-    # HW3 NOTE - custom_handle_steps is a place for reward shaping
+    # HW3 NOTE - custom_handle_steps is a place for reward shaping. This will execute after the default actions being executed in the step() of the environemnt
     @staticmethod
     def custom_handle_steps( agent, agent_index, action, agent_observed_objects, agent_reward, agent_terminated, agent_info, reward_schemes, training_scheme):
 

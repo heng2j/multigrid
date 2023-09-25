@@ -12,12 +12,16 @@ class Policy(Generic[State], metaclass=abc.ABCMeta):
   """
   def __init__(self, policy_id:str , policy_name:str):
       # You can implement any init operations here or in setup()
-      self.policy_id = policy_id # TODO - Should this be multiple or indiviaul, current is not individual
-      self.policy_name = policy_name # TODO - Should this be multiple or indiviaul, current is not individual
-      self.training_scheme = "DTDE" # Can be either "CTCE", "DTDE" or "CTDE"
+      self.policy_id = policy_id # future todo  - Should this be multiple or indiviaul, current is not individual
+      self.policy_name = policy_name # future todo  - Should this be multiple or indiviaul, current is not individual
       self.reward_schemes =  { self.policy_id: {}}
       self.algorithm_training_config = {self.policy_id: {}}
 
+
+  @staticmethod
+  @abc.abstractmethod
+  def custom_observation_space(policy_id, raw_observation_space,raw_action_space):
+        raise NotImplementedError()
 
   @staticmethod
   @abc.abstractmethod

@@ -269,7 +269,7 @@ if __name__ == "__main__":
         "--policies-to-load", nargs="+", type=str, default=None, help="List of agent ids to train"
     )
     parser.add_argument(
-        "--restore-all-policies-from-checkpoint", type=bool, default=True, help="If we want to continue training from last checkpoint"
+        "--restore-all-policies-from-checkpoint", type=bool, default=False, help="If we want to continue training from last checkpoint"
     )
     parser.add_argument(
         "--save-dir",
